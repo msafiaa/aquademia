@@ -1,56 +1,52 @@
-
 from flask import Blueprint, jsonify, request
-from services.ai_service import generate_adaptive_quiz
+from services.attempt_service import (
+    save_quiz_attempt,
+    save_adaptive_questions
+)
+from services.quiz_service import get_default_questions
 from services.performance_service import analyze_performance
+from services.question_validator import validate_adaptive_questions
+from services.ai_service import generate_verified_adaptive_quiz
 
 quiz_bp = Blueprint("quiz", __name__)
-
-# Temporary questions for testing only.
-# Replace with verified KSSR-aligned questions later.
-questions = [
-    {
-        "id": 1,
-        "year": 4,
-        "subject": "Mathematics",
-        "topic": "Addition",
-        "question": "What is 125 + 235?",
-        "options": ["350", "360", "370", "380"],
-        "answer": "360",
-        "skill": "addition"
-    },
-    {
-        "id": 2,
-        "year": 4,
-        "subject": "Mathematics",
-        "topic": "Addition",
-        "question": "What is 420 + 180?",
-        "options": ["500", "600", "650", "700"],
-        "answer": "600",
-        "skill": "addition"
-    }
-]
 
 
 @quiz_bp.route("/api/questions", methods=["GET"])
 def get_questions():
-    # Never send correct answers to the frontend.
+    year = request.args.get("year", default=4, type=int)
+    subject = request.args.get("subject", "Mathematics")
+    topic = request.args.get("topic", "Addition")
+
+    questions = get_default_questions(year, subject, topic)
+
+    # Never send default quiz answer keys to frontend
     public_questions = [
         {k: v for k, v in q.items() if k != "answer"}
         for q in questions
     ]
-    return jsonify(public_questions)
 
+    return jsonify(public_questions)
 
 
 @quiz_bp.route("/api/quiz/submit", methods=["POST"])
 def submit_quiz():
     data = request.get_json(silent=True) or {}
+
     answers = data.get("answers")
+    year = data.get("year", 4)
+    subject = data.get("subject", "Mathematics")
+    topic = data.get("topic", "Addition")
 
     if not isinstance(answers, dict):
-        return jsonify({
-            "error": "Answers must be an object"
-        }), 400
+        return jsonify({"error": "Invalid answers"}), 400
+
+    if not isinstance(year, int) or year not in (4, 5, 6):
+        return jsonify({"error": "Invalid year"}), 400
+
+    questions = get_default_questions(year, subject, topic)
+
+    if not questions:
+        return jsonify({"error": "No questions found"}), 404
 
     expected_ids = {str(q["id"]) for q in questions}
 
@@ -67,25 +63,37 @@ def submit_quiz():
                 "error": "Invalid answer option"
             }), 400
 
-   
-    # Analyze default quiz performance
     result = analyze_performance(questions, answers)
 
-    # Add learning context for AI
-    result["year"] = questions[0]["year"]
-    result["subject"] = questions[0]["subject"]
-    result["topic"] = questions[0]["topic"]
+    result["year"] = year
+    result["subject"] = subject
+    result["topic"] = topic
+    
+    # Temporary demo student
+    student_id = 1
 
-    # Generate adaptive quiz based on performance
+    # Save default quiz attempt
+    attempt_id = save_quiz_attempt(student_id, result)
+
+    result["attempt_id"] = attempt_id
+
+    #
+
     if result["weak_skills"]:
         try:
-            adaptive_result = generate_adaptive_quiz(result)
+            adaptive_result = generate_verified_adaptive_quiz(result)
+
+            question_ids = save_adaptive_questions(
+                attempt_id,
+                adaptive_result["questions"]
+            )
 
             result["adaptive_quiz"] = {
                 "analysis": adaptive_result["analysis"],
+                
                 "questions": [
                     {
-                        "id": index + 1,
+                        "id": question_ids[index],
                         "question": question["question"],
                         "options": question["options"],
                         "skill": question["skill"]
@@ -94,19 +102,25 @@ def submit_quiz():
                         adaptive_result["questions"]
                     )
                 ]
+
             }
 
-        except Exception:
+        except Exception as e:
+            print("ADAPTIVE QUIZ ERROR:", repr(e))
+
             result["adaptive_quiz"] = {
                 "status": "unavailable",
-                "message": "Adaptive quiz is temporarily unavailable."
-            }
+                "message": "Adaptive quiz temporarily unavailable."
+        }
 
     else:
         result["adaptive_quiz"] = {
             "status": "completed",
-            "message": "Excellent! No weak skills detected."
+            "message": "No weak skills detected."
         }
 
-    return jsonify(result)
+    # Don't expose correct answers in student-facing results
+    for item in result["question_results"]:
+        item.pop("correct_answer", None)
 
+    return jsonify(result)

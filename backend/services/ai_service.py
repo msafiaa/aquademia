@@ -6,6 +6,7 @@ from unittest import result
 
 from dotenv import load_dotenv
 from groq import Groq
+from services.question_validator import validate_adaptive_questions
 
 # Load .env from Aquademia root folder
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -122,3 +123,34 @@ JSON format:
             raise ValueError("Invalid AI-generated question.")
 
     return result
+
+
+def generate_verified_adaptive_quiz(performance, max_attempts=3):
+    """
+    Generate adaptive questions and validate them.
+    Retry if the AI returns invalid questions.
+    """
+    subject = performance["subject"]
+    last_error = None
+
+    for attempt in range(max_attempts):
+        try:
+            result = generate_adaptive_quiz(performance)
+
+            validate_adaptive_questions(
+                result["questions"],
+                subject
+            )
+
+            return result
+
+        except (ValueError, KeyError, TypeError) as error:
+            last_error = error
+            print(
+                f"AI validation attempt {attempt + 1} "
+                f"failed: {error}"
+            )
+
+    raise ValueError(
+        f"Unable to generate verified adaptive quiz: {last_error}"
+    )
