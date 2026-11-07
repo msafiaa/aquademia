@@ -83,19 +83,25 @@ def save_adaptive_questions(attempt_id, questions):
         connection.close()
 
 
-def grade_adaptive_quiz(default_attempt_id, answers):
+def grade_adaptive_quiz(default_attempt_id, answers, student_id):
     connection = get_db_connection()
     cursor = connection.cursor(dictionary=True)
 
     try:
         # Retrieve original default quiz attempt
         cursor.execute("""
-            SELECT attempt_id, student_id, year_level,
-                   subject, topic, score
+            SELECT
+                attempt_id,
+                student_id,
+                year_level,
+                subject,
+                topic,
+                score
             FROM quiz_attempts
             WHERE attempt_id = %s
-              AND quiz_type = 'default'
-        """, (default_attempt_id,))
+            AND student_id = %s
+            AND quiz_type = 'default'
+        """, (default_attempt_id, student_id))
 
         default_attempt = cursor.fetchone()
 

@@ -1,5 +1,5 @@
 from datetime import date
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
 from services.aquarium_service import (
     get_aquarium_data,
     get_lifetime_stats,
@@ -31,8 +31,12 @@ def get_aquarium():
             "error": "Invalid month. Use YYYY-MM."
         }), 400
 
-    # Temporary demo student
-    student_id = 1
+    student_id = session.get("student_id")
+
+    if student_id is None:
+        return jsonify({
+            "error": "Login required."
+        }), 401
 
     try:
         data = get_aquarium_data(
@@ -65,7 +69,12 @@ def get_aquarium():
 
 @aquarium_bp.route("/api/aquarium/stats", methods=["GET"])
 def aquarium_stats():
-    student_id = 1  # Temporary demo student
+    student_id = session.get("student_id")
+
+    if student_id is None:
+        return jsonify({
+            "error": "Login required."
+        }), 401
 
     try:
         stats = get_lifetime_stats(student_id)
@@ -80,7 +89,12 @@ def aquarium_stats():
 
 @aquarium_bp.route("/api/aquarium/history", methods=["GET"])
 def aquarium_history():
-    student_id = 1  # Temporary demo student
+    student_id = session.get("student_id")
+
+    if student_id is None:
+        return jsonify({
+            "error": "Login required."
+        }), 401
 
     try:
         history = get_aquarium_history(student_id)

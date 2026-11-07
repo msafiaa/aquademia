@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, session
+
 from services.attempt_service import (
     save_quiz_attempt,
     save_adaptive_questions
@@ -13,6 +14,10 @@ quiz_bp = Blueprint("quiz", __name__)
 
 @quiz_bp.route("/api/questions", methods=["GET"])
 def get_questions():
+    
+    if session.get("student_id") is None:
+         return jsonify({"error": "Login required."}), 401
+
     year = request.args.get("year", default=4, type=int)
     subject = request.args.get("subject", "Mathematics")
     topic = request.args.get("topic", "Addition")
@@ -69,15 +74,18 @@ def submit_quiz():
     result["subject"] = subject
     result["topic"] = topic
     
-    # Temporary demo student
-    student_id = 1
+    student_id = session.get("student_id")
+
+    if student_id is None:
+        return jsonify({
+            "error": "Login required."
+        }), 401
 
     # Save default quiz attempt
     attempt_id = save_quiz_attempt(student_id, result)
 
     result["attempt_id"] = attempt_id
 
-    #
 
     if result["weak_skills"]:
         try:
