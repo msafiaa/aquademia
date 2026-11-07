@@ -2,7 +2,6 @@
 import json
 import os
 from pathlib import Path
-from unittest import result
 
 from dotenv import load_dotenv
 from groq import Groq

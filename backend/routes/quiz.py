@@ -1,13 +1,23 @@
 from flask import Blueprint, jsonify, request, session
+from services.ai_service import generate_verified_adaptive_quiz
 
 from services.attempt_service import (
     save_quiz_attempt,
     save_adaptive_questions
 )
-from services.quiz_service import get_default_questions
+from services.explanation_service import (
+    generate_question_explanations,
+    save_question_explanations
+)
+from services.notes_service import (
+    generate_personalised_notes,
+    save_personalised_notes
+)
+
 from services.performance_service import analyze_performance
+from services.quiz_service import get_default_questions
 from services.question_validator import validate_adaptive_questions
-from services.ai_service import generate_verified_adaptive_quiz
+
 
 quiz_bp = Blueprint("quiz", __name__)
 
@@ -86,6 +96,59 @@ def submit_quiz():
 
     result["attempt_id"] = attempt_id
 
+    
+    # Generate explanations for completed quiz questions
+    try:
+        explanations = generate_question_explanations(result)
+
+        save_question_explanations(
+            student_id=student_id,
+            attempt_id=attempt_id,
+            question_results=result["question_results"],
+            explanations=explanations
+        )
+
+        explanation_map = {
+            item["question_id"]: item["explanation"]
+            for item in explanations
+        }
+
+        for item in result["question_results"]:
+            item["explanation"] = explanation_map[
+                item["question_id"]
+            ]
+
+        result["explanation_status"] = "available"
+
+    except Exception as error:
+        print("AI EXPLANATION ERROR:", repr(error))
+
+        result["explanation_status"] = "unavailable"
+
+        for item in result["question_results"]:
+            item["explanation"] = None
+
+    
+    # Generate personalised AI revision notes
+    try:
+        notes = generate_personalised_notes(result)
+
+        save_personalised_notes(
+            student_id=student_id,
+            attempt_id=attempt_id,
+            performance=result,
+            notes=notes
+        )
+
+        result["notes_status"] = "available"
+        result["personalised_notes"] = notes
+
+    except Exception as error:
+        print("AI NOTES ERROR:", repr(error))
+
+        result["notes_status"] = "unavailable"
+        result["personalised_notes"] = None
+
 
     if result["weak_skills"]:
         try:
@@ -126,9 +189,5 @@ def submit_quiz():
             "status": "completed",
             "message": "No weak skills detected."
         }
-
-    # Don't expose correct answers in student-facing results
-    for item in result["question_results"]:
-        item.pop("correct_answer", None)
 
     return jsonify(result)

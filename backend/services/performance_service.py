@@ -1,4 +1,3 @@
-
 def analyze_performance(questions, answers):
     total = len(questions)
     correct = 0
