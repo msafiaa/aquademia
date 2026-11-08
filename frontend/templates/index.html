@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block title %}Aquademia – Lautan Pembelajaran{% endblock %}
+{% block body_class %}page-dashboard{% endblock %}
+
+{% block head_extra %}
+<style>
+  .dash-container {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: max(1rem, env(safe-area-inset-top)) 1.25rem max(2rem, env(safe-area-inset-bottom));
+  }
+
+  /* Header bar */
+  .dash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.25rem;
+    background: rgba(255, 250, 245, 0.92);
+    border-radius: var(--aq-radius);
+    box-shadow: var(--aq-shadow-sm);
+    border: 2px solid rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    margin-bottom: 1.5rem;
+  }
+
+  .dash-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--aq-font-display);
+    font-size: 1.4rem;
+    color: var(--aq-ocean);
+    text-decoration: none;
+  }
+
+  .dash-user-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .pearl-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: linear-gradient(135deg, #fff2a3, #ffd86b);
+    color: #5c4100;
+    font-weight: 700;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 5px rgba(217, 164, 0, 0.25);
+  }
+
+  .user-greeting {
+    font-weight: 700;
+    color: var(--aq-ocean-deep);
+  }
+
+  /* Hero Section */
+  .dash-hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.8rem 2rem;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, rgba(230, 251, 255, 0.95), rgba(255, 250, 245, 0.92));
+  }
+
+  .dash-hero__title {
+    font-size: 2rem;
+    color: var(--aq-ocean);
+    margin-bottom: 0.5rem;
+  }
+
+  .dash-hero__desc {
+    color: var(--aq-muted);
+    font-size: 1.1rem;
+    margin: 0;
+    max-width: 48ch;
+  }
+
+  .dash-hero__mascots {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+  }
+
+  .dash-hero__mascot {
+    height: 140px;
+    width: auto;
+    filter: drop-shadow(0 6px 8px rgba(6, 58, 90, 0.25));
+    animation: aq-bob 5s ease-in-out infinite;
+  }
+  .dash-hero__mascot--fania {
+    animation-delay: -2.5s;
+  }
+
+  /* Adventure cards grid */
+  .destinations-heading {
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(6, 58, 90, 0.6);
+    margin-bottom: 1.25rem;
+    font-size: 1.5rem;
+  }
+
+  .destinations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .card-destination {
+    display: flex;
+    flex-direction: column;
+    padding: 1.5rem;
+    border-radius: var(--aq-radius);
+    text-decoration: none;
+    color: var(--aq-ocean-deep);
+    transition: transform 0.2s var(--aq-ease), box-shadow 0.2s var(--aq-ease);
+  }
+
+  .card-destination:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(6, 58, 90, 0.28);
+  }
+
+  .card-icon {
+    font-size: 2.2rem;
+    margin-bottom: 0.75rem;
+    display: inline-block;
+  }
+
+  .card-title {
+    font-size: 1.35rem;
+    color: var(--aq-ocean);
+    margin-bottom: 0.35rem;
+  }
+
+  .card-desc {
+    font-size: 0.95rem;
+    color: var(--aq-muted);
+    margin: 0;
+    flex-grow: 1;
+  }
+
+  .card-action {
+    margin-top: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 700;
+    color: var(--aq-teal);
+  }
+
+  @media (max-width: 768px) {
+    .dash-hero {
+      grid-template-columns: 1fr;
+      text-align: center;
+      padding: 1.5rem 1rem;
+    }
+    .dash-hero__mascots {
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .dash-hero__mascot {
+      height: 100px;
+    }
+    .dash-user-bar {
+      gap: 0.5rem;
+    }
+    .user-greeting {
+      display: none;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+{% set cut = 'images/characters/cutouts/' %}
+<div class="dash-container">
+  <!-- Top Bar -->
+  <header class="dash-header">
+    <a href="/index" class="dash-brand">
+      <svg viewBox="0 0 48 48" width="36" height="36" aria-hidden="true" focusable="false">
+        <circle cx="24" cy="24" r="21" fill="#e6fbff" stroke="#0d8aa6" stroke-width="3"/>
+        <ellipse cx="17" cy="15" rx="6" ry="3.5" fill="#fff" opacity=".9" transform="rotate(-30 17 15)"/>
+        <circle cx="31" cy="30" r="3" fill="#7fe0ea"/>
+        <circle cx="24" cy="33" r="1.8" fill="#7fe0ea"/>
+      </svg>
+      <span>Aquademia</span>
+    </a>
+
+    <div class="dash-user-bar">
+      <div class="pearl-pill" title="Baki Mutiara">
+        <span>🐚</span>
+        <span id="user-pearls">...</span>
+        <span>Mutiara</span>
+      </div>
+
+      <span class="user-greeting" id="user-display">Hai, Pengembara!</span>
+
+      <button type="button" class="aq-btn aq-btn--ghost" id="dash-logout" style="min-height: 40px; padding: 0.4rem 1rem; font-size: 0.95rem;">
+        <span>Log Keluar</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero Welcome -->
+  <section class="dash-hero bubble-panel">
+    <div>
+      <h1 class="dash-hero__title" id="welcome-heading">Selamat Datang ke Lautan Pembelajaran! 🌊</h1>
+      <p class="dash-hero__desc">
+        Pilih destinasi pembelajaran anda di bawah. Teroka kuiz interaktif, bimbingan AI Aqua, kumpul ikan comel, dan hiaskan akuarium anda!
+      </p>
+    </div>
+    <div class="dash-hero__mascots">
+      <img src="{{ url_for('static', filename=cut ~ 'mal-happy.png') }}"
+           alt="Mal" class="dash-hero__mascot dash-hero__mascot--mal">
+      <img src="{{ url_for('static', filename=cut ~ 'fania-happy.png') }}"
+           alt="Fania" class="dash-hero__mascot dash-hero__mascot--fania">
+    </div>
+  </section>
+
+  <!-- Navigation Cards -->
+  <h2 class="destinations-heading">Destinasi Pengembaraan Lautan</h2>
+  <div class="destinations-grid">
+    <!-- Mathematics -->
+    <div class="card-destination bubble-panel">
+      <span class="card-icon">📐</span>
+      <h3 class="card-title">Matematik</h3>
+      <p class="card-desc">Selesaikan teka-teki nombor, pecahan, dan kuiz adaptif untuk mengumpul mutiara laut.</p>
+      <span class="card-action">Mula Kuiz &rarr;</span>
+    </div>
+
+    <!-- Science -->
+    <div class="card-destination bubble-panel">
+      <span class="card-icon">🔬</span>
+      <h3 class="card-title">Sains</h3>
+      <p class="card-desc">Kaji alam hidupan, daya, tenaga, dan misteri ekosistem marin bersama Mal & Fania.</p>
+      <span class="card-action">Mula Teroka &rarr;</span>
+    </div>
+
+    <!-- My Aquarium -->
+    <div class="card-destination bubble-panel">
+      <span class="card-icon">🐠</span>
+      <h3 class="card-title">Akuarium Saya</h3>
+      <p class="card-desc">Lihat ikan-ikan tropika yang telah anda perolehi melalui kejayaan kuiz anda.</p>
+      <span class="card-action">Lihat Akuarium &rarr;</span>
+    </div>
+
+    <!-- Decoration Shop -->
+    <div class="card-destination bubble-panel">
+      <span class="card-icon">🐚</span>
+      <h3 class="card-title">Kedai Hiasan</h3>
+      <p class="card-desc">Gunakan mutiara ganjaran untuk membeli karang warna-warni, istana laut, dan hiasan.</p>
+      <span class="card-action">Buka Kedai &rarr;</span>
+    </div>
+
+    <!-- Ask Aqua AI Tutor -->
+    <div class="card-destination bubble-panel">
+      <span class="card-icon">🤖</span>
+      <h3 class="card-title">Tanya Aqua (AI Tutor)</h3>
+      <p class="card-desc">Ada soalan sukar? Tanya Aqua, pembimbing AI dwibahasa mesra anda bila-bila masa!</p>
+      <span class="card-action">Bual Sekarang &rarr;</span>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function() {
+    // Load student info
+    fetch("/api/auth/me", { credentials: "same-origin" })
+      .then(function(res) {
+        if (!res.ok) {
+          window.location.assign("/login");
+          return null;
+        }
+        return res.json();
+      })
+      .then(function(data) {
+        if (data && data.student) {
+          var user = data.student.username;
+          var year = data.student.year_level;
+          document.getElementById("user-display").textContent = "Hai, " + user + " (Tahun " + year + ")!";
+          document.getElementById("welcome-heading").textContent = "Selamat Kembali, " + user + "! 🌊";
+        }
+      })
+      .catch(function() {});
+
+    // Load pearl wallet balance
+    fetch("/api/shop/wallet", { credentials: "same-origin" })
+      .then(function(res) { return res.ok ? res.json() : null; })
+      .then(function(data) {
+        if (data && typeof data.pearls !== "undefined") {
+          document.getElementById("user-pearls").textContent = data.pearls;
+        } else {
+          document.getElementById("user-pearls").textContent = "0";
+        }
+      })
+      .catch(function() {
+        document.getElementById("user-pearls").textContent = "0";
+      });
+
+    // Logout button handler
+    document.getElementById("dash-logout").addEventListener("click", function() {
+      fetch("/api/auth/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin"
+      }).then(function() {
+        window.location.assign("/login");
+      });
+    });
+  })();
+</script>
+{% endblock %}

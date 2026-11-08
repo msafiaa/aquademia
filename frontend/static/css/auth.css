@@ -1,0 +1,334 @@
+/* ==========================================================================
+   Login / Registration page  (builds on aquademia.css)
+   ========================================================================== */
+
+.auth-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: start;
+  gap: .35rem;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: max(.5rem, env(safe-area-inset-top)) .85rem max(1.25rem, env(safe-area-inset-bottom));
+}
+
+/* ---------- Stage: brand + mascots ---------- */
+.auth-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(6, 58, 90, .55);
+}
+
+.auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: 1.6rem;
+  letter-spacing: .02em;
+  color: #fff;
+}
+.auth-brand__icon { width: 34px; height: 34px; filter: drop-shadow(0 2px 4px rgba(6,58,90,.4)); animation: aq-bob 4s ease-in-out infinite; }
+
+.auth-tagline {
+  display: none;                 /* phones: the mascot's speech bubble does the greeting */
+  margin: .4rem 0 0;
+  max-width: 30ch;
+  padding: .5rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background: rgba(7, 72, 108, .42);   /* soft backing keeps white text readable on the reef */
+  border-radius: 18px;
+  -webkit-backdrop-filter: blur(3px);
+          backdrop-filter: blur(3px);
+}
+.auth-tagline strong { display: block; font-family: var(--aq-font-display); font-size: 1.2rem; }
+
+.mascots {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: end;
+  gap: .5rem;
+  width: 100%;
+  max-width: 520px;
+  margin-top: .15rem;
+}
+
+.mascot {
+  width: auto;
+  height: 96px;                  /* compact on phones; bigger on larger screens below */
+  filter: drop-shadow(0 6px 8px rgba(6, 58, 90, .35));
+  animation: aq-bob 5s ease-in-out infinite;
+  transition: opacity .2s;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+.mascot--fania { animation-delay: -2.2s; }
+
+.speech {
+  position: relative;
+  align-self: center;
+  margin: 0 0 .9rem;
+  padding: .45rem .7rem;
+  background: #fff;
+  color: var(--aq-ocean-deep);
+  text-shadow: none;
+  font-weight: 700;
+  font-size: .9rem;
+  line-height: 1.25;
+  border-radius: 18px;
+  box-shadow: var(--aq-shadow-sm);
+}
+.speech::after {                 /* little bubble tail toward Mal */
+  content: "";
+  position: absolute;
+  left: -7px; bottom: 12px;
+  width: 16px; height: 16px;
+  background: #fff;
+  border-radius: 3px;
+  transform: rotate(45deg);
+}
+
+.mascots[data-state="success"] .mascot { animation: aq-hop .6s var(--aq-ease) 2; }
+
+@keyframes aq-bob {
+  0%, 100% { transform: translateY(0) rotate(-1deg); }
+  50%      { transform: translateY(-9px) rotate(1deg); }
+}
+@keyframes aq-hop {
+  0%, 100% { transform: translateY(0); }
+  40%      { transform: translateY(-22px); }
+}
+
+/* ---------- Card ---------- */
+.auth-card {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 1rem .95rem 1.1rem;
+}
+
+/* Tabs */
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .35rem;
+  padding: .3rem;
+  margin-bottom: .8rem;
+  background: var(--aq-foam);
+  border-radius: 999px;
+  box-shadow: inset 0 2px 4px rgba(6,58,90,.12);
+}
+.tab {
+  min-height: 44px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-family: var(--aq-font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--aq-teal);
+  cursor: pointer;
+  transition: background .2s var(--aq-ease), color .2s, box-shadow .2s;
+  touch-action: manipulation;
+}
+.tab:hover { background: rgba(255,255,255,.7); }
+.tab[aria-selected="true"] {
+  background: linear-gradient(180deg, #14a0bd, #0b7aa0);
+  color: #fff;
+  box-shadow: 0 3px 8px rgba(11,122,160,.4);
+}
+
+.tab-panel:not([hidden]),
+.auth-done:not([hidden]) { animation: aq-panel-in .35s var(--aq-ease); }
+
+@keyframes aq-panel-in {
+  from { opacity: 0; transform: translateY(10px) scale(.99); }
+  to   { opacity: 1; transform: none; }
+}
+
+.auth-heading { font-size: 1.35rem; color: var(--aq-ocean); }
+.auth-heading:focus { outline: none; }
+.auth-sub { display: none; margin: .25rem 0 1rem; color: var(--aq-muted); }  /* shown from 600px up */
+.auth-done .auth-sub { display: block; }
+
+/* Fields */
+form { display: grid; gap: .8rem; margin-top: .7rem; }
+.field { margin: 0; padding: 0; border: 0; min-width: 0; }
+.field > label, .field > legend {
+  display: block;
+  margin-bottom: .3rem;
+  padding: 0;
+  font-weight: 700;
+}
+.field-hint  { margin: .35rem 0 0; font-size: .9rem; color: var(--aq-muted); }
+.field-error { margin: .35rem 0 0; font-size: .95rem; font-weight: 700; color: var(--aq-error); }
+.field-error::before { content: "\1F4AD  "; }   /* thought bubble: gentle, not a scary X */
+
+/* Password field + eye toggle */
+.password-wrap { position: relative; }
+.password-wrap .aq-input { padding-right: 3.4rem; }
+.pw-toggle {
+  position: absolute;
+  top: 50%; right: .35rem;
+  transform: translateY(-50%);
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  border: 0; border-radius: 50%;
+  background: transparent;
+  color: var(--aq-teal);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.pw-toggle:hover { background: var(--aq-foam); }
+.pw-toggle .slash { display: none; }
+.pw-toggle[aria-pressed="true"] .slash { display: inline; }
+
+/* Password strength meter (length-based, mirrors the server's 12-char rule) */
+.pw-meter { height: 8px; margin-top: .5rem; background: #dcebf0; border-radius: 999px; overflow: hidden; }
+.pw-meter > span {
+  display: block; height: 100%; width: 0;
+  border-radius: 999px;
+  background: var(--aq-coral-soft);
+  transition: width .25s var(--aq-ease), background .25s;
+}
+.pw-meter > span[data-level="ok"]     { background: var(--aq-sun); }
+.pw-meter > span[data-level="strong"] { background: var(--aq-turquoise); }
+.pw-count { display: inline-block; margin-left: .35rem; font-weight: 700; }
+
+/* Year picker: big tappable chips */
+.year-options { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+.year-option { position: relative; display: block; margin: 0 !important; }
+.year-option input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.year-option span {
+  display: grid; place-items: center;
+  min-height: var(--aq-tap);
+  border: 3px solid #b6e3ec;
+  border-radius: var(--aq-radius-sm);
+  background: #fff;
+  font-weight: 700;
+  transition: background .15s, border-color .15s, transform .15s var(--aq-ease), color .15s;
+}
+.year-option:hover span { border-color: var(--aq-aqua); transform: translateY(-1px); }
+.year-option input:checked + span { background: var(--aq-teal); border-color: var(--aq-teal); color: #fff; transform: scale(1.03); }
+.year-option input:focus-visible + span { outline: 3px solid var(--aq-sun); outline-offset: 2px; box-shadow: 0 0 0 5px var(--aq-ocean-deep); }
+.year-field.has-error .year-option span { border-color: var(--aq-error); }
+
+/* Footer link buttons */
+.switch-hint { margin: 1.1rem 0 0; text-align: center; color: var(--aq-muted); }
+.link-btn {
+  padding: .35rem .25rem;
+  border: 0; background: none;
+  font-weight: 700; font-size: inherit;
+  color: var(--aq-teal);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.link-btn:hover { color: var(--aq-ocean); }
+
+.auth-done { text-align: center; display: grid; gap: .5rem; }
+.auth-done .auth-sub { font-size: 1.1rem; margin-bottom: .5rem; }
+
+/* ---------- Tablet / desktop ---------- */
+@media (min-width: 600px) {
+  .auth-shell { gap: .75rem; padding-top: max(.75rem, env(safe-area-inset-top)); }
+  .auth-brand { font-size: 2.5rem; }
+  .auth-brand__icon { width: 44px; height: 44px; }
+  .auth-tagline { display: block; }
+  .mascot { height: 170px; }
+  .speech { margin-bottom: 1.5rem; font-size: .95rem; padding: .55rem .8rem; }
+  .auth-card { padding: 1.6rem 1.8rem 1.8rem; }
+  .auth-heading { font-size: 1.6rem; }
+  .auth-sub { display: block; }
+  form { gap: 1rem; margin-top: 0; }
+}
+
+@media (min-width: 900px) {
+  .auth-shell {
+    grid-template-columns: 1.05fr 1fr;
+    align-content: center;
+    align-items: center;
+    gap: 2.5rem;
+    padding-block: 2rem;
+  }
+  .auth-stage { gap: .25rem; }
+  .auth-brand { font-size: 3.2rem; }
+  .auth-tagline { font-size: 1.15rem; max-width: 32ch; }
+  .mascots { margin-top: 1rem; max-width: 560px; }
+  .mascot { height: 300px; }
+  .speech { font-size: 1.05rem; margin-bottom: 4rem; }
+  .auth-card { margin: 0; max-width: 540px; justify-self: start; }
+}
+
+/* very short screens (phones in landscape): keep the form reachable */
+@media (max-height: 520px) and (orientation: landscape) and (max-width: 899px) {
+  .mascots, .auth-tagline { display: none; }
+}
+
+/* ==========================================================================
+   Celebration rising bubbles ("bubble naik atas" on successful login)
+   ========================================================================== */
+.bubble-surge-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  background: radial-gradient(circle at center, rgba(13, 138, 166, 0.12), rgba(11, 58, 83, 0.28));
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.bubble-surge-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.surge-bubble {
+  position: absolute;
+  bottom: -90px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.6) 20%, rgba(127, 224, 234, 0.45) 55%, rgba(25, 196, 212, 0.2) 80%, rgba(255, 255, 255, 0.5) 100%);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 16px rgba(127, 224, 234, 0.75), inset 0 0 12px rgba(255, 255, 255, 0.85);
+  will-change: transform, opacity;
+  animation: bubbleNaikAtas var(--surge-dur, 1.4s) cubic-bezier(0.22, 1, 0.36, 1) var(--surge-delay, 0s) forwards;
+}
+
+@keyframes bubbleNaikAtas {
+  0% {
+    transform: translate3d(0, 0, 0) scale(0.4);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.95;
+    transform: translate3d(calc(var(--sway-x, 0px) * 0.2), -15vh, 0) scale(0.9);
+  }
+  60% {
+    opacity: 0.9;
+    transform: translate3d(calc(var(--sway-x, 0px) * 0.7), -70vh, 0) scale(1.15);
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate3d(var(--sway-x, 0px), -125vh, 0) scale(1.35);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .surge-bubble {
+    animation: none;
+    display: none;
+  }
+  .bubble-surge-overlay.active {
+    background: rgba(11, 58, 83, 0.4);
+  }
+}

@@ -1,0 +1,223 @@
+/* ==========================================================================
+   Aquademia shared design system  (used by every page)
+   Sections: tokens · base · scene/bubbles · panels · buttons · inputs ·
+             alerts · spinner · utilities · reduced motion
+   ========================================================================== */
+
+:root {
+  /* Colour palette */
+  --aq-ocean-deep: #0b3a53;      /* main text */
+  --aq-ocean: #0b6fa4;
+  --aq-teal: #0d8aa6;
+  --aq-turquoise: #19c4d4;
+  --aq-aqua: #7fe0ea;
+  --aq-coral: #d93f5c;           /* coral pink, AA with white text */
+  --aq-coral-soft: #ffb3c0;
+  --aq-lavender: #b9a4e6;
+  --aq-sun: #ffd86b;
+  --aq-pearl: #fffaf5;
+  --aq-foam: #e6fbff;
+  --aq-error: #a8201a;
+  --aq-error-bg: #fff0ef;
+  --aq-success: #137a4f;
+  --aq-muted: #4a6b7d;           /* secondary text, AA on pearl */
+
+  /* Typography (system fonts only: no external requests) */
+  --aq-font: "Trebuchet MS", "Segoe UI", ui-rounded, "Avenir Next", system-ui, sans-serif;
+  --aq-font-display: "Arial Rounded MT Bold", "Trebuchet MS", "Segoe UI", ui-rounded, system-ui, sans-serif;
+
+  /* Shape, depth, motion */
+  --aq-radius-sm: 14px;
+  --aq-radius: 22px;
+  --aq-radius-lg: 32px;
+  --aq-shadow: 0 10px 30px rgba(6, 58, 90, .22), 0 2px 6px rgba(6, 58, 90, .12);
+  --aq-shadow-sm: 0 4px 12px rgba(6, 58, 90, .18);
+  --aq-ease: cubic-bezier(.3, .8, .3, 1);
+  --aq-tap: 48px;                /* minimum touch target */
+
+  /* Breakpoints (reference values for media queries): 600px · 900px */
+}
+
+/* ---------- Base ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  font-family: var(--aq-font);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  color: var(--aq-ocean-deep);
+  background: #0b8fb0;           /* shown while the ocean image loads */
+}
+
+h1, h2, h3 { font-family: var(--aq-font-display); line-height: 1.15; margin: 0; }
+
+button, input { font: inherit; color: inherit; }
+
+:focus-visible {
+  outline: 3px solid var(--aq-sun);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--aq-ocean-deep);
+}
+
+[hidden] { display: none !important; }
+
+/* ---------- Underwater scene (fixed background + bubbles) ---------- */
+.aq-scene {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,0) 40%),
+    url("../images/background/ocean-bg.jpg") center bottom / cover no-repeat,
+    #0b8fb0;
+}
+
+.aq-bubble {
+  position: absolute;
+  bottom: -60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 28%, rgba(255,255,255,.95) 0 12%, rgba(255,255,255,.28) 30%, rgba(255,255,255,.08) 70%);
+  border: 1.5px solid rgba(255,255,255,.55);
+  opacity: 0;
+  will-change: transform, opacity;
+  animation: aq-rise var(--dur, 14s) linear var(--delay, 0s) infinite;
+}
+
+.aq-scene--paused .aq-bubble { animation-play-state: paused; }
+
+@keyframes aq-rise {
+  0%   { transform: translate3d(0, 0, 0); opacity: 0; }
+  10%  { opacity: .85; }
+  50%  { transform: translate3d(var(--sway, 18px), -55vh, 0); }
+  90%  { opacity: .6; }
+  100% { transform: translate3d(calc(var(--sway, 18px) * -1), -115vh, 0); opacity: 0; }
+}
+
+/* ---------- Bubble panel (rounded, translucent, still very readable) ---------- */
+.bubble-panel {
+  position: relative;
+  background: rgba(255, 250, 245, .94);
+  border: 2px solid rgba(255, 255, 255, .85);
+  border-radius: var(--aq-radius-lg);
+  box-shadow: var(--aq-shadow), inset 0 2px 0 rgba(255,255,255,.9);
+  -webkit-backdrop-filter: blur(6px);
+          backdrop-filter: blur(6px);
+}
+
+.bubble-panel::before {            /* little shine in the corner */
+  content: "";
+  position: absolute;
+  top: 6px; left: 30px;
+  width: 42px; height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.75);
+  transform: rotate(-12deg);
+  pointer-events: none;
+}
+
+/* ---------- Buttons ---------- */
+.aq-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  min-height: var(--aq-tap);
+  padding: .7rem 1.6rem;
+  border: 0;
+  border-radius: 999px;
+  font-family: var(--aq-font-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: .01em;
+  cursor: pointer;
+  color: #fff;
+  box-shadow: 0 5px 0 rgba(0,0,0,.18), var(--aq-shadow-sm);
+  transition: transform .15s var(--aq-ease), box-shadow .15s var(--aq-ease), filter .15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.aq-btn:hover  { transform: translateY(-2px); filter: brightness(1.06); }
+.aq-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 rgba(0,0,0,.18); }
+
+.aq-btn--primary { background: linear-gradient(180deg, #14a0bd, #0b7aa0); }
+.aq-btn--coral   { background: linear-gradient(180deg, #ee5d78, var(--aq-coral)); }
+.aq-btn--ghost   { background: #fff; color: var(--aq-teal); box-shadow: inset 0 0 0 3px var(--aq-teal), var(--aq-shadow-sm); }
+.aq-btn--block   { width: 100%; }
+
+.aq-btn[disabled], .aq-btn[aria-busy="true"] {
+  cursor: progress;
+  filter: saturate(.7);
+  transform: none;
+}
+
+/* ---------- Spinner (inside buttons; hidden until busy) ---------- */
+.aq-spinner {
+  display: none;
+  width: 1.3rem; height: 1.3rem;
+  border: 3px solid rgba(255,255,255,.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: aq-spin .8s linear infinite;
+}
+.aq-btn--ghost .aq-spinner { border-color: rgba(13,138,166,.3); border-top-color: var(--aq-teal); }
+[aria-busy="true"] > .aq-spinner { display: inline-block; }
+
+@keyframes aq-spin { to { transform: rotate(360deg); } }
+
+/* ---------- Form inputs ---------- */
+.aq-input {
+  width: 100%;
+  min-height: var(--aq-tap);
+  padding: .65rem 1rem;
+  font-size: 1.0625rem;          /* ≥16px stops iOS zooming on focus */
+  color: var(--aq-ocean-deep);
+  background: #fff;
+  border: 3px solid #b6e3ec;
+  border-radius: var(--aq-radius-sm);
+  transition: border-color .15s, box-shadow .15s;
+}
+.aq-input::placeholder { color: #7f9aa8; }
+.aq-input:hover { border-color: var(--aq-aqua); }
+.aq-input:focus { outline: none; border-color: var(--aq-teal); box-shadow: 0 0 0 4px rgba(25,196,212,.28); }
+.aq-input[aria-invalid="true"] { border-color: var(--aq-error); background: var(--aq-error-bg); }
+.aq-input[aria-invalid="true"]:focus { box-shadow: 0 0 0 4px rgba(168,32,26,.18); }
+
+/* ---------- Inline notifications ---------- */
+.aq-alert {
+  padding: .75rem 1rem;
+  border-radius: var(--aq-radius-sm);
+  font-weight: 600;
+  border: 2px solid transparent;
+}
+.aq-alert--error   { background: var(--aq-error-bg); color: var(--aq-error); border-color: #f3b7b3; }
+.aq-alert--success { background: #e9f9f0; color: var(--aq-success); border-color: #a8e3c3; }
+
+/* ---------- Utilities ---------- */
+.sr-only {
+  position: absolute !important;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Respect reduced-motion preferences ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .aq-bubble { display: none; }
+}

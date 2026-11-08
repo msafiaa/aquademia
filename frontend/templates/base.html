@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b8fb0">
+  <title>{% block title %}Aquademia{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/aquademia.css') }}">
+  {% block head_extra %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <!-- Shared underwater scene: background + floating bubbles (decorative only) -->
+  <div class="aq-scene" aria-hidden="true">
+    <div class="aq-scene__bubbles" id="aq-bubbles"></div>
+  </div>
+
+  {% block content %}{% endblock %}
+
+  <script src="{{ url_for('static', filename='js/bubbles.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

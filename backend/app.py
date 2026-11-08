@@ -10,6 +10,7 @@ from routes.chat import chat_bp
 from routes.quiz import quiz_bp
 from routes.shop import shop_bp
 from routes.learning import learning_bp
+from routes.pages import pages_bp
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -34,6 +35,7 @@ app.register_blueprint(aquarium_bp)
 app.register_blueprint(shop_bp)
 app.register_blueprint(chat_bp)
 app.register_blueprint(learning_bp)
+app.register_blueprint(pages_bp)
 
 @app.route("/")
 def home():

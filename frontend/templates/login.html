@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}Aquademia – Log in or join the adventure{% endblock %}
+{% block body_class %}page-auth{% endblock %}
+
+{% block head_extra %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+{% set cut = 'images/characters/cutouts/' %}
+<main class="auth-shell"
+      id="auth-root"
+      data-initial-tab="{{ initial_tab }}"
+      data-has-session="{{ 'true' if has_session else 'false' }}"
+      data-next-url="{{ post_login_url or '' }}"
+      data-login-url="{{ url_for('auth.login') }}"
+      data-register-url="{{ url_for('auth.register') }}"
+      data-me-url="{{ url_for('auth.current_student') }}"
+      data-logout-url="{{ url_for('auth.logout') }}">
+
+  <!-- ===== Left: brand + mascots ===== -->
+  <section class="auth-stage" aria-label="Welcome to Aquademia">
+    <h1 class="auth-brand">
+      <svg class="auth-brand__icon" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true" focusable="false">
+        <circle cx="24" cy="24" r="21" fill="#e6fbff" stroke="#0d8aa6" stroke-width="3"/>
+        <ellipse cx="17" cy="15" rx="6" ry="3.5" fill="#fff" opacity=".9" transform="rotate(-30 17 15)"/>
+        <circle cx="31" cy="30" r="3" fill="#7fe0ea"/>
+        <circle cx="24" cy="33" r="1.8" fill="#7fe0ea"/>
+      </svg>
+      <span>Aquademia</span>
+    </h1>
+    <p class="auth-tagline">
+      <strong>Selamat datang!</strong>
+      Belajar sambil meneroka lautan &mdash; learn while you explore the ocean.
+    </p>
+
+    <div class="mascots" id="mascots" data-state="idle">
+      <img class="mascot mascot--mal" id="mascot-mal"
+           src="{{ url_for('static', filename=cut ~ 'mal-happy.png') }}"
+           data-idle="{{ url_for('static', filename=cut ~ 'mal-happy.png') }}"
+           data-thinking="{{ url_for('static', filename=cut ~ 'mal-thinking.png') }}"
+           data-surprised="{{ url_for('static', filename=cut ~ 'mal-surprised.png') }}"
+           width="225" height="520"
+           alt="Mal, a cheerful boy explorer in a turquoise diving suit and bubble helmet">
+      <p class="speech" id="mascot-speech" role="status" aria-live="polite">
+        Hai! I'm Mal. Ready to dive in?
+      </p>
+      <img class="mascot mascot--fania" id="mascot-fania"
+           src="{{ url_for('static', filename=cut ~ 'fania-happy.png') }}"
+           data-idle="{{ url_for('static', filename=cut ~ 'fania-happy.png') }}"
+           data-thinking="{{ url_for('static', filename=cut ~ 'fania-thinking.png') }}"
+           data-surprised="{{ url_for('static', filename=cut ~ 'fania-surprised.png') }}"
+           width="206" height="520"
+           alt="Fania, a cheerful girl explorer in a coral-pink diving suit, lavender hijab and bubble helmet">
+    </div>
+  </section>
+
+  <!-- ===== Right: forms ===== -->
+  <section class="auth-card bubble-panel" aria-labelledby="auth-heading">
+    <div id="auth-forms">
+      <div class="tabs" role="tablist" aria-label="Log in or create an account">
+        <button type="button" class="tab" role="tab" id="tab-login"
+                aria-controls="panel-login" aria-selected="true">Log in</button>
+        <button type="button" class="tab" role="tab" id="tab-register"
+                aria-controls="panel-register" aria-selected="false" tabindex="-1">Join us</button>
+      </div>
+
+      <!-- ---------- LOG IN ---------- -->
+      <div class="tab-panel" id="panel-login" role="tabpanel" aria-labelledby="tab-login">
+        <h2 class="auth-heading" id="auth-heading">Welcome back, explorer!</h2>
+        <p class="auth-sub">Log in to continue your ocean adventure.</p>
+
+        <form id="login-form" novalidate>
+          <div class="aq-alert aq-alert--error" id="login-alert" role="alert" hidden></div>
+
+          <div class="field">
+            <label for="login-username">Username</label>
+            <input class="aq-input" id="login-username" name="username" type="text"
+                   autocomplete="username" autocapitalize="none" autocorrect="off"
+                   spellcheck="false" maxlength="30" required
+                   aria-describedby="login-username-error">
+            <p class="field-error" id="login-username-error" hidden></p>
+          </div>
+
+          <div class="field">
+            <label for="login-password">Password</label>
+            <div class="password-wrap">
+              <input class="aq-input" id="login-password" name="password" type="password"
+                     autocomplete="current-password" maxlength="128" required
+                     aria-describedby="login-password-error">
+              <button type="button" class="pw-toggle" data-toggle-for="login-password"
+                      aria-label="Show password" aria-pressed="false">
+                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+                  <path class="eye" d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  <circle class="eye" cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+                  <path class="slash" d="M3 3l18 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <p class="field-error" id="login-password-error" hidden></p>
+          </div>
+
+          <button class="aq-btn aq-btn--primary aq-btn--block" type="submit" id="login-submit">
+            <span class="aq-btn__label">Dive in!</span>
+            <span class="aq-spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+
+        <p class="switch-hint">New here? <button type="button" class="link-btn" data-goto="register">Create your account</button></p>
+      </div>
+
+      <!-- ---------- REGISTER ---------- -->
+      <div class="tab-panel" id="panel-register" role="tabpanel" aria-labelledby="tab-register" hidden>
+        <h2 class="auth-heading">Join the adventure!</h2>
+        <p class="auth-sub">Make your explorer account in a few quick steps.</p>
+
+        <form id="register-form" novalidate>
+          <div class="aq-alert aq-alert--error" id="register-alert" role="alert" hidden></div>
+
+          <div class="field">
+            <label for="reg-username">Choose a username</label>
+            <input class="aq-input" id="reg-username" name="username" type="text"
+                   autocomplete="username" autocapitalize="none" autocorrect="off"
+                   spellcheck="false" maxlength="30" required
+                   aria-describedby="reg-username-hint reg-username-error">
+            <p class="field-hint" id="reg-username-hint">
+              3&ndash;30 letters, numbers or _ . Please don't use your full name or school.
+            </p>
+            <p class="field-error" id="reg-username-error" hidden></p>
+          </div>
+
+          <fieldset class="field year-field" aria-describedby="reg-year-error">
+            <legend>Which year are you in?</legend>
+            <div class="year-options">
+              <label class="year-option"><input type="radio" name="year_level" value="4"><span>Year 4</span></label>
+              <label class="year-option"><input type="radio" name="year_level" value="5"><span>Year 5</span></label>
+              <label class="year-option"><input type="radio" name="year_level" value="6"><span>Year 6</span></label>
+            </div>
+            <p class="field-error" id="reg-year-error" hidden></p>
+          </fieldset>
+
+          <div class="field">
+            <label for="reg-password">Create a password</label>
+            <div class="password-wrap">
+              <input class="aq-input" id="reg-password" name="password" type="password"
+                     autocomplete="new-password" maxlength="128" required
+                     aria-describedby="reg-password-hint reg-password-error">
+              <button type="button" class="pw-toggle" data-toggle-for="reg-password"
+                      aria-label="Show password" aria-pressed="false">
+                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+                  <path class="eye" d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  <circle class="eye" cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+                  <path class="slash" d="M3 3l18 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <div class="pw-meter" aria-hidden="true"><span id="pw-meter-fill"></span></div>
+            <p class="field-hint" id="reg-password-hint">
+              At least 12 characters. Tip: join 3 fun words, like <em>BlueFish-Jumps-High</em>!
+              <span id="pw-count" class="pw-count">0 / 12</span>
+            </p>
+            <p class="field-error" id="reg-password-error" hidden></p>
+          </div>
+
+          <div class="field">
+            <label for="reg-confirm">Type your password again</label>
+            <div class="password-wrap">
+              <input class="aq-input" id="reg-confirm" name="confirm_password" type="password"
+                     autocomplete="new-password" maxlength="128" required
+                     aria-describedby="reg-confirm-error">
+              <button type="button" class="pw-toggle" data-toggle-for="reg-confirm"
+                      aria-label="Show password" aria-pressed="false">
+                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+                  <path class="eye" d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                  <circle class="eye" cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+                  <path class="slash" d="M3 3l18 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <p class="field-error" id="reg-confirm-error" hidden></p>
+          </div>
+
+          <button class="aq-btn aq-btn--coral aq-btn--block" type="submit" id="register-submit">
+            <span class="aq-btn__label">Start my adventure!</span>
+            <span class="aq-spinner" aria-hidden="true"></span>
+          </button>
+        </form>
+
+        <p class="switch-hint">Already have an account? <button type="button" class="link-btn" data-goto="login">Log in</button></p>
+      </div>
+    </div>
+
+    <!-- ---------- SUCCESS / ALREADY LOGGED IN ---------- -->
+    <div class="auth-done" id="auth-done" hidden>
+      <h2 class="auth-heading" id="done-heading" tabindex="-1">You're in!</h2>
+      <p class="auth-sub" id="done-text"></p>
+      <button type="button" class="aq-btn aq-btn--ghost aq-btn--block" id="logout-btn">
+        <span class="aq-btn__label">Log out</span>
+        <span class="aq-spinner" aria-hidden="true"></span>
+      </button>
+    </div>
+  </section>
+</main>
+
+<!-- Celebration rising bubbles layer ("bubble naik atas") -->
+<div class="bubble-surge-overlay" id="bubble-surge" aria-hidden="true"></div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/auth.js') }}" defer></script>
+{% endblock %}
