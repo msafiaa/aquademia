@@ -41,6 +41,60 @@ body.page-world {
   pointer-events: auto;
   gap: 0.75rem;
   flex-wrap: wrap;
+  padding: 0.6rem 1.25rem;
+  background: rgba(255, 250, 245, 0.92);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  border-radius: var(--aq-radius);
+  box-shadow: var(--aq-shadow-sm);
+  backdrop-filter: blur(8px);
+}
+
+.hud-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--aq-font-display);
+  font-size: 1.4rem;
+  color: var(--aq-ocean);
+  margin-right: 0.4rem;
+}
+
+.pearl-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: linear-gradient(135deg, #fff2a3, #ffd86b);
+  color: #5c4100;
+  font-weight: 700;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 5px rgba(217, 164, 0, 0.25);
+}
+
+.hud-greeting {
+  font-weight: 700;
+  color: var(--aq-ocean-deep);
+}
+
+.hud-logout {
+  min-height: 40px;
+  padding: 0.4rem 1rem;
+  font-size: 0.95rem;
+}
+
+/* pills sit inside the white bar now, so give them a soft aqua tint */
+.hud-top-bar .hud-pill {
+  background: rgba(230, 251, 255, 0.95);
+  border-color: rgba(13, 138, 166, 0.25);
+  box-shadow: none;
+}
+
+@media (max-width: 768px) {
+  .hud-top-bar { padding: 0.5rem 0.75rem; }
+  .hud-greeting,
+  .hud-pill__label { display: none; }
+  .hud-brand { font-size: 1.15rem; }
 }
 
 .hud-left-group {
@@ -109,7 +163,7 @@ body.page-world {
 /* Floating Controls Guide Card (Top-Left under nav) */
 .controls-guide-card {
   position: absolute;
-  top: 4.8rem;
+  top: 5.9rem;
   left: 1.25rem;
   background: rgba(11, 58, 83, 0.78);
   border: 1.5px solid rgba(127, 224, 234, 0.4);
@@ -406,6 +460,10 @@ body.touch-ui .controls-guide-touch strong {
   body.touch-ui .hud-top-bar { gap: 0.4rem; }
   body.touch-ui .hud-left-group,
   body.touch-ui .hud-right-group { gap: 0.4rem; }
+  body.touch-ui .hud-top-bar { padding: 0.3rem 0.75rem; }
+  body.touch-ui .hud-brand { font-size: 1rem; }
+  body.touch-ui .hud-brand svg { width: 26px; height: 26px; }
+  body.touch-ui .hud-logout { min-height: 32px; padding: 0.2rem 0.8rem; font-size: 0.8rem; }
   body.touch-ui .hud-pill { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
   body.touch-ui .mascot-btn { padding: 0.25rem 0.7rem; font-size: 0.8rem; }
   body.touch-ui .destination-guide-banner { padding: 0.4rem 1.1rem; font-size: 0.88rem; }
@@ -431,5 +489,5 @@ body.touch-ui .controls-guide-touch strong {
   .touch-joystick { width: 104px; height: 104px; }
   .touch-joystick__knob { width: 46px; height: 46px; margin: -23px 0 0 -23px; }
   .touch-vbtn { width: 54px; height: 54px; }
-  body.touch-ui .controls-guide-touch { top: 3.9rem; }
+  body.touch-ui .controls-guide-touch { top: 4.4rem; }
 }

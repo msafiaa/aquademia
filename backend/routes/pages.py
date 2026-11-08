@@ -26,16 +26,24 @@ def register_page():
 
 @pages_bp.route("/index")
 def index_page():
+    # The 3D underwater city IS the home page now: login lands straight here.
     if not session.get("student_id"):
         return redirect(url_for("pages.login_page"))
-    return render_template("index.html")
+    return render_template("world.html")
 
 
 @pages_bp.route("/world")
 def world_page():
+    # Old address kept so existing bookmarks/links still work.
+    return redirect(url_for("pages.index_page"))
+
+
+@pages_bp.route("/dashboard")
+def dashboard_page():
+    # The previous 2D card dashboard, kept as a fallback (no longer linked).
     if not session.get("student_id"):
         return redirect(url_for("pages.login_page"))
-    return render_template("world.html")
+    return render_template("index.html")
 
 
 @pages_bp.route("/quiz")

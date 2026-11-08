@@ -87,6 +87,7 @@
 
     // Build World City & Explorer Character
     city = new window.UnderwaterCity(scene);
+    city.camera = camera; // image buildings turn to face the camera
 
     var savedMascot = sessionStorage.getItem("aquademia_mascot") || "mal";
     character = new window.ExplorerCharacter(scene, {
@@ -103,6 +104,7 @@
     setupTouchControls();
     setupHUDControls();
     loadStudentInfo();
+    setupLogout();
 
     // Check Opening Cinematic
     checkCinematicIntro();
@@ -385,12 +387,29 @@
     if (btnSelectFania) btnSelectFania.classList.toggle("active", type === "fania");
   }
 
+  function setupLogout() {
+    var btn = document.getElementById("btn-logout");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var done = function () {
+        try { sessionStorage.removeItem("aquademia_intro_seen"); } catch (e) { /* ignore */ }
+        window.location.assign("/login");
+      };
+      fetch("/api/auth/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin"
+      }).then(done, done);
+    });
+  }
+
   function loadStudentInfo() {
     fetch("/api/auth/me", { credentials: "same-origin" })
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (data && data.student) {
-          document.getElementById("user-display").textContent = "Hai, " + data.student.username + "!";
+          var yr = data.student.year_level ? " (Tahun " + data.student.year_level + ")" : "";
+          document.getElementById("user-display").textContent = "Hai, " + data.student.username + yr + "!";
         }
       });
 

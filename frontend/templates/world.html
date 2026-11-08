@@ -17,10 +17,15 @@
     <!-- Top Bar -->
     <header class="hud-top-bar">
       <div class="hud-left-group">
-        <a href="/index" class="hud-pill" title="Kembali ke Dashboard Tradisional">
-          <span>&larr;</span>
-          <span>Pangkalan 2D</span>
-        </a>
+        <div class="hud-brand">
+          <svg viewBox="0 0 48 48" width="36" height="36" aria-hidden="true" focusable="false">
+            <circle cx="24" cy="24" r="21" fill="#e6fbff" stroke="#0d8aa6" stroke-width="3"/>
+            <ellipse cx="17" cy="15" rx="6" ry="3.5" fill="#fff" opacity=".9" transform="rotate(-30 17 15)"/>
+            <circle cx="31" cy="30" r="3" fill="#7fe0ea"/>
+            <circle cx="24" cy="33" r="1.8" fill="#7fe0ea"/>
+          </svg>
+          <span>Aquademia</span>
+        </div>
 
         <!-- Character Mascot Selector Toggle -->
         <div class="mascot-toggle-group" title="Pilih Karakter Penyelam Anda">
@@ -30,7 +35,7 @@
 
         <button type="button" class="hud-pill" id="btn-reset-cam" title="Set semula sudut pandangan kamera ke belakang karakter">
           <span>🎯</span>
-          <span>Set Semula Kamera</span>
+          <span class="hud-pill__label">Set Semula Kamera</span>
         </button>
       </div>
 
@@ -40,7 +45,10 @@
           <span id="user-pearls">0</span>
           <span>Mutiara</span>
         </div>
-        <span class="hud-pill" id="user-display">Hai, Pengembara!</span>
+        <span class="hud-greeting" id="user-display">Hai, Pengembara!</span>
+        <button type="button" class="aq-btn aq-btn--ghost hud-logout" id="btn-logout">
+          <span>Log Keluar</span>
+        </button>
       </div>
     </header>
 
@@ -108,7 +116,10 @@
   </div>
 
   <!-- Scripts: Local Standalone Three.js and City Modules -->
+  <script>window.AQ_BUILDING_IMG_BASE = "{{ url_for('static', filename='images/buildings/cutouts/') }}";
+    window.AQ_BUILDING_MODEL_BASE = "{{ url_for('static', filename='models/buildings/') }}";</script>
   <script src="{{ url_for('static', filename='js/three.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/gltf-loader.min.js') }}"></script>
   <script src="{{ url_for('static', filename='js/world/city.js') }}"></script>
   <script src="{{ url_for('static', filename='js/world/character.js') }}"></script>
   <script src="{{ url_for('static', filename='js/world/controls.js') }}"></script>
