@@ -23,7 +23,7 @@
 
   // Same rules as the backend
   var USERNAME_RE = /^[A-Za-z0-9_]{3,30}$/;
-  var PW_MIN = 12, PW_MAX = 128;
+  var PW_MIN = 8, PW_MAX = 128;
 
   var $ = function (id) { return document.getElementById(id); };
 
