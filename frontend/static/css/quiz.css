@@ -1,0 +1,312 @@
+/* ==========================================================================
+   Aquademia Quiz & Results Styles
+   ========================================================================== */
+
+.quiz-shell {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: max(1rem, env(safe-area-inset-top)) 1.25rem max(2rem, env(safe-area-inset-bottom));
+}
+
+/* Header bar */
+.quiz-nav-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 250, 245, 0.92);
+  border-radius: var(--aq-radius);
+  box-shadow: var(--aq-shadow-sm);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  margin-bottom: 1.5rem;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  color: var(--aq-teal);
+  text-decoration: none;
+}
+.back-link:hover { color: var(--aq-ocean); }
+
+/* Step 1: Selection Cards */
+.topic-selector-card {
+  padding: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.subject-tabs {
+  display: inline-flex;
+  gap: 0.75rem;
+  background: var(--aq-foam);
+  padding: 0.4rem;
+  border-radius: 999px;
+  margin: 1.25rem 0;
+}
+
+.subject-tab {
+  padding: 0.6rem 1.5rem;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  font-family: var(--aq-font-display);
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--aq-teal);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.subject-tab.active {
+  background: linear-gradient(180deg, #14a0bd, #0b7aa0);
+  color: #fff;
+  box-shadow: 0 3px 8px rgba(11, 122, 160, 0.4);
+}
+
+.topics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+  text-align: left;
+}
+
+.topic-btn {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem;
+  border-radius: var(--aq-radius);
+  background: #fff;
+  border: 2px solid #b6e3ec;
+  cursor: pointer;
+  transition: all 0.2s var(--aq-ease);
+}
+
+.topic-btn:hover {
+  border-color: var(--aq-teal);
+  transform: translateY(-3px);
+  box-shadow: var(--aq-shadow-sm);
+}
+
+.topic-btn.selected {
+  border-color: var(--aq-teal);
+  background: #e6fbff;
+  box-shadow: 0 0 0 3px rgba(25, 196, 212, 0.3);
+}
+
+.topic-btn__name {
+  font-family: var(--aq-font-display);
+  font-size: 1.2rem;
+  color: var(--aq-ocean-deep);
+  margin-bottom: 0.25rem;
+}
+
+.topic-btn__meta {
+  font-size: 0.9rem;
+  color: var(--aq-muted);
+}
+
+/* Step 2: Active Quiz Screen */
+.quiz-progress-bar-wrap {
+  width: 100%;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.quiz-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--aq-turquoise), var(--aq-sun));
+  border-radius: 999px;
+  transition: width 0.3s var(--aq-ease);
+}
+
+.question-card {
+  padding: 2.25rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+}
+
+.question-badge {
+  display: inline-block;
+  padding: 0.3rem 0.9rem;
+  border-radius: 999px;
+  background: var(--aq-foam);
+  color: var(--aq-teal);
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 1rem;
+}
+
+.question-text {
+  font-size: 1.5rem;
+  line-height: 1.35;
+  color: var(--aq-ocean-deep);
+  margin-bottom: 1.75rem;
+  font-weight: 600;
+}
+
+.question-image-box {
+  max-width: 400px;
+  margin: 0 auto 1.5rem;
+  border-radius: var(--aq-radius-sm);
+  overflow: hidden;
+  border: 2px solid #b6e3ec;
+}
+.question-image-box img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.options-list {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.option-choice {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.4rem;
+  background: #fff;
+  border: 3px solid #b6e3ec;
+  border-radius: var(--aq-radius-sm);
+  cursor: pointer;
+  transition: all 0.15s var(--aq-ease);
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--aq-ocean-deep);
+  user-select: none;
+}
+
+.option-choice:hover {
+  border-color: var(--aq-aqua);
+  transform: translateX(4px);
+}
+
+.option-choice.selected {
+  border-color: var(--aq-teal);
+  background: #e6fbff;
+  box-shadow: 0 0 0 3px rgba(25, 196, 212, 0.3);
+}
+
+.option-letter {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--aq-foam);
+  color: var(--aq-teal);
+  font-family: var(--aq-font-display);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.option-choice.selected .option-letter {
+  background: var(--aq-teal);
+  color: #fff;
+}
+
+.quiz-footer-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+/* Step 3: Results Card */
+.results-card {
+  padding: 2.5rem;
+  text-align: center;
+}
+
+.score-badge-circle {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  margin: 0 auto 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ffd86b, #ffae19);
+  color: #573300;
+  box-shadow: 0 8px 24px rgba(255, 174, 25, 0.4);
+}
+
+.score-number {
+  font-family: var(--aq-font-display);
+  font-size: 2.5rem;
+  line-height: 1;
+}
+.score-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.results-mascot-msg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0 2rem;
+}
+
+.results-mascot-img {
+  height: 90px;
+  width: auto;
+}
+
+.results-breakdown {
+  text-align: left;
+  margin-top: 2rem;
+  border-top: 2px dashed #b6e3ec;
+  padding-top: 1.5rem;
+}
+
+.review-item {
+  padding: 1rem;
+  margin-bottom: 0.8rem;
+  border-radius: var(--aq-radius-sm);
+  background: #fff;
+  border-left: 6px solid #ccc;
+}
+.review-item.correct { border-left-color: var(--aq-success); background: #f0fdf4; }
+.review-item.incorrect { border-left-color: var(--aq-error); background: #fff5f5; }
+
+.review-q-title {
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+.review-ans {
+  font-size: 0.95rem;
+  color: var(--aq-muted);
+}
+.review-exp {
+  margin-top: 0.5rem;
+  font-size: 0.92rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 6px;
+  color: var(--aq-ocean-deep);
+}
+
+.results-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}

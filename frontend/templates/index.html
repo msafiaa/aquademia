@@ -203,6 +203,10 @@
 
       <span class="user-greeting" id="user-display">Hai, Pengembara!</span>
 
+      <a href="/world" class="aq-btn aq-btn--primary" style="min-height: 40px; padding: 0.4rem 1.1rem; font-size: 0.95rem; text-decoration: none;">
+        <span>🌊 Kota 3D Hub</span>
+      </a>
+
       <button type="button" class="aq-btn aq-btn--ghost" id="dash-logout" style="min-height: 40px; padding: 0.4rem 1rem; font-size: 0.95rem;">
         <span>Log Keluar</span>
       </button>
@@ -214,8 +218,13 @@
     <div>
       <h1 class="dash-hero__title" id="welcome-heading">Selamat Datang ke Lautan Pembelajaran! 🌊</h1>
       <p class="dash-hero__desc">
-        Pilih destinasi pembelajaran anda di bawah. Teroka kuiz interaktif, bimbingan AI Aqua, kumpul ikan comel, dan hiaskan akuarium anda!
+        Pilih destinasi pembelajaran anda di bawah atau teroka secara langsung dalam Kota 3D Bawah Laut yang interaktif bersama Mal & Fania!
       </p>
+      <div style="margin-top: 1rem;">
+        <a href="/world" class="aq-btn aq-btn--coral" style="text-decoration: none; display: inline-flex;">
+          <span>🚀 Masuk ke Kota 3D Bawah Laut &rarr;</span>
+        </a>
+      </div>
     </div>
     <div class="dash-hero__mascots">
       <img src="{{ url_for('static', filename=cut ~ 'mal-happy.png') }}"
@@ -229,44 +238,44 @@
   <h2 class="destinations-heading">Destinasi Pengembaraan Lautan</h2>
   <div class="destinations-grid">
     <!-- Mathematics -->
-    <div class="card-destination bubble-panel">
+    <a href="/quiz?subject=Mathematics" class="card-destination bubble-panel">
       <span class="card-icon">📐</span>
       <h3 class="card-title">Matematik</h3>
-      <p class="card-desc">Selesaikan teka-teki nombor, pecahan, dan kuiz adaptif untuk mengumpul mutiara laut.</p>
+      <p class="card-desc">Selesaikan teka-teki nombor, operasi asas, dan kuiz adaptif untuk mengumpul mutiara laut.</p>
       <span class="card-action">Mula Kuiz &rarr;</span>
-    </div>
+    </a>
 
     <!-- Science -->
-    <div class="card-destination bubble-panel">
+    <a href="/quiz?subject=Science" class="card-destination bubble-panel">
       <span class="card-icon">🔬</span>
       <h3 class="card-title">Sains</h3>
-      <p class="card-desc">Kaji alam hidupan, daya, tenaga, dan misteri ekosistem marin bersama Mal & Fania.</p>
+      <p class="card-desc">Kaji alam hidupan, daya, tenaga, dan ekosistem marin bersama Mal & Fania.</p>
       <span class="card-action">Mula Teroka &rarr;</span>
-    </div>
+    </a>
 
     <!-- My Aquarium -->
-    <div class="card-destination bubble-panel">
+    <a href="/aquarium" class="card-destination bubble-panel">
       <span class="card-icon">🐠</span>
       <h3 class="card-title">Akuarium Saya</h3>
       <p class="card-desc">Lihat ikan-ikan tropika yang telah anda perolehi melalui kejayaan kuiz anda.</p>
       <span class="card-action">Lihat Akuarium &rarr;</span>
-    </div>
+    </a>
 
     <!-- Decoration Shop -->
-    <div class="card-destination bubble-panel">
+    <a href="/shop" class="card-destination bubble-panel">
       <span class="card-icon">🐚</span>
       <h3 class="card-title">Kedai Hiasan</h3>
       <p class="card-desc">Gunakan mutiara ganjaran untuk membeli karang warna-warni, istana laut, dan hiasan.</p>
       <span class="card-action">Buka Kedai &rarr;</span>
-    </div>
+    </a>
 
-    <!-- Ask Aqua AI Tutor -->
-    <div class="card-destination bubble-panel">
+    <!-- Ask Aqua AI Tutor & Learning Notes -->
+    <a href="/learning" class="card-destination bubble-panel">
       <span class="card-icon">🤖</span>
-      <h3 class="card-title">Tanya Aqua (AI Tutor)</h3>
-      <p class="card-desc">Ada soalan sukar? Tanya Aqua, pembimbing AI dwibahasa mesra anda bila-bila masa!</p>
-      <span class="card-action">Bual Sekarang &rarr;</span>
-    </div>
+      <h3 class="card-title">Nota & Tanya Aqua (AI)</h3>
+      <p class="card-desc">Semak semula nota pembelajaran peribadi, buat latihan adaptif, dan bual dengan Aqua!</p>
+      <span class="card-action">Buka Pembelajaran &rarr;</span>
+    </a>
   </div>
 </div>
 {% endblock %}

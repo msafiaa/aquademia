@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, redirect, url_for, session
 from pathlib import Path
 from routes.adaptive_quiz import adaptive_bp
 from routes.aquarium import aquarium_bp
@@ -39,10 +39,9 @@ app.register_blueprint(pages_bp)
 
 @app.route("/")
 def home():
-    return jsonify({
-        "message": "Welcome to Aquademia!",
-        "status": "Backend running successfully"
-    })
+    if session.get("student_id"):
+        return redirect(url_for("pages.index_page"))
+    return redirect(url_for("pages.login_page"))
 
 if __name__ == "__main__":
     app.run(debug=True)

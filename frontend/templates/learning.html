@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Aquademia – Pembelajaran Adaptif & Tanya Aqua{% endblock %}
+{% block body_class %}page-learning{% endblock %}
+
+{% block head_extra %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/learning.css') }}">
+{% endblock %}
+
+{% block content %}
+{% set cut = 'images/characters/cutouts/' %}
+<div class="learning-shell">
+  <!-- Top Navigation Header -->
+  <header class="learning-nav-header">
+    <a href="/index" class="back-link">
+      <span>&larr;</span>
+      <span>Kembali ke Pangkalan Utama</span>
+    </a>
+
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div class="pearl-pill" title="Baki Mutiara">
+        <span>🐚</span>
+        <span id="user-pearls">0</span>
+        <span>Mutiara</span>
+      </div>
+      <span class="user-greeting" id="user-display">Hai, Pengembara!</span>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="learning-tabs" role="tablist">
+    <button type="button" class="learning-tab active" id="tab-notes">
+      <span>📖</span>
+      <span>Nota & Kelemahan</span>
+    </button>
+    <button type="button" class="learning-tab" id="tab-adaptive">
+      <span>🎯</span>
+      <span>Latihan Adaptif</span>
+    </button>
+    <button type="button" class="learning-tab" id="tab-chat">
+      <span>🤖</span>
+      <span>Tanya Aqua (AI Tutor)</span>
+    </button>
+    <button type="button" class="learning-tab" id="tab-history">
+      <span>📜</span>
+      <span>Sejarah Kuiz</span>
+    </button>
+  </div>
+
+  <!-- PANEL 1: Notes & Weak Skills -->
+  <section class="learning-card bubble-panel" id="panel-notes">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <h2 style="color: var(--aq-ocean); font-size: 1.6rem; margin: 0;">Nota Pembelajaran Peribadi</h2>
+      <span class="question-badge" id="active-attempt-title">Percubaan Kuiz</span>
+    </div>
+
+    <h3 style="color: var(--aq-ocean-deep); font-size: 1.15rem; margin-top: 1rem;">Kemahiran yang Perlu Diperbaiki:</h3>
+    <div class="skills-tags-wrap" id="weak-skills-list">
+      <!-- Rendered by learning.js -->
+    </div>
+
+    <h3 style="color: var(--aq-ocean-deep); font-size: 1.15rem; margin-top: 1.5rem;">Nota Revisi Disesuaikan untuk Anda:</h3>
+    <div class="notes-content-box" id="notes-container">
+      <p style="color: var(--aq-muted);">Memuatkan nota revisi...</p>
+    </div>
+
+    <h3 style="color: var(--aq-ocean-deep); font-size: 1.15rem; margin-top: 1.5rem;">Penerangan Soalan & Jawapan AI:</h3>
+    <div id="explanations-list">
+      <!-- Rendered by learning.js -->
+    </div>
+  </section>
+
+  <!-- PANEL 2: Adaptive Quiz Activity -->
+  <section class="learning-card bubble-panel" id="panel-adaptive" hidden>
+    <h2 style="color: var(--aq-ocean); font-size: 1.6rem; margin-bottom: 1rem;">Latihan Pengukuhan Adaptif AI</h2>
+    <div id="adaptive-questions-box">
+      <!-- Interactive questions loaded by learning.js -->
+    </div>
+    <div style="text-align: center; margin-top: 1.5rem;">
+      <button type="button" class="aq-btn aq-btn--coral" id="btn-submit-adaptive" hidden>
+        <span>Hantar Latihan Adaptif & Tebung Ganjaran! &check;</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- PANEL 3: Ask Aqua Chatbot -->
+  <section class="bubble-panel" id="panel-chat" hidden style="padding: 1rem;">
+    <div class="chat-window">
+      <!-- Header -->
+      <div class="chat-header">
+        <div class="chat-avatar">
+          <img src="{{ url_for('static', filename=cut ~ 'fania-happy.png') }}" alt="Aqua">
+        </div>
+        <div class="chat-title-group">
+          <h3>Tanya Aqua (AI Tutor Pembelajaran)</h3>
+          <p>Bimbingan dwibahasa mesra untuk Matematik & Sains Tahun 4-6</p>
+        </div>
+      </div>
+
+      <!-- Messages Area -->
+      <div class="chat-messages-area" id="chat-messages-area">
+        <div class="chat-msg chat-msg--assistant">
+          <div class="chat-avatar">
+            <img src="{{ url_for('static', filename=cut ~ 'fania-happy.png') }}" alt="Aqua">
+          </div>
+          <div class="chat-bubble-text">
+            Hai pengembara cilik! Saya Aqua. Ada sebarang soalan tentang kuiz tadi atau perlukan bimbingan langkah demi langkah? Tanya saja pada saya dalam Bahasa Melayu atau English! 🌊🫧
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Prompt Chips -->
+      <div class="chat-prompt-chips">
+        <button type="button" class="chat-chip" data-prompt="Boleh tolong terangkan soalan yang saya buat silap tadi?">💡 Terangkan kesilapan saya</button>
+        <button type="button" class="chat-chip" data-prompt="Tunjukkan langkah demi langkah cara mengira soalan penambahan.">📐 Langkah pengiraan</button>
+        <button type="button" class="chat-chip" data-prompt="Beri satu petunjuk mudah untuk topik ini.">🔍 Beri petunjuk</button>
+      </div>
+
+      <!-- Input Bar -->
+      <div class="chat-input-bar">
+        <input type="text" class="chat-input" id="chat-input" placeholder="Tanya soalan kepada Aqua di sini... (Tekan Enter)">
+        <button type="button" class="aq-btn aq-btn--primary chat-send-btn" id="btn-chat-send">
+          <span>Hantar</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- PANEL 4: History Table -->
+  <section class="learning-card bubble-panel" id="panel-history" hidden>
+    <h2 style="color: var(--aq-ocean); font-size: 1.6rem; margin-bottom: 1rem;">Sejarah Percubaan Kuiz Anda</h2>
+    <div style="overflow-x: auto;">
+      <table class="history-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Subjek & Topik</th>
+            <th>Skor</th>
+            <th>Tarikh</th>
+            <th>Tindakan</th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody">
+          <!-- Populated by learning.js -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<!-- Reward Celebration Modal -->
+<div class="reward-modal-overlay" id="reward-modal" aria-hidden="true">
+  <div class="reward-modal-card">
+    <span style="font-size: 3rem;">🎉🌊</span>
+    <h2 style="color: var(--aq-ocean); font-size: 2rem; margin: 0.5rem 0;">Tahniah, Pengembara!</h2>
+    <p style="color: var(--aq-muted); font-size: 1.05rem;">Anda berjaya menyelesaikan latihan adaptif dan membuka kunci penghuni lautan baharu:</p>
+
+    <img src="" alt="Reward Fish" class="reward-fish-img" id="reward-fish-img">
+    <h3 style="color: var(--aq-ocean-deep); font-size: 1.5rem; margin: 0.5rem 0;" id="reward-fish-name">Ikan Tropika</h3>
+    <div class="pearl-pill" style="font-size: 1.1rem; padding: 0.5rem 1.25rem; margin: 0.5rem auto 1.5rem;" id="reward-pearls-text">
+      +20 Mutiara Berkilau!
+    </div>
+
+    <div style="display: flex; gap: 0.75rem; justify-content: center;">
+      <button type="button" class="aq-btn aq-btn--primary" id="btn-close-reward">
+        <span>Berenang ke Akuarium Saya! 🐠</span>
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/learning.js') }}" defer></script>
+{% endblock %}

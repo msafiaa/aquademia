@@ -1,0 +1,231 @@
+/* ==========================================================================
+   Aquademia Decoration Shop Styles
+   ========================================================================== */
+
+.shop-shell {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: max(1rem, env(safe-area-inset-top)) 1.25rem max(2rem, env(safe-area-inset-bottom));
+}
+
+.shop-nav-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 250, 245, 0.92);
+  border-radius: var(--aq-radius);
+  box-shadow: var(--aq-shadow-sm);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  margin-bottom: 1.5rem;
+}
+
+/* Shop Banner */
+.shop-hero-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.75rem 2rem;
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, rgba(230, 251, 255, 0.95), rgba(255, 250, 245, 0.92));
+}
+
+.shop-hero-text h1 {
+  color: var(--aq-ocean);
+  font-size: 2rem;
+  margin-bottom: 0.35rem;
+}
+
+.shop-tabs {
+  display: inline-flex;
+  gap: 0.5rem;
+  background: var(--aq-foam);
+  padding: 0.35rem;
+  border-radius: 999px;
+  margin-bottom: 1.5rem;
+}
+
+.shop-tab-btn {
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  font-family: var(--aq-font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--aq-teal);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.shop-tab-btn.active {
+  background: linear-gradient(180deg, #14a0bd, #0b7aa0);
+  color: #fff;
+  box-shadow: 0 3px 8px rgba(11, 122, 160, 0.35);
+}
+
+/* Items Grid */
+.shop-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.shop-item-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem;
+  background: #fff;
+  border: 2px solid #b6e3ec;
+  border-radius: var(--aq-radius);
+  transition: all 0.2s var(--aq-ease);
+  position: relative;
+}
+.shop-item-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--aq-teal);
+  box-shadow: var(--aq-shadow-sm);
+}
+
+.shop-item-card.owned {
+  border-color: #a8e3c3;
+  background: #f7fdf9;
+}
+
+.item-img-container {
+  height: 140px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1rem;
+}
+.item-img-container img {
+  max-height: 130px;
+  max-width: 130px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 8px rgba(6, 58, 90, 0.2));
+  transition: transform 0.2s;
+}
+.shop-item-card:hover .item-img-container img {
+  transform: scale(1.08);
+}
+
+.item-badge-category {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: var(--aq-foam);
+  color: var(--aq-teal);
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.item-title {
+  font-family: var(--aq-font-display);
+  font-size: 1.3rem;
+  color: var(--aq-ocean-deep);
+  margin-bottom: 0.35rem;
+}
+
+.item-desc {
+  font-size: 0.92rem;
+  color: var(--aq-muted);
+  line-height: 1.4;
+  margin-bottom: 1.25rem;
+  flex-grow: 1;
+}
+
+.item-bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  border-top: 1px solid #e0eff4;
+  padding-top: 1rem;
+}
+
+.item-price-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 700;
+  color: #8a6500;
+  background: #fff8d6;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.95rem;
+}
+
+.btn-buy {
+  padding: 0.45rem 1.2rem;
+  font-size: 0.95rem;
+  min-height: 40px;
+}
+
+.owned-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-weight: 700;
+  color: var(--aq-success);
+  font-size: 0.95rem;
+}
+
+/* Placement Modal */
+.placement-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 58, 90, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s;
+}
+.placement-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+.placement-card {
+  background: #fff;
+  border-radius: var(--aq-radius-lg);
+  padding: 2rem;
+  max-width: 560px;
+  width: 90%;
+  box-shadow: 0 20px 45px rgba(0,0,0,0.4);
+}
+
+.mini-tank-preview {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  border-radius: var(--aq-radius);
+  background: linear-gradient(180deg, #1ba2bd 0%, #0c698e 100%);
+  border: 3px solid #b6e3ec;
+  margin: 1.25rem 0;
+  cursor: crosshair;
+  overflow: hidden;
+}
+.mini-tank-sand {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: #d8af65;
+  pointer-events: none;
+}
+.mini-tank-marker {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  filter: drop-shadow(0 3px 5px rgba(0,0,0,0.4));
+}

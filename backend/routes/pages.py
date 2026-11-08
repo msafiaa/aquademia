@@ -2,7 +2,6 @@ from flask import Blueprint, render_template, session, redirect, url_for
 
 pages_bp = Blueprint("pages", __name__)
 
-# Where to send a student right after a successful login.
 POST_LOGIN_URL = "/index"
 
 
@@ -27,7 +26,41 @@ def register_page():
 
 @pages_bp.route("/index")
 def index_page():
-    student_id = session.get("student_id")
-    if not student_id:
+    if not session.get("student_id"):
         return redirect(url_for("pages.login_page"))
     return render_template("index.html")
+
+
+@pages_bp.route("/world")
+def world_page():
+    if not session.get("student_id"):
+        return redirect(url_for("pages.login_page"))
+    return render_template("world.html")
+
+
+@pages_bp.route("/quiz")
+def quiz_page():
+    if not session.get("student_id"):
+        return redirect(url_for("pages.login_page"))
+    return render_template("quiz.html")
+
+
+@pages_bp.route("/learning")
+def learning_page():
+    if not session.get("student_id"):
+        return redirect(url_for("pages.login_page"))
+    return render_template("learning.html")
+
+
+@pages_bp.route("/aquarium")
+def aquarium_page():
+    if not session.get("student_id"):
+        return redirect(url_for("pages.login_page"))
+    return render_template("aquarium.html")
+
+
+@pages_bp.route("/shop")
+def shop_page():
+    if not session.get("student_id"):
+        return redirect(url_for("pages.login_page"))
+    return render_template("shop.html")

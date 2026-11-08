@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Aquademia – Kedai Hiasan Akuarium{% endblock %}
+{% block body_class %}page-shop{% endblock %}
+
+{% block head_extra %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+{% endblock %}
+
+{% block content %}
+{% set cut = 'images/characters/cutouts/' %}
+<div class="shop-shell">
+  <!-- Top Navigation Header -->
+  <header class="shop-nav-header">
+    <a href="/index" class="back-link">
+      <span>&larr;</span>
+      <span>Kembali ke Pangkalan Utama</span>
+    </a>
+
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div class="pearl-pill" title="Baki Mutiara">
+        <span>🐚</span>
+        <span id="user-pearls-header">0</span>
+        <span>Mutiara</span>
+      </div>
+      <span class="user-greeting" id="user-display">Hai, Pengembara!</span>
+    </div>
+  </header>
+
+  <!-- Shop Hero Banner -->
+  <section class="shop-hero-banner bubble-panel">
+    <div class="shop-hero-text">
+      <h1>Kedai Hiasan Bawah Laut 🐚✨</h1>
+      <p style="color: var(--aq-muted); max-width: 50ch; margin: 0.25rem 0 1rem;">
+        Gunakan mutiara ganjaran kuiz anda untuk membeli karang indah, kulit mutiara, dan istana pasir untuk menghias akuarium peribadi anda!
+      </p>
+      <div class="pearl-pill" style="font-size: 1.15rem; padding: 0.5rem 1.25rem; width: fit-content;">
+        <span>Baki Mutiara Anda:</span>
+        <strong id="user-pearls">0</strong>
+        <span>🐚</span>
+      </div>
+    </div>
+    <img src="{{ url_for('static', filename=cut ~ 'fania-happy.png') }}"
+         alt="Fania Kedai" style="height: 140px; width: auto; filter: drop-shadow(0 4px 8px rgba(6,58,90,0.3));">
+  </section>
+
+  <!-- Shop Tabs -->
+  <div class="shop-tabs" role="tablist">
+    <button type="button" class="shop-tab-btn active" id="tab-shop-catalog">
+      <span>🛍️ Katalog Kedai</span>
+    </button>
+    <button type="button" class="shop-tab-btn" id="tab-shop-inventory">
+      <span>📦 Inventori Saya</span>
+    </button>
+  </div>
+
+  <!-- VIEW 1: Catalog -->
+  <div id="view-catalog">
+    <div class="shop-catalog-grid" id="shop-catalog-grid">
+      <!-- Populated by shop.js -->
+    </div>
+  </div>
+
+  <!-- VIEW 2: Inventory -->
+  <div id="view-inventory" hidden>
+    <div class="shop-catalog-grid" id="shop-inventory-grid">
+      <!-- Populated by shop.js -->
+    </div>
+  </div>
+</div>
+
+<!-- Placement Modal -->
+<div class="placement-modal-overlay" id="placement-modal" aria-hidden="true">
+  <div class="placement-card">
+    <h2 style="color: var(--aq-ocean); font-size: 1.6rem; margin-top: 0; margin-bottom: 0.35rem;">
+      Urus Kedudukan: <span id="placement-item-title">Hiasan</span>
+    </h2>
+    <p style="color: var(--aq-muted); font-size: 0.95rem; margin-bottom: 1rem;">
+      Klik di mana-mana bahagian dalam tangki di bawah untuk meletakkan hiasan anda pada kedudukan yang diingini:
+    </p>
+
+    <!-- Mini Tank Canvas Preview -->
+    <div class="mini-tank-preview" id="mini-tank-preview">
+      <div class="mini-tank-sand"></div>
+      <img src="" alt="Marker" class="mini-tank-marker" id="mini-tank-marker">
+    </div>
+
+    <div style="display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
+      <button type="button" class="aq-btn aq-btn--ghost" id="btn-remove-placement" style="min-height: 40px; padding: 0.4rem 1rem; font-size: 0.9rem; color: var(--aq-error);" hidden>
+        <span>Keluarkan dari Akuarium</span>
+      </button>
+
+      <button type="button" class="aq-btn aq-btn--ghost" id="btn-close-placement" style="min-height: 40px; padding: 0.4rem 1rem; font-size: 0.9rem;">
+        <span>Batal</span>
+      </button>
+
+      <button type="button" class="aq-btn aq-btn--primary" id="btn-save-placement" style="min-height: 40px; padding: 0.4rem 1.4rem; font-size: 0.95rem;">
+        <span>Simpan Kedudukan &check;</span>
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/shop.js') }}" defer></script>
+{% endblock %}

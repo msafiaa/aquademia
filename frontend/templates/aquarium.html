@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Aquademia – Akuarium Saya{% endblock %}
+{% block body_class %}page-aquarium{% endblock %}
+
+{% block head_extra %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/aquarium.css') }}">
+{% endblock %}
+
+{% block content %}
+{% set cut = 'images/characters/cutouts/' %}
+<div class="aquarium-shell">
+  <!-- Top Navigation Header -->
+  <header class="aquarium-nav-header">
+    <a href="/index" class="back-link">
+      <span>&larr;</span>
+      <span>Kembali ke Pangkalan Utama</span>
+    </a>
+
+    <div style="display: flex; align-items: center; gap: 1rem;">
+      <div class="pearl-pill" title="Baki Mutiara">
+        <span>🐚</span>
+        <span id="user-pearls">0</span>
+        <span>Mutiara</span>
+      </div>
+      <span class="user-greeting" id="user-display">Hai, Pengembara!</span>
+    </div>
+  </header>
+
+  <!-- Lifetime Stats Ribbon -->
+  <div class="aquarium-stats-ribbon">
+    <div class="stat-pill-card">
+      <span class="stat-pill-icon">🐠</span>
+      <div>
+        <div class="stat-pill-val" id="stat-fish-total">0</div>
+        <div class="stat-pill-lbl">Jumlah Ikan Dikumpul</div>
+      </div>
+    </div>
+
+    <div class="stat-pill-card">
+      <span class="stat-pill-icon">🐚</span>
+      <div>
+        <div class="stat-pill-val" id="stat-pearls-total">0</div>
+        <div class="stat-pill-lbl">Jumlah Mutiara Diperoleh</div>
+      </div>
+    </div>
+
+    <div class="stat-pill-card" style="justify-content: space-between;">
+      <div>
+        <div class="stat-pill-val" style="font-size: 1.25rem;">Hias Akuarium</div>
+        <div class="stat-pill-lbl">Beli karang & istana laut</div>
+      </div>
+      <a href="/shop" class="aq-btn aq-btn--primary" style="min-height: 38px; padding: 0.35rem 1rem; font-size: 0.9rem; text-decoration: none;">
+        <span>Kedai &rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Controls & Week Switcher -->
+  <div class="tank-controls-bar">
+    <h2 style="color: #fff; text-shadow: 0 2px 6px rgba(6, 58, 90, 0.6); margin: 0; font-size: 1.5rem;" id="current-view-title">
+      Akuarium Minggu 1
+    </h2>
+
+    <div class="view-tabs-group" role="tablist">
+      <button type="button" class="view-btn active" id="btn-week-1">Minggu 1</button>
+      <button type="button" class="view-btn" id="btn-week-2">Minggu 2</button>
+      <button type="button" class="view-btn" id="btn-week-3">Minggu 3</button>
+      <button type="button" class="view-btn" id="btn-week-4">Minggu 4</button>
+      <button type="button" class="view-btn" id="btn-view-monthly">🌊 Lautan Bulanan</button>
+    </div>
+  </div>
+
+  <!-- Main 2D Aquarium Tank Canvas -->
+  <div class="aquarium-tank-container" id="aquarium-tank">
+    <!-- Sandy seabed floor -->
+    <div class="aquarium-sandbed"></div>
+
+    <!-- Empty state prompt inside tank -->
+    <div id="empty-tank-msg" style="position: absolute; top: 38%; left: 50%; transform: translate(-50%, -50%); text-align: center; color: #fff; z-index: 10;" hidden>
+      <img src="{{ url_for('static', filename=cut ~ 'mal-thinking.png') }}" alt="Mal" style="height: 110px; margin-bottom: 0.5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));">
+      <h3 style="margin: 0.2rem 0; font-size: 1.3rem;">Akuarium ini masih sunyi!</h3>
+      <p style="margin: 0; font-size: 0.95rem; opacity: 0.9;">Selesaikan kuiz dan latihan adaptif untuk menangkap ikan tropika ke dalam akuarium ini.</p>
+    </div>
+  </div>
+
+  <!-- Collection Encyclopedia Card -->
+  <section class="fish-collection-card bubble-panel">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+      <h2 style="color: var(--aq-ocean); font-size: 1.5rem; margin: 0;">Koleksi Ikan Anda</h2>
+      <a href="/quiz" class="aq-btn aq-btn--coral" style="text-decoration: none; min-height: 38px; padding: 0.4rem 1rem; font-size: 0.95rem;">
+        <span>+ Dapatkan Ikan Baharu (Kuiz)</span>
+      </a>
+    </div>
+    <p style="color: var(--aq-muted); font-size: 0.95rem; margin-top: 0.25rem;">
+      Ikan tropika yang anda perolehi bergantung kepada markah kuiz anda (Betta, Angelfish, Clownfish, Neon Tetra, Guppy).
+    </p>
+
+    <div class="collection-grid" id="fish-collection-grid">
+      <!-- Populated by aquarium.js -->
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/aquarium.js') }}" defer></script>
+{% endblock %}

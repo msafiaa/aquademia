@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#084c68">
+  <title>Aquademia – Kota 3D Bawah Laut</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/aquademia.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/world.css') }}">
+</head>
+<body class="page-world">
+  <!-- 3D Canvas Mounting Point -->
+  <div id="world-canvas-container"></div>
+
+  <!-- Game HUD Overlay -->
+  <div class="world-hud-overlay">
+    <!-- Top Bar -->
+    <header class="hud-top-bar">
+      <div class="hud-left-group">
+        <a href="/index" class="hud-pill" title="Kembali ke Dashboard Tradisional">
+          <span>&larr;</span>
+          <span>Pangkalan 2D</span>
+        </a>
+
+        <!-- Character Mascot Selector Toggle -->
+        <div class="mascot-toggle-group" title="Pilih Karakter Penyelam Anda">
+          <button type="button" class="mascot-btn active" id="btn-select-mal">👦 Mal</button>
+          <button type="button" class="mascot-btn" id="btn-select-fania">👧 Fania</button>
+        </div>
+
+        <button type="button" class="hud-pill" id="btn-reset-cam" title="Set semula sudut pandangan kamera ke belakang karakter">
+          <span>🎯</span>
+          <span>Set Semula Kamera</span>
+        </button>
+      </div>
+
+      <div class="hud-right-group">
+        <div class="pearl-pill" title="Baki Mutiara">
+          <span>🐚</span>
+          <span id="user-pearls">0</span>
+          <span>Mutiara</span>
+        </div>
+        <span class="hud-pill" id="user-display">Hai, Pengembara!</span>
+      </div>
+    </header>
+
+    <!-- Controls Helper Card (Top Left) -->
+    <div class="controls-guide-card">
+      <strong>🎮 Kawalan Penerokaan 3D:</strong>
+      <div>&bull; <b>W, A, S, D / Anak Panah</b>: Berenang bebas</div>
+      <div>&bull; <b>Space / Shift</b>: Berenang Naik / Turun</div>
+      <div>&bull; <b>Tarik Tetikus</b>: Putar Kamera 360&deg;</div>
+      <div>&bull; <b>Roda Tetikus</b>: Zum Masuk / Keluar</div>
+      <div>&bull; <b>Klik Bangunan</b>: Berenang Automatik</div>
+    </div>
+
+    <!-- Bottom Destination Guide & Quick Navigation -->
+    <footer class="hud-bottom-bar">
+      <div class="destination-guide-banner" id="destination-guide-banner">
+        <span>🌊</span>
+        <span id="hud-banner-text">Teroka bebas guna papan kekunci (WASD / Anak Panah) atau klik bangunan!</span>
+        <button type="button" class="btn-cancel-swim" id="btn-cancel-swim" hidden>Batal</button>
+      </div>
+
+      <!-- Quick Nav Chips -->
+      <div class="hud-quick-nav">
+        <button type="button" class="hud-nav-chip" data-id="quiz">📐 Quiz Academy</button>
+        <button type="button" class="hud-nav-chip" data-id="chat">🤖 Ask Aqua Lab</button>
+        <button type="button" class="hud-nav-chip" data-id="aquarium">🐠 My Aquarium</button>
+        <button type="button" class="hud-nav-chip" data-id="shop">🐚 Kedai Hiasan</button>
+        <button type="button" class="hud-nav-chip" data-id="learning">📖 Learning Cove</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Opening Ocean Cinematic Overlay -->
+  <div class="cinematic-overlay" id="cinematic-overlay">
+    <button type="button" class="aq-btn aq-btn--ghost btn-skip-intro" id="btn-skip-intro">
+      <span>Langkau Sinematik &rarr;</span>
+    </button>
+
+    <div class="cinematic-welcome-banner">
+      <h2>Selamat Datang ke Aquademia! 🌊</h2>
+      <p>Pengembaraan lautan 3D anda bermula di sini!</p>
+    </div>
+  </div>
+
+  <!-- Arrival Flash Splash Overlay -->
+  <div class="arrival-flash-overlay" id="arrival-flash-overlay" aria-hidden="true">
+    <div style="font-size: 3.5rem; margin-bottom: 0.5rem; animation: aq-bob 2s ease-in-out infinite;">🌊🫧</div>
+    <h1 style="font-size: 2.2rem; font-family: var(--aq-font-display); margin: 0;" id="arrival-flash-text">Tiba di Destinasi!</h1>
+    <p style="font-size: 1.1rem; opacity: 0.9; margin-top: 0.5rem;">Berenang masuk...</p>
+  </div>
+
+  <!-- Loading Screen -->
+  <div class="world-loading-screen" id="world-loading">
+    <div class="aq-spinner" style="display: block; width: 3rem; height: 3rem; border-width: 4px; margin-bottom: 1rem;"></div>
+    <h2 style="font-family: var(--aq-font-display); font-size: 1.8rem; margin: 0 0 0.5rem;">Kota 3D Aquademia</h2>
+    <p style="opacity: 0.9; margin: 0;">Menyelam dan memuatkan alam bawah laut...</p>
+  </div>
+
+  <!-- Scripts: Local Standalone Three.js and City Modules -->
+  <script src="{{ url_for('static', filename='js/three.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/world/city.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/world/character.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/world/world.js') }}"></script>
+</body>
+</html>
