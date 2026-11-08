@@ -18,14 +18,16 @@
     <header class="hud-top-bar">
       <div class="hud-left-group">
         <div class="hud-brand">
-          <svg viewBox="0 0 48 48" width="36" height="36" aria-hidden="true" focusable="false">
+          <svg viewBox="0 0 48 48" width="34" height="34" aria-hidden="true" focusable="false">
             <circle cx="24" cy="24" r="21" fill="#e6fbff" stroke="#0d8aa6" stroke-width="3"/>
             <ellipse cx="17" cy="15" rx="6" ry="3.5" fill="#fff" opacity=".9" transform="rotate(-30 17 15)"/>
             <circle cx="31" cy="30" r="3" fill="#7fe0ea"/>
             <circle cx="24" cy="33" r="1.8" fill="#7fe0ea"/>
           </svg>
-          <span>Aquademia</span>
+          <span class="hud-brand__name">Aquademia</span>
         </div>
+
+        <span class="hud-divider" aria-hidden="true"></span>
 
         <!-- Character Mascot Selector Toggle -->
         <div class="mascot-toggle-group" title="Pilih Karakter Penyelam Anda">
@@ -33,9 +35,11 @@
           <button type="button" class="mascot-btn" id="btn-select-fania">👧 Fania</button>
         </div>
 
-        <button type="button" class="hud-pill" id="btn-reset-cam" title="Set semula sudut pandangan kamera ke belakang karakter">
-          <span>🎯</span>
-          <span class="hud-pill__label">Set Semula Kamera</span>
+        <button type="button" class="hud-icon-btn" id="btn-reset-cam" title="Set semula kamera" aria-label="Set semula kamera">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/>
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>
+          </svg>
         </button>
       </div>
 
@@ -43,32 +47,50 @@
         <div class="pearl-pill" title="Baki Mutiara">
           <span>🐚</span>
           <span id="user-pearls">0</span>
-          <span>Mutiara</span>
+          <span class="pearl-pill__label">Mutiara</span>
         </div>
-        <span class="hud-greeting" id="user-display">Hai, Pengembara!</span>
-        <button type="button" class="aq-btn aq-btn--ghost hud-logout" id="btn-logout">
-          <span>Log Keluar</span>
+
+        <div class="hud-user">
+          <span class="hud-avatar" id="user-avatar" aria-hidden="true">?</span>
+          <span class="hud-user__text">
+            <strong id="user-display">Hai, Pengembara!</strong>
+            <small id="user-year"></small>
+          </span>
+        </div>
+
+        <!-- Help: keyboard / touch controls (hidden until pressed) -->
+        <div class="hud-help">
+          <button type="button" class="hud-help-btn pulse" id="btn-help" aria-expanded="false" aria-controls="controls-panel" title="Kawalan">!</button>
+          <div class="controls-panel" id="controls-panel" hidden>
+            <div class="controls-panel__head">
+              <strong>🎮 Kawalan Penerokaan</strong>
+              <button type="button" class="controls-panel__close" id="btn-help-close" aria-label="Tutup">&times;</button>
+            </div>
+            <div class="controls-panel__keys">
+              <div>&bull; <b>W, A, S, D / Anak Panah</b>: Berenang bebas</div>
+              <div>&bull; <b>Space / Shift</b>: Berenang Naik / Turun</div>
+              <div>&bull; <b>Tarik Tetikus</b>: Putar Kamera 360&deg;</div>
+              <div>&bull; <b>Roda Tetikus</b>: Zum Masuk / Keluar</div>
+              <div>&bull; <b>Klik Bangunan</b>: Berenang Automatik</div>
+            </div>
+            <div class="controls-panel__touch">
+              <div>&bull; <b>Joystik</b>: Berenang &nbsp;&bull;&nbsp; <b>▲ / ▼</b>: Naik / Turun</div>
+              <div>&bull; <b>Seret skrin</b>: Putar kamera &nbsp;&bull;&nbsp; <b>Cubit</b>: Zum</div>
+              <div>&bull; <b>Ketik bangunan</b>: Berenang Automatik</div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="hud-logout" id="btn-logout" title="Log Keluar">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3"/><path d="M16 8l4 4-4 4M20 12H9"/>
+          </svg>
+          <span class="hud-logout__label">Log Keluar</span>
         </button>
       </div>
     </header>
 
-    <!-- Controls Helper Card (Top Left) -->
-    <div class="controls-guide-card">
-      <strong>🎮 Kawalan Penerokaan 3D:</strong>
-      <div>&bull; <b>W, A, S, D / Anak Panah</b>: Berenang bebas</div>
-      <div>&bull; <b>Space / Shift</b>: Berenang Naik / Turun</div>
-      <div>&bull; <b>Tarik Tetikus</b>: Putar Kamera 360&deg;</div>
-      <div>&bull; <b>Roda Tetikus</b>: Zum Masuk / Keluar</div>
-      <div>&bull; <b>Klik Bangunan</b>: Berenang Automatik</div>
-    </div>
 
-    <!-- Touch Controls Helper Card (only shown on touch devices) -->
-    <div class="controls-guide-touch" id="controls-guide-touch">
-      <strong>👆 Kawalan Sentuh:</strong>
-      <div>&bull; <b>Joystik</b>: Berenang &nbsp;&bull;&nbsp; <b>▲ / ▼</b>: Naik / Turun</div>
-      <div>&bull; <b>Seret skrin</b>: Putar kamera &nbsp;&bull;&nbsp; <b>Cubit</b>: Zum</div>
-      <div>&bull; <b>Ketik bangunan</b>: Berenang Automatik</div>
-    </div>
 
     <!-- Bottom Destination Guide & Quick Navigation -->
     <footer class="hud-bottom-bar">
@@ -80,11 +102,11 @@
 
       <!-- Quick Nav Chips -->
       <div class="hud-quick-nav">
-        <button type="button" class="hud-nav-chip" data-id="quiz">📐 Quiz Academy</button>
-        <button type="button" class="hud-nav-chip" data-id="chat">🤖 Ask Aqua Lab</button>
-        <button type="button" class="hud-nav-chip" data-id="aquarium">🐠 My Aquarium</button>
-        <button type="button" class="hud-nav-chip" data-id="shop">🐚 Kedai Hiasan</button>
-        <button type="button" class="hud-nav-chip" data-id="learning">📖 Learning Cove</button>
+        <button type="button" class="hud-nav-chip" data-id="quiz" title="Quiz Academy"><span class="chip-ico">📐</span><span class="chip-label">Quiz Academy</span></button>
+        <button type="button" class="hud-nav-chip" data-id="chat" title="Ask Aqua Lab"><span class="chip-ico">🤖</span><span class="chip-label">Ask Aqua Lab</span></button>
+        <button type="button" class="hud-nav-chip" data-id="aquarium" title="My Aquarium"><span class="chip-ico">🐠</span><span class="chip-label">My Aquarium</span></button>
+        <button type="button" class="hud-nav-chip" data-id="shop" title="Kedai Hiasan"><span class="chip-ico">🐚</span><span class="chip-label">Kedai Hiasan</span></button>
+        <button type="button" class="hud-nav-chip" data-id="learning" title="Learning Cove"><span class="chip-ico">📖</span><span class="chip-label">Learning Cove</span></button>
       </div>
     </footer>
   </div>

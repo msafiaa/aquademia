@@ -105,6 +105,7 @@
     setupHUDControls();
     loadStudentInfo();
     setupLogout();
+    setupHelp();
 
     // Check Opening Cinematic
     checkCinematicIntro();
@@ -358,7 +359,7 @@
         character.cancelAutoSwim();
         btnCancelAutoSwim.hidden = true;
         bannerWrap.classList.remove("swimming");
-        bannerText.textContent = "Berenang automatik dibatalkan. Anda bebas bergerak!";
+        showNotice("Berenang automatik dibatalkan. Anda bebas bergerak!");
       });
     }
 
@@ -387,6 +388,38 @@
     if (btnSelectFania) btnSelectFania.classList.toggle("active", type === "fania");
   }
 
+  function setupHelp() {
+    var btn = document.getElementById("btn-help");
+    var panel = document.getElementById("controls-panel");
+    var closeBtn = document.getElementById("btn-help-close");
+    if (!btn || !panel) return;
+
+    function setOpen(open) {
+      panel.hidden = !open;
+      btn.setAttribute("aria-expanded", open ? "true" : "false");
+      if (open) btn.classList.remove("pulse");
+    }
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      setOpen(panel.hidden);
+    });
+    if (closeBtn) closeBtn.addEventListener("click", function () { setOpen(false); });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") setOpen(false);
+    });
+    // Touching/clicking the 3D world closes the panel
+    container.addEventListener("pointerdown", function () { setOpen(false); });
+  }
+
+  // Short message in the banner that fades away by itself
+  var noticeTimer = null;
+  function showNotice(text) {
+    bannerText.textContent = text;
+    bannerWrap.classList.add("notice");
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(function () { bannerWrap.classList.remove("notice"); }, 2500);
+  }
+
   function setupLogout() {
     var btn = document.getElementById("btn-logout");
     if (!btn) return;
@@ -408,8 +441,11 @@
       .then(function (res) { return res.json(); })
       .then(function (data) {
         if (data && data.student) {
-          var yr = data.student.year_level ? " (Tahun " + data.student.year_level + ")" : "";
-          document.getElementById("user-display").textContent = "Hai, " + data.student.username + yr + "!";
+          document.getElementById("user-display").textContent = "Hai, " + data.student.username + "!";
+          var yearEl = document.getElementById("user-year");
+          if (yearEl && data.student.year_level) yearEl.textContent = "Tahun " + data.student.year_level;
+          var avatarEl = document.getElementById("user-avatar");
+          if (avatarEl) avatarEl.textContent = String(data.student.username || "?").charAt(0);
         }
       });
 
@@ -475,7 +511,7 @@
       if (character.isMoving && btnCancelAutoSwim && !btnCancelAutoSwim.hidden) {
         btnCancelAutoSwim.hidden = true;
         bannerWrap.classList.remove("swimming");
-        bannerText.textContent = "Berenang automatik dibatalkan. Anda bebas bergerak!";
+        showNotice("Berenang automatik dibatalkan. Anda bebas bergerak!");
       }
     }
 
