@@ -19,6 +19,7 @@ body.page-world {
   width: 100%;
   height: 100%;
   z-index: 1;
+  touch-action: none; /* one-finger orbit and pinch zoom are handled in JS */
 }
 
 /* 3D HUD Overlay */
@@ -289,4 +290,146 @@ body.page-world {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+}
+
+/* ==========================================================================
+   Touch controls (Stage 1) - shown only on touch devices (body.touch-ui)
+   ========================================================================== */
+.controls-guide-touch {
+  display: none;
+}
+
+body.touch-ui {
+  /* fallback only: world.js measures the bottom bar and overrides this */
+  --touch-ui-bottom: calc(env(safe-area-inset-bottom, 0px) + 8.5rem);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.touch-ui .controls-guide-card {
+  display: none;
+}
+
+body.touch-ui .controls-guide-touch {
+  display: block;
+  position: absolute;
+  top: 4.8rem;
+  left: 1.25rem;
+  max-width: 270px;
+  background: rgba(11, 58, 83, 0.78);
+  border: 1.5px solid rgba(127, 224, 234, 0.4);
+  border-radius: 16px;
+  padding: 0.6rem 0.9rem;
+  color: #fff;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+  box-shadow: var(--aq-shadow-sm);
+  animation: world-hint-fade 0.8s ease 12s forwards;
+}
+body.touch-ui .controls-guide-touch strong {
+  color: var(--aq-sun);
+  display: block;
+  font-size: 0.86rem;
+  margin-bottom: 0.2rem;
+}
+
+@keyframes world-hint-fade {
+  to { opacity: 0; visibility: hidden; }
+}
+
+.touch-joystick {
+  position: absolute;
+  left: max(1.25rem, env(safe-area-inset-left, 0px));
+  bottom: var(--touch-ui-bottom);
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background: rgba(11, 58, 83, 0.45);
+  border: 2px solid rgba(127, 224, 234, 0.65);
+  backdrop-filter: blur(4px);
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  z-index: 110;
+}
+
+.touch-joystick__knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 54px;
+  height: 54px;
+  margin: -27px 0 0 -27px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #7fe0ea, #19c4d4);
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.touch-vertical {
+  position: absolute;
+  right: max(1.25rem, env(safe-area-inset-right, 0px));
+  bottom: var(--touch-ui-bottom);
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  pointer-events: none;
+  z-index: 110;
+}
+
+.touch-vbtn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  background: rgba(255, 250, 245, 0.9);
+  color: var(--aq-ocean-deep);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: var(--aq-shadow-sm);
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  cursor: pointer;
+}
+.touch-vbtn.active {
+  background: var(--aq-teal);
+  color: #fff;
+  transform: scale(0.94);
+}
+
+/* Compact HUD on short touch screens (phones in landscape) so the 3D view stays visible */
+@media (max-height: 420px) {
+  body.touch-ui .hud-top-bar { gap: 0.4rem; }
+  body.touch-ui .hud-left-group,
+  body.touch-ui .hud-right-group { gap: 0.4rem; }
+  body.touch-ui .hud-pill { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
+  body.touch-ui .mascot-btn { padding: 0.25rem 0.7rem; font-size: 0.8rem; }
+  body.touch-ui .destination-guide-banner { padding: 0.4rem 1.1rem; font-size: 0.88rem; }
+  body.touch-ui .hud-quick-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: safe center;
+    max-width: 100%;
+    scrollbar-width: none;
+  }
+  body.touch-ui .hud-quick-nav::-webkit-scrollbar { display: none; }
+  body.touch-ui .hud-nav-chip { flex: 0 0 auto; padding: 0.3rem 0.7rem; }
+  /* keep the (self-fading) hint card clear of the joystick */
+  body.touch-ui .controls-guide-touch {
+    left: calc(max(1.25rem, env(safe-area-inset-left, 0px)) + 104px + 0.75rem);
+    max-width: 250px;
+    font-size: 0.74rem;
+    padding: 0.45rem 0.7rem;
+  }
+}
+
+@media (max-height: 520px) {
+  .touch-joystick { width: 104px; height: 104px; }
+  .touch-joystick__knob { width: 46px; height: 46px; margin: -23px 0 0 -23px; }
+  .touch-vbtn { width: 54px; height: 54px; }
+  body.touch-ui .controls-guide-touch { top: 3.9rem; }
 }

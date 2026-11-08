@@ -22,11 +22,14 @@
 
     this.group = new THREE.Group();
     this.group.position.set(0, 1.4, 0); // Plaza center
+    this.group.rotation.y = Math.PI;    // face -Z (towards Learning Cove) so the default camera sits behind
 
     // Motion parameters
     this.velocity = new THREE.Vector3();
     this.moveSpeed = 9.5;       // forward/backward speed
-    this.turnSpeed = 2.8;       // radians per second
+    this.turnSpeed = 2.8;       // (legacy) radians per second
+    this.turnRate = 12;         // smoothing rate when turning to face the swim direction
+    this.playerRadius = 0.7;    // collision radius around the character
     this.verticalSpeed = 6.0;   // up/down swim speed
     this.isMoving = false;
     this.isSwimmingAuto = false;
@@ -178,71 +181,127 @@
   };
 
   /**
-   * Manual keyboard input handler (WASD / Arrows / Space / Shift)
+   * Manual input handler (keyboard + touch joystick), camera-relative.
+   *   keys    - { KeyW, KeyA, ..., Space, ShiftLeft } held-key map
+   *   cameraYaw - orbit yaw of the camera; "forward" is always away from the camera
+   *   analog  - optional { x, y, vertical } from the on-screen joystick (x right, y forward)
    */
-  ExplorerCharacter.prototype.handleManualInput = function (keys, cameraYaw, delta, obstacleColliders) {
-    var forward = 0;
-    var turn = 0;
-    var vertical = 0;
+  ExplorerCharacter.prototype.handleManualInput = function (keys, cameraYaw, delta, obstacleColliders, analog) {
+    keys = keys || {};
+    var clamp = function (v, lo, hi) { return Math.max(lo, Math.min(hi, v)); };
 
-    // Cancel auto-swim if manual keys are pressed
-    if (keys.KeyW || keys.ArrowUp) forward += 1;
-    if (keys.KeyS || keys.ArrowDown) forward -= 1;
-    if (keys.KeyA || keys.ArrowLeft) turn += 1;
-    if (keys.KeyD || keys.ArrowRight) turn -= 1;
-    if (keys.Space) vertical += 1;
-    if (keys.ShiftLeft || keys.ShiftRight || keys.KeyC) vertical -= 1;
+    var kbX = ((keys.KeyD || keys.ArrowRight) ? 1 : 0) - ((keys.KeyA || keys.ArrowLeft) ? 1 : 0);
+    var kbF = ((keys.KeyW || keys.ArrowUp) ? 1 : 0) - ((keys.KeyS || keys.ArrowDown) ? 1 : 0);
+    var kbV = (keys.Space ? 1 : 0) - ((keys.ShiftLeft || keys.ShiftRight || keys.KeyC) ? 1 : 0);
 
-    if (forward !== 0 || turn !== 0 || vertical !== 0) {
-      if (this.isSwimmingAuto) {
-        this.cancelAutoSwim();
-      }
-      this.isMoving = true;
-    } else {
+    var inX = clamp(kbX + (analog ? analog.x : 0), -1, 1);
+    var inF = clamp(kbF + (analog ? analog.y : 0), -1, 1);
+    var inV = clamp(kbV + (analog ? analog.vertical : 0), -1, 1);
+    var mag = Math.hypot(inX, inF);
+    if (mag > 1) { inX /= mag; inF /= mag; mag = 1; }
+
+    var hasInput = mag > 0.01 || Math.abs(inV) > 0.01;
+
+    // Any manual input takes over from auto-swim
+    if (hasInput && this.isSwimmingAuto) this.cancelAutoSwim();
+    if (this.isSwimmingAuto) {
+      this.velocity.set(0, 0, 0);
       this.isMoving = false;
+      return;
     }
 
-    if (!this.isMoving) return;
+    // Camera-relative direction: forward = away from camera, right = camera's right
+    var s = Math.sin(cameraYaw);
+    var c = Math.cos(cameraYaw);
+    var dirX = -s * inF + c * inX;
+    var dirZ = -c * inF - s * inX;
 
-    // Rotate character
-    if (turn !== 0) {
-      this.group.rotation.y += turn * this.turnSpeed * delta;
+    // Smooth acceleration / gentle water drag when keys are released
+    var accel = 1 - Math.exp(-(hasInput ? 9 : 4.5) * delta);
+    this.velocity.x += (dirX * this.moveSpeed - this.velocity.x) * accel;
+    this.velocity.z += (dirZ * this.moveSpeed - this.velocity.z) * accel;
+    this.velocity.y += (inV * this.verticalSpeed - this.velocity.y) * accel;
+
+    // Turn the character smoothly to face the direction it is swimming
+    if (mag > 0.1) {
+      var target = Math.atan2(dirX, dirZ);
+      var cur = this.group.rotation.y;
+      var diff = Math.atan2(Math.sin(target - cur), Math.cos(target - cur));
+      this.group.rotation.y = cur + diff * (1 - Math.exp(-this.turnRate * delta));
     }
 
-    // Move forward/backward along character facing direction
-    if (forward !== 0) {
-      var moveStep = forward * this.moveSpeed * delta;
-      var moveX = Math.sin(this.group.rotation.y) * moveStep;
-      var moveZ = Math.cos(this.group.rotation.y) * moveStep;
+    var pos = this.group.position;
+    var startX = pos.x;
+    var startZ = pos.z;
+    var prevY = pos.y;
+    var nextX = startX + this.velocity.x * delta;
+    var nextZ = startZ + this.velocity.z * delta;
+    var nextY = clamp(prevY + this.velocity.y * delta, this.minY, this.maxY);
 
-      var nextX = this.group.position.x + moveX;
-      var nextZ = this.group.position.z + moveZ;
+    var res = this.resolveCollisions(nextX, nextY, nextZ, prevY, obstacleColliders);
+    pos.set(res.x, res.y, res.z);
 
-      // Check collision against obstacle colliders (buildings)
-      var collision = this.checkCollision(nextX, nextZ, obstacleColliders);
-      if (!collision) {
-        this.group.position.x = nextX;
-        this.group.position.z = nextZ;
-      }
-    }
-
-    // Vertical swim up/down
-    if (vertical !== 0) {
-      var nextY = this.group.position.y + vertical * this.verticalSpeed * delta;
-      this.group.position.y = Math.max(this.minY, Math.min(this.maxY, nextY));
+    // After sliding along a wall keep only the velocity that actually happened
+    if (res.collided && delta > 0) {
+      this.velocity.x = (res.x - startX) / delta;
+      this.velocity.z = (res.z - startZ) / delta;
+      if (res.y !== nextY) this.velocity.y = 0;
     }
 
     // Keep character within ocean circular bounds
-    var distFromPlaza = Math.hypot(this.group.position.x, this.group.position.z);
+    var distFromPlaza = Math.hypot(pos.x, pos.z);
     if (distFromPlaza > this.boundsRadius) {
-      var angle = Math.atan2(this.group.position.z, this.group.position.x);
-      this.group.position.x = Math.cos(angle) * this.boundsRadius;
-      this.group.position.z = Math.sin(angle) * this.boundsRadius;
+      var angle = Math.atan2(pos.z, pos.x);
+      pos.x = Math.cos(angle) * this.boundsRadius;
+      pos.z = Math.sin(angle) * this.boundsRadius;
     }
+
+    var speed = Math.hypot(this.velocity.x, this.velocity.y, this.velocity.z);
+    this.isMoving = hasInput || speed > 0.5;
   };
 
   /**
-   * Basic collision detection against city buildings
+   * Cylinder collision against buildings ({x, z, radius, height?}).
+   * - Walls: the character slides around them instead of stopping dead.
+   * - Roofs: above `height` the character swims freely over the building,
+   *   and descending onto it rests on top instead of being pushed sideways.
+   */
+  ExplorerCharacter.prototype.resolveCollisions = function (x, y, z, prevY, colliders) {
+    var out = { x: x, y: y, z: z, collided: false };
+    if (!colliders || colliders.length === 0) return out;
+
+    for (var pass = 0; pass < 3; pass++) {
+      var pushed = false;
+      for (var i = 0; i < colliders.length; i++) {
+        var col = colliders[i];
+        var minDist = (col.radius || 4.2) + this.playerRadius;
+        var dx = out.x - col.x;
+        var dz = out.z - col.z;
+        var dist = Math.hypot(dx, dz);
+        if (dist >= minDist) continue;
+
+        var top = (col.height == null) ? Infinity : col.height;
+        if (out.y >= top) continue; // swimming above the roof
+
+        if (prevY >= top - 1e-6) {  // came down from above this frame: land on the roof
+          out.y = top;
+          out.collided = true;
+          continue;
+        }
+
+        if (dist < 1e-6) { dx = 1; dz = 0; dist = 1; }
+        out.x = col.x + (dx / dist) * minDist;
+        out.z = col.z + (dz / dist) * minDist;
+        out.collided = true;
+        pushed = true;
+      }
+      if (!pushed) break;
+    }
+    return out;
+  };
+
+  /**
+   * Basic point-in-collider test (kept for callers that only need a yes/no)
    */
   ExplorerCharacter.prototype.checkCollision = function (x, z, colliders) {
     if (!colliders || colliders.length === 0) return false;

@@ -7,6 +7,8 @@
    - Opening 4-6s ocean dive cinematic with Skip Intro
    - Click-to-swim raycasting & cancelable auto-swim
    - Real-time student HUD (pearls, profile, 2D switch, camera reset)
+   Stage 1: camera-relative movement, smooth follow camera, touch controls
+   (camera rig / keyboard / touch helpers live in controls.js).
    ========================================================================== */
 (function () {
   "use strict";
@@ -35,18 +37,16 @@
   var mouse = new THREE.Vector2(-999, -999);
   var hoveredDestination = null;
 
-  // Camera Orbit State (Full 360 horizontal rotation)
-  var cameraYaw = 0.0;            // horizontal azimuth angle (0..2*PI)
-  var cameraPitch = 0.28;         // vertical polar angle (-0.35 .. 1.15)
-  var cameraDistance = 8.5;       // distance from character
-  var minDistance = 4.0;
-  var maxDistance = 18.0;
-  var isDraggingMouse = false;
-  var previousMousePos = { x: 0, y: 0 };
-  var hasMovedSinceDown = false;
+  // Smooth third-person camera rig (full 360-degree yaw) and input state - see controls.js
+  var WC = window.WorldControls;
+  var rig = new WC.CameraRig();
+  var input = new WC.InputState();
+  var touchControls = null;
+  var idleBannerText = "Teroka bebas guna papan kekunci (WASD / Anak Panah) atau klik bangunan!";
 
-  // Keyboard input state
-  var keys = {};
+  // Pointer gesture state: mouse drag / one-finger orbit / two-finger pinch / tap
+  var activePointers = new Map();
+  var gesture = { startX: 0, startY: 0, startTime: 0, moved: false, multi: false, pinchDist: 0 };
 
   // Cinematic Intro state
   var isCinematicActive = false;
@@ -94,8 +94,13 @@
     });
     updateMascotButtonUI(savedMascot);
 
+    // Camera starts directly behind the character
+    rig.resetBehind(character.group.rotation.y, true);
+    rig.snapFocus(character.group.position);
+
     // Setup Event Listeners
     setupInputListeners();
+    setupTouchControls();
     setupHUDControls();
     loadStudentInfo();
 
@@ -112,109 +117,185 @@
   }
 
   /* ------------------------------------------------------------------
-     2. Input Listeners (Keyboard, Mouse Drag Orbit, Wheel Zoom)
+     2. Input Listeners (Keyboard, Mouse/Touch Orbit, Wheel & Pinch Zoom, Tap)
      ------------------------------------------------------------------ */
   function setupInputListeners() {
     window.addEventListener("resize", onWindowResize);
+    window.addEventListener("orientationchange", onWindowResize);
 
-    // Keyboard controls
-    window.addEventListener("keydown", function (e) {
-      // Don't capture keys if typing inside input boxes
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
-      keys[e.code] = true;
-    });
+    // Keyboard (stuck-key and focus safe) - see InputState in controls.js
+    input.attach(window, document);
 
-    window.addEventListener("keyup", function (e) {
-      keys[e.code] = false;
-    });
+    // After a real pointer click, drop focus from HUD buttons so Space/Enter can't re-trigger them
+    document.addEventListener("click", function (e) {
+      if (e.detail === 0) return; // keyboard-activated click: keep focus for accessibility
+      var btn = e.target && e.target.closest ? e.target.closest("button") : null;
+      if (btn) btn.blur();
+    }, true);
 
-    // Mouse Drag Camera Orbit
+    // Pointer gestures on the 3D canvas
     container.addEventListener("pointerdown", function (e) {
-      if (e.button !== 0) return; // left click only
-      isDraggingMouse = true;
-      hasMovedSinceDown = false;
-      previousMousePos.x = e.clientX;
-      previousMousePos.y = e.clientY;
-    });
+      if (e.pointerType === "mouse" && e.button !== 0) return; // left click only
+      activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      try { container.setPointerCapture(e.pointerId); } catch (err) { /* not supported */ }
 
-    window.addEventListener("pointermove", function (e) {
-      // Update normalized mouse for raycasting
-      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-
-      if (isDraggingMouse) {
-        var dx = e.clientX - previousMousePos.x;
-        var dy = e.clientY - previousMousePos.y;
-
-        if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
-          hasMovedSinceDown = true;
-        }
-
-        // 360-degree horizontal orbit sensitivity
-        cameraYaw -= dx * 0.0065;
-        // Keep yaw within [0, 2*PI]
-        cameraYaw = (cameraYaw % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
-
-        // Bounded vertical pitch
-        cameraPitch += dy * 0.005;
-        cameraPitch = Math.max(-0.35, Math.min(1.15, cameraPitch));
-
-        previousMousePos.x = e.clientX;
-        previousMousePos.y = e.clientY;
+      if (activePointers.size === 1) {
+        gesture.startX = e.clientX;
+        gesture.startY = e.clientY;
+        gesture.startTime = performance.now();
+        gesture.moved = false;
+        gesture.multi = false;
       } else {
-        checkRaycastHover();
+        gesture.multi = true;
+        gesture.pinchDist = pointerSpread();
       }
     });
 
-    window.addEventListener("pointerup", function (e) {
-      if (isDraggingMouse && !hasMovedSinceDown) {
-        // Pure click without dragging: trigger building interaction
-        handleBuildingClick();
+    container.addEventListener("pointermove", function (e) {
+      var p = activePointers.get(e.pointerId);
+      if (!p) {
+        if (e.pointerType === "mouse") updateHoverFromPointer(e);
+        return;
       }
-      isDraggingMouse = false;
+
+      var dx = e.clientX - p.x;
+      var dy = e.clientY - p.y;
+      p.x = e.clientX;
+      p.y = e.clientY;
+
+      if (activePointers.size === 1 && !gesture.multi) {
+        var threshold = e.pointerType === "mouse" ? 4 : 8;
+        if (Math.hypot(e.clientX - gesture.startX, e.clientY - gesture.startY) > threshold) {
+          gesture.moved = true;
+        }
+        // 360-degree horizontal orbit + bounded vertical pitch
+        rig.rotate(dx, dy);
+      } else if (activePointers.size >= 2) {
+        // Pinch: fingers apart = zoom in
+        var spread = pointerSpread();
+        rig.zoom(-(spread - gesture.pinchDist) * 0.03);
+        gesture.pinchDist = spread;
+        gesture.moved = true;
+      }
+    });
+
+    function endPointer(e, allowTap) {
+      if (!activePointers.delete(e.pointerId)) return;
+      if (activePointers.size === 0) {
+        var isTap = allowTap && !gesture.moved && !gesture.multi &&
+          (performance.now() - gesture.startTime) < 700;
+        gesture.multi = false;
+        if (isTap) handleTap(e);
+      } else {
+        gesture.moved = true; // pinch ended with one finger left: never count that as a tap
+      }
+    }
+    container.addEventListener("pointerup", function (e) { endPointer(e, true); });
+    container.addEventListener("pointercancel", function (e) { endPointer(e, false); });
+    container.addEventListener("lostpointercapture", function (e) { activePointers.delete(e.pointerId); });
+
+    container.addEventListener("pointerleave", function (e) {
+      if (e.pointerType === "mouse" && activePointers.size === 0) clearHover();
     });
 
     // Mouse Wheel Zoom
     container.addEventListener("wheel", function (e) {
       e.preventDefault();
-      cameraDistance += e.deltaY * 0.008;
-      cameraDistance = Math.max(minDistance, Math.min(maxDistance, cameraDistance));
+      var unit = e.deltaMode === 1 ? 16 : 1;
+      rig.zoom(e.deltaY * unit * 0.008);
     }, { passive: false });
+  }
+
+  function pointerSpread() {
+    var pts = Array.from(activePointers.values());
+    if (pts.length < 2) return 0;
+    return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+  }
+
+  function setupTouchControls() {
+    if (!WC.TouchControls.shouldEnable(window)) return;
+    document.body.classList.add("touch-ui");
+    touchControls = new WC.TouchControls({
+      container: document.querySelector(".world-hud-overlay"),
+      analog: input.analog
+    });
+    touchControls.mount();
+
+    // Short hint instead of the keyboard instructions
+    idleBannerText = "Ketik bangunan untuk berenang!";
+    bannerText.textContent = idleBannerText;
+
+    // Keep the joystick and up/down buttons just above the bottom bar, however its chips wrap
+    var overlay = document.querySelector(".world-hud-overlay");
+    var bar = document.querySelector(".hud-bottom-bar");
+    function positionTouchControls() {
+      var pad = parseFloat(window.getComputedStyle(overlay).paddingBottom) || 0;
+      document.body.style.setProperty("--touch-ui-bottom", Math.round(pad + bar.offsetHeight + 12) + "px");
+    }
+    positionTouchControls();
+    window.addEventListener("resize", positionTouchControls);
+    window.addEventListener("orientationchange", positionTouchControls);
+    if (window.ResizeObserver) new ResizeObserver(positionTouchControls).observe(bar);
   }
 
   /* ------------------------------------------------------------------
      3. Raycasting & Building Interactions
      ------------------------------------------------------------------ */
-  function checkRaycastHover() {
-    if (isCinematicActive || character.isSwimmingAuto) return;
+  function setMouseFromEvent(e) {
+    mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  }
 
+  function pickDestination() {
     raycaster.setFromCamera(mouse, camera);
     var intersects = raycaster.intersectObjects(city.destinations, true);
-
     if (intersects.length > 0) {
       var target = intersects[0].object;
       while (target.parent && target.parent !== city.cityGroup) {
         target = target.parent;
       }
-
-      if (target.destinationData) {
-        hoveredDestination = target;
-        document.body.style.cursor = "pointer";
-        bannerText.textContent = "📍 " + target.destinationData.name + " (" + target.destinationData.desc + ") — Klik untuk berenang!";
-        bannerWrap.classList.add("hovered");
-        return;
-      }
+      if (target.destinationData) return target;
     }
+    return null;
+  }
 
+  function updateHoverFromPointer(e) {
+    setMouseFromEvent(e);
+    checkRaycastHover();
+  }
+
+  function clearHover() {
+    if (character && character.isSwimmingAuto) return;
     hoveredDestination = null;
     document.body.style.cursor = "default";
     bannerWrap.classList.remove("hovered");
-    bannerText.textContent = "Teroka bebas guna papan kekunci (WASD / Anak Panah) atau klik bangunan!";
+    bannerText.textContent = idleBannerText;
   }
 
-  function handleBuildingClick() {
-    if (isCinematicActive || character.isSwimmingAuto || !hoveredDestination) return;
-    swimToDestination(hoveredDestination);
+  function checkRaycastHover() {
+    if (isCinematicActive || character.isSwimmingAuto) return;
+
+    var target = pickDestination();
+    if (target) {
+      hoveredDestination = target;
+      document.body.style.cursor = "pointer";
+      bannerText.textContent = "📍 " + target.destinationData.name + " (" + target.destinationData.desc + ") — Klik untuk berenang!";
+      bannerWrap.classList.add("hovered");
+      return;
+    }
+
+    clearHover();
+  }
+
+  // A tap or click (no drag) picks the building under the pointer, mouse or touch
+  function handleTap(e) {
+    if (isCinematicActive || character.isSwimmingAuto) return;
+    setMouseFromEvent(e);
+    var target = pickDestination();
+    if (target) {
+      hoveredDestination = target;
+      swimToDestination(target);
+    }
   }
 
   function swimToDestination(destinationObj) {
@@ -264,9 +345,8 @@
     // Reset Camera Button
     if (btnResetCam) {
       btnResetCam.addEventListener("click", function () {
-        cameraYaw = 0.0;
-        cameraPitch = 0.28;
-        cameraDistance = 8.5;
+        // Smoothly swing the camera back to sit directly behind the character
+        rig.resetBehind(character.group.rotation.y);
       });
     }
 
@@ -348,10 +428,10 @@
       cinematicOverlay.classList.remove("active");
       setTimeout(function () { cinematicOverlay.remove(); }, 500);
     }
-    // Snap camera to normal player view
-    cameraDistance = 8.5;
-    cameraPitch = 0.28;
-    cameraYaw = 0.0;
+    // Hand over to the normal follow camera, directly behind the character
+    rig.resetBehind(character.group.rotation.y, true);
+    rig.snapFocus(character.group.position);
+    rig.startBlend(camera, 0.6);
   }
 
   /* ------------------------------------------------------------------
@@ -366,16 +446,17 @@
   function animate() {
     requestAnimationFrame(animate);
 
-    var delta = clock.getDelta();
+    var delta = Math.min(clock.getDelta(), 0.1); // avoid big jumps after a hidden tab
     var elapsed = clock.getElapsedTime();
 
     // 1. Handle Manual Keyboard Movement
     if (!isCinematicActive) {
-      character.handleManualInput(keys, cameraYaw, delta, city.colliders);
+      character.handleManualInput(input.keys, rig.yaw, delta, city.colliders, input.analog);
       // If manual movement was triggered, cancel auto-swim UI
       if (character.isMoving && btnCancelAutoSwim && !btnCancelAutoSwim.hidden) {
         btnCancelAutoSwim.hidden = true;
         bannerWrap.classList.remove("swimming");
+        bannerText.textContent = "Berenang automatik dibatalkan. Anda bebas bergerak!";
       }
     }
 
@@ -402,31 +483,8 @@
         camera.lookAt(charPos.x, charPos.y + 1.2, charPos.z);
       }
     } else {
-      // 3rd Person Orbit/Follow Camera
-      // Calculate spherical offset from character position
-      var cosPitch = Math.cos(cameraPitch);
-      var sinPitch = Math.sin(cameraPitch);
-      var sinYaw = Math.sin(cameraYaw);
-      var cosYaw = Math.cos(cameraYaw);
-
-      var offsetX = cameraDistance * cosPitch * sinYaw;
-      var offsetY = cameraDistance * sinPitch;
-      var offsetZ = cameraDistance * cosPitch * cosYaw;
-
-      var targetCamX = charPos.x + offsetX;
-      var targetCamY = charPos.y + 1.2 + offsetY;
-      var targetCamZ = charPos.z + offsetZ;
-
-      // Prevent camera from dipping below the sandy seabed
-      targetCamY = Math.max(0.6, targetCamY);
-
-      // Smooth interpolation for stability
-      camera.position.x = THREE.MathUtils.lerp(camera.position.x, targetCamX, delta * 7);
-      camera.position.y = THREE.MathUtils.lerp(camera.position.y, targetCamY, delta * 7);
-      camera.position.z = THREE.MathUtils.lerp(camera.position.z, targetCamZ, delta * 7);
-
-      // Camera aims at character's chest/head
-      camera.lookAt(charPos.x, charPos.y + 1.2, charPos.z);
+      // 3rd Person Orbit/Follow Camera (smooth follow, building-aware, behind the character)
+      rig.update(camera, charPos, delta, city.colliders);
     }
 
     renderer.render(scene, camera);

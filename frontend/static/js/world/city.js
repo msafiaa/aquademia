@@ -21,7 +21,7 @@
     this.scene = scene;
     this.cityGroup = new THREE.Group();
     this.destinations = [];
-    this.colliders = []; // [{x, z, radius}] for player collision detection
+    this.colliders = []; // [{x, z, radius, height}] cylinders; the player swims over them above `height`
     this.swayingSeaweeds = [];
     this.roamingFish = [];
     this.bubbleParticles = null;
@@ -353,7 +353,7 @@
 
     this.cityGroup.add(group);
     this.destinations.push(group);
-    this.colliders.push({ x: x, z: z, radius: 5.2 });
+    this.colliders.push({ x: x, z: z, radius: 5.2, height: 10.2 });
   };
 
   /**
@@ -418,7 +418,7 @@
 
     this.cityGroup.add(group);
     this.destinations.push(group);
-    this.colliders.push({ x: x, z: z, radius: 5.2 });
+    this.colliders.push({ x: x, z: z, radius: 5.2, height: 5.8 });
   };
 
   /**
@@ -481,7 +481,7 @@
 
     this.cityGroup.add(group);
     this.destinations.push(group);
-    this.colliders.push({ x: x, z: z, radius: 5.2 });
+    this.colliders.push({ x: x, z: z, radius: 5.2, height: 10.4 });
   };
 
   /**
@@ -541,7 +541,7 @@
 
     this.cityGroup.add(group);
     this.destinations.push(group);
-    this.colliders.push({ x: x, z: z, radius: 5.2 });
+    this.colliders.push({ x: x, z: z, radius: 5.2, height: 9.0 });
   };
 
   /**
@@ -591,7 +591,7 @@
 
     this.cityGroup.add(group);
     this.destinations.push(group);
-    this.colliders.push({ x: x, z: z, radius: 5.0 });
+    this.colliders.push({ x: x, z: z, radius: 5.0, height: 6.5 });
   };
 
   /* ------------------------------------------------------------------
