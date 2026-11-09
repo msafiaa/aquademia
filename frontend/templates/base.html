@@ -7,6 +7,7 @@
   <title>{% block title %}Aquademia{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/aquademia.css') }}">
   {% block head_extra %}{% endblock %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/page-header.css') }}">
 </head>
 <body class="{% block body_class %}{% endblock %}">
   <!-- Shared underwater scene: background + floating bubbles (decorative only) -->

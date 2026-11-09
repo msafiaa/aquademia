@@ -335,7 +335,7 @@
           var entry = document.createElement("article");
           entry.className = "adaptive-history-entry " + (item.is_correct ? "is-correct" : "is-incorrect");
           var title = document.createElement("h4");
-          title.textContent = (item.is_correct ? "✅ Betul" : "💪 Perlu cuba lagi") + " · Soalan " + (index + 1);
+          title.textContent = (item.is_correct ? "✅ Betul" : "💪 Perlu cuba lagi") + " · Soalan " + index;
           var questionText = document.createElement("p");
           questionText.className = "adaptive-history-question";
           questionText.textContent = item.question;

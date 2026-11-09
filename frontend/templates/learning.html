@@ -11,24 +11,26 @@
 {% block content %}
 {% set cut = 'images/characters/cutouts/' %}
 <div class="learning-shell">
-  <header class="learning-nav-header">
-    <a href="/index" class="learning-back-link">
-      <span class="learning-back-icon" aria-hidden="true">&larr;</span>
+  <header class="aq-page-header learning-nav-header">
+    <a href="/index" class="aq-header-start aq-header-back learning-back-link">
+      <span class="aq-header-back-icon learning-back-icon" aria-hidden="true">&larr;</span>
       <span>Pangkalan Utama</span>
     </a>
-    <div class="learning-brand">
-      <span class="learning-brand-icon" aria-hidden="true">📚</span>
-      <div>
+    <div class="aq-header-brand learning-brand">
+      <span class="aq-header-brand-icon learning-brand-icon" aria-hidden="true">📚</span>
+      <span class="learning-brand__text">
         <strong>Learning Cove</strong>
         <span>Ruang belajar bersama Aqua</span>
-      </div>
+      </span>
     </div>
-    <a href="/shop" class="pearl-pill learning-pearl-pill" title="Baki Mutiara">
+    <div class="aq-header-end">
+    <a href="/shop" class="aq-header-pearl pearl-pill learning-pearl-pill" title="Baki Mutiara">
       <span aria-hidden="true">🐚</span>
       <strong id="user-pearls">0</strong>
       <span>Mutiara</span>
     </a>
     <span class="user-greeting" id="user-display">Hai, Pengembara!</span>
+    </div>
   </header>
 
   <section class="learning-hero" aria-labelledby="learning-page-title">
