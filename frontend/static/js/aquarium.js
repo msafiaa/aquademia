@@ -10,11 +10,11 @@
 
   // Fish images mapping
   var FISH_IMAGES = {
-    "Royal Betta": "/static/images/fish/fish-1.jpg",
-    "Angelfish": "/static/images/fish/fish-2.jpg",
-    "Clownfish": "/static/images/fish/fish-3.jpg",
-    "Neon Tetra": "/static/images/fish/fish-4.jpg",
-    "Guppy": "/static/images/fish/fish-5.jpg"
+    "Royal Betta": "/static/images/fish/fish-1-2.png",
+    "Angelfish": "/static/images/fish/fish-2.png",
+    "Clownfish": "/static/images/fish/fish-3.png",
+    "Neon Tetra": "/static/images/fish/fish-4.png",
+    "Guppy": "/static/images/fish/fish-5.png"
   };
 
   function decorationEmoji(item) {
@@ -180,7 +180,7 @@
     fishList.forEach(function (f, idx) {
       var img = document.createElement("img");
       img.className = "tank-swimming-fish";
-      img.src = FISH_IMAGES[f.fish_type] || "/static/images/fish/fish-1.jpg";
+      img.src = FISH_IMAGES[f.fish_type] || "/static/images/fish/fish-1-2.png";
       img.alt = f.fish_type;
       img.title = f.fish_type + " (+" + f.pearls_earned + " mutiara)";
 
@@ -212,7 +212,7 @@
       var card = document.createElement("div");
       card.className = "fish-item-card";
       card.innerHTML =
-        '<img src="' + (FISH_IMAGES[f.fish_type] || "/static/images/fish/fish-1.jpg") + '" alt="' + f.fish_type + '" class="fish-thumb-img">' +
+        '<img src="' + (FISH_IMAGES[f.fish_type] || "/static/images/fish/fish-1-2.png") + '" alt="' + f.fish_type + '" class="fish-thumb-img">' +
         '<div class="fish-item-name">' + f.fish_type + '</div>' +
         '<div class="fish-item-meta">🐚 +' + f.pearls_earned + ' Mutiara</div>' +
         (f.earned_at ? '<div class="fish-item-meta" style="font-size:0.75rem; margin-top:0.2rem;">' + f.earned_at.substring(0, 10) + '</div>' : '');

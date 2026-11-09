@@ -85,21 +85,20 @@
 /* Swimming Fish in Tank */
 .tank-swimming-fish {
   position: absolute;
-  width: 75px;
-  height: 55px;
-  object-fit: cover;
-  border-radius: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.85);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  width: auto;
+  height: 62px;            /* lebar auto ikut bentuk ikan */
+  object-fit: contain;
+  /* drop-shadow ikut bentuk ikan (alpha), bukan kotak */
+  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.35));
   z-index: 10;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: scale 0.2s;
   animation: swimHorizontal var(--swim-dur, 16s) ease-in-out var(--swim-delay, 0s) infinite alternate,
              fishBob 3s ease-in-out infinite alternate;
 }
 
 .tank-swimming-fish:hover {
-  transform: scale(1.15) !important;
+  scale: 1.15;             /* guna 'scale' supaya tak ganggu flip scaleX dalam animasi */
   z-index: 50;
 }
 
@@ -204,9 +203,9 @@
 .fish-thumb-img {
   width: 100%;
   height: 110px;
-  object-fit: cover;
-  border-radius: var(--aq-radius-sm);
+  object-fit: contain;     /* tunjuk seluruh ikan, tak dipotong */
   margin-bottom: 0.75rem;
+  filter: drop-shadow(0 3px 4px rgba(7, 72, 108, 0.2));
 }
 
 .fish-item-name {

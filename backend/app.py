@@ -1,6 +1,6 @@
 import os
 from dotenv import load_dotenv
-
+load_dotenv()
 from flask import Flask, jsonify, redirect, url_for, session
 from pathlib import Path
 from routes.adaptive_quiz import adaptive_bp
