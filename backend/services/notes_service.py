@@ -14,50 +14,40 @@ load_dotenv(BASE_DIR / ".env")
 
 def generate_personalised_notes(performance):
     """
-    Generate revision notes based on the student's
-    weak skills and completed quiz performance.
+    Generate revision notes for the quiz topic, emphasizing weak skills
+    when mistakes are present and providing a general review otherwise.
     """
 
     weak_skills = performance.get("weak_skills", {})
 
-    if not weak_skills:
-        return {
-            "title": "Syabas, Pengembara Hebat!",
-            "summary": (
-                "Anda menunjukkan kefahaman yang baik "
-                "tentang kemahiran dalam kuiz ini."
-            ),
-            "focus_skills": [],
-            "key_concepts": [],
-            "worked_example": None,
-            "revision_tips": [
-                "Teruskan berlatih untuk menguatkan kefahaman anda."
-            ]
-        }
-
     mistakes = []
 
     for item in performance.get("question_results", []):
-        if not item["is_correct"]:
+        if not item.get("is_correct"):
             mistakes.append({
-                "question": item["question"],
-                "student_answer": item["student_answer"],
-                "correct_answer": item["correct_answer"],
-                "skill": item["skill"]
+                "question": item.get("question"),
+                "student_answer": item.get("student_answer"),
+                "correct_answer": item.get("correct_answer"),
+                "skill": item.get("skill")
             })
 
-    client = Groq(api_key=os.environ["GROQ_API_KEY"])
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        raise ValueError("GROQ_API_KEY is not configured.")
+
+    client = Groq(api_key=api_key)
     model = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
     system_prompt = """
 You are Aquademia's AI revision tutor for
 Malaysian primary school students in Years 4 to 6.
 
-Generate personalised revision notes based on
-the student's completed quiz and weak skills.
+Generate useful revision notes for the selected quiz topic.
 
 Rules:
-1. Focus on the student's weak skills.
+1. If weak_skills is non-empty, prioritize those skills.
+   If weak_skills is empty, write a general topic review. Never return
+   empty key_concepts or generic congratulations in place of notes.
 2. Use the verified correct answers supplied.
 3. Do not change the supplied correct answers.
 4. Write ALL text values (title, summary, headings,
@@ -106,6 +96,7 @@ Required JSON format:
     "Semak semula pengiraan selepas menyusun semula."
   ]
 }
+When weak_skills is empty, set focus_skills to [].
 """
 
     user_data = {
@@ -113,7 +104,15 @@ Required JSON format:
         "subject": performance.get("subject"),
         "topic": performance.get("topic"),
         "weak_skills": weak_skills,
-        "mistakes": mistakes
+        "mistakes": mistakes,
+        "quiz_questions": [
+            {
+                "question": item.get("question"),
+                "correct_answer": item.get("correct_answer"),
+                "skill": item.get("skill")
+            }
+            for item in performance.get("question_results", [])
+        ]
     }
 
     response = client.chat.completions.create(
@@ -133,6 +132,8 @@ Required JSON format:
     )
 
     notes = json.loads(response.choices[0].message.content)
+    if not isinstance(notes, dict):
+        raise ValueError("AI notes response must be a JSON object.")
 
     # Validate the AI response structure
     required_fields = [

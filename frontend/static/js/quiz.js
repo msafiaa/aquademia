@@ -660,9 +660,7 @@
     var btnAdaptive = document.getElementById("btn-goto-adaptive");
     if (
       result.weak_skills &&
-      Object.keys(result.weak_skills).length > 0 &&
-      result.adaptive_quiz &&
-      result.adaptive_quiz.status !== "unavailable"
+      Object.keys(result.weak_skills).length > 0
     ) {
       btnAdaptive.hidden = false;
       btnAdaptive.onclick = function () {

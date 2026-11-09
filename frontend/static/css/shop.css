@@ -531,7 +531,7 @@
   z-index: 1;
   font-size: 2rem;
   pointer-events: none;
-  transform: translate(-50%, -85%);
+  transform: translate(-50%, -50%);
 }
 
 .catalog-preview-decoration.ghost {
@@ -636,4 +636,160 @@
   .shop-item-emoji,
   .shop-goal-progress i,
   .shop-item-progress i { transition: none; }
+}
+
+.shop-dialog-overlay {
+  position: fixed;
+  z-index: 10001;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  padding: 1rem;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(114, 226, 238, .28), transparent 40%),
+    rgba(5, 47, 74, .72);
+  backdrop-filter: blur(7px);
+}
+
+.shop-dialog-card {
+  position: relative;
+  width: min(440px, 100%);
+  overflow: hidden;
+  padding: 1.1rem 1.5rem 1.35rem;
+  border: 4px solid #fff;
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 8% 8%, #fff0bc 0 42px, transparent 43px),
+    linear-gradient(180deg, #fffdf6, #effcff);
+  box-shadow: 0 18px 48px rgba(0, 27, 44, .36), inset 0 2px 0 #fff;
+  text-align: center;
+  transform: translateY(14px) scale(.94);
+  opacity: 0;
+}
+
+.shop-dialog-overlay.is-opening .shop-dialog-card {
+  animation: shop-dialog-pop 260ms cubic-bezier(.2, .8, .3, 1.2) forwards;
+}
+
+.shop-dialog-friends {
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  gap: .55rem;
+  height: 118px;
+}
+
+.shop-dialog-mascot {
+  width: auto;
+  height: 112px;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 5px rgba(0, 55, 80, .16));
+}
+
+.shop-dialog-item {
+  display: grid;
+  width: 70px;
+  height: 70px;
+  place-items: center;
+  margin-bottom: 5px;
+  border: 3px solid #fff;
+  border-radius: 24px;
+  background: linear-gradient(145deg, #fff4bf, #ffdb8d);
+  box-shadow: 0 5px 0 rgba(207, 151, 53, .2);
+  font-size: 2.45rem;
+  animation: shop-dialog-float 2.5s ease-in-out infinite;
+}
+
+.shop-dialog-eyebrow {
+  margin: .25rem 0 .25rem;
+  color: #0b849f;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+}
+
+.shop-dialog-card h2 {
+  margin: 0;
+  color: #0b3a53;
+  font-size: 1.55rem;
+}
+
+.shop-dialog-card > p:not(.shop-dialog-eyebrow) {
+  margin: .45rem auto 0;
+  max-width: 350px;
+  color: #4a6b7d;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.shop-dialog-price {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  margin-top: .8rem;
+  padding: .4rem 1rem;
+  border: 2px solid #ffdc84;
+  border-radius: 999px;
+  background: #fff3cc;
+  color: #704b0b;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.shop-dialog-balance {
+  font-size: .85rem !important;
+}
+
+.shop-dialog-actions {
+  display: flex;
+  gap: .65rem;
+  margin-top: 1.05rem;
+}
+
+.shop-dialog-actions .aq-btn {
+  flex: 1 1 0;
+  min-height: 48px;
+  padding: .55rem .8rem;
+  font-size: .98rem;
+}
+
+.shop-dialog-actions #shop-dialog-cancel[hidden] {
+  display: none;
+}
+
+.shop-dialog-sparkle {
+  position: absolute;
+  color: #f3bb45;
+  font-size: 1.45rem;
+  pointer-events: none;
+}
+
+.shop-dialog-sparkle--one { top: 28px; left: 28px; }
+.shop-dialog-sparkle--two { top: 66px; right: 24px; color: #41b9c9; }
+
+.shop-dialog-confirm:disabled {
+  cursor: wait;
+  opacity: .7;
+}
+
+@keyframes shop-dialog-pop {
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes shop-dialog-float {
+  50% { transform: translateY(-5px) rotate(4deg); }
+}
+
+@media (max-width: 560px) {
+  .shop-dialog-card { padding: .9rem 1rem 1.1rem; }
+  .shop-dialog-friends { height: 104px; }
+  .shop-dialog-mascot { height: 98px; }
+  .shop-dialog-item { width: 62px; height: 62px; font-size: 2.1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shop-dialog-overlay.is-opening .shop-dialog-card,
+  .shop-dialog-item { animation: none; opacity: 1; transform: none; }
 }

@@ -90,6 +90,26 @@
   </section>
 </div>
 
+<div class="shop-dialog-overlay" id="shop-dialog" hidden>
+  <section class="shop-dialog-card" role="dialog" aria-modal="true" aria-labelledby="shop-dialog-title" aria-describedby="shop-dialog-copy">
+    <span class="shop-dialog-sparkle shop-dialog-sparkle--one" aria-hidden="true">✦</span>
+    <span class="shop-dialog-sparkle shop-dialog-sparkle--two" aria-hidden="true">✧</span>
+    <div class="shop-dialog-friends">
+      <img src="{{ url_for('static', filename='images/characters/cutouts/mal-happy.png') }}" alt="" class="shop-dialog-mascot">
+      <span class="shop-dialog-item" id="shop-dialog-item" aria-hidden="true">🐚</span>
+    </div>
+    <p class="shop-dialog-eyebrow" id="shop-dialog-eyebrow">MISI KEDAI BAWAH LAUT</p>
+    <h2 id="shop-dialog-title">Beli hiasan ini?</h2>
+    <p id="shop-dialog-copy"></p>
+    <div class="shop-dialog-price" id="shop-dialog-price" hidden></div>
+    <p class="shop-dialog-balance" id="shop-dialog-balance" hidden></p>
+    <div class="shop-dialog-actions">
+      <button type="button" class="aq-btn aq-btn--ghost" id="shop-dialog-cancel">Tak jadi</button>
+      <button type="button" class="aq-btn aq-btn--coral" id="shop-dialog-confirm">Ya, beli!</button>
+    </div>
+  </section>
+</div>
+
 <!-- Placement Modal -->
 <div class="placement-modal-overlay" id="placement-modal" aria-hidden="true">
   <div class="placement-card">

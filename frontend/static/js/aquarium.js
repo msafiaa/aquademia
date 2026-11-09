@@ -239,11 +239,11 @@
       decoration.setAttribute("role", "img");
       decoration.setAttribute("aria-label", dec.item_name || "Hiasan");
 
-      // Position relative inside tank
-      var posX = Math.round((dec.position_x !== null ? dec.position_x : 0.5) * 85);
-      var posY = Math.round((dec.position_y !== null ? dec.position_y : 0.8) * 45 + 35); // towards bottom
-      decoration.style.left = Math.max(5, Math.min(posX, 85)) + "%";
-      decoration.style.top = Math.max(25, Math.min(posY, 75)) + "%";
+      // Shop positions are normalized to the full tank (0 to 1).
+      var posX = dec.position_x !== null ? dec.position_x : 0.5;
+      var posY = dec.position_y !== null ? dec.position_y : 0.8;
+      decoration.style.left = (Math.max(0, Math.min(posX, 1)) * 100) + "%";
+      decoration.style.top = (Math.max(0, Math.min(posY, 1)) * 100) + "%";
 
       tankContainer.appendChild(decoration);
     });

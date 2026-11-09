@@ -1,9 +1,8 @@
 from flask import Blueprint, jsonify, request, session
-from services.ai_service import generate_verified_adaptive_quiz
 
 from services.attempt_service import (
-    save_quiz_attempt,
-    save_adaptive_questions
+    get_or_create_adaptive_questions,
+    save_quiz_attempt
 )
 from services.explanation_service import (
     generate_question_explanations,
@@ -16,7 +15,6 @@ from services.notes_service import (
 
 from services.performance_service import analyze_performance
 from services.quiz_service import get_default_questions, get_topics
-from services.question_validator import validate_adaptive_questions
 from services.reward_service import award_quiz_reward
 
 
@@ -118,7 +116,25 @@ def submit_quiz():
         result["reward"] = None
         result["reward_status"] = "unavailable"
 
-    
+    try:
+        adaptive_questions = get_or_create_adaptive_questions(
+            attempt_id,
+            student_id
+        )
+        if adaptive_questions is None:
+            raise ValueError("Saved quiz attempt could not be loaded.")
+
+        result["adaptive_quiz"] = {
+            "status": "available" if adaptive_questions else "unavailable",
+            "questions": adaptive_questions
+        }
+    except Exception as error:
+        print("ADAPTIVE QUIZ ERROR:", repr(error))
+        result["adaptive_quiz"] = {
+            "status": "unavailable",
+            "message": "Adaptive practice is temporarily unavailable."
+        }
+
     # Generate explanations for completed quiz questions
     try:
         explanations = generate_question_explanations(result)
@@ -171,45 +187,5 @@ def submit_quiz():
         result["notes_status"] = "unavailable"
         result["personalised_notes"] = None
 
-
-    if result["weak_skills"]:
-        try:
-            adaptive_result = generate_verified_adaptive_quiz(result)
-
-            question_ids = save_adaptive_questions(
-                attempt_id,
-                adaptive_result["questions"]
-            )
-
-            result["adaptive_quiz"] = {
-                "analysis": adaptive_result["analysis"],
-                
-                "questions": [
-                    {
-                        "id": question_ids[index],
-                        "question": question["question"],
-                        "options": question["options"],
-                        "skill": question["skill"]
-                    }
-                    for index, question in enumerate(
-                        adaptive_result["questions"]
-                    )
-                ]
-
-            }
-
-        except Exception as e:
-            print("ADAPTIVE QUIZ ERROR:", repr(e))
-
-            result["adaptive_quiz"] = {
-                "status": "unavailable",
-                "message": "Adaptive quiz temporarily unavailable."
-        }
-
-    else:
-        result["adaptive_quiz"] = {
-            "status": "completed",
-            "message": "No weak skills detected."
-        }
 
     return jsonify(result)

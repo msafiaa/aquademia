@@ -3,6 +3,10 @@ import json
 
 from flask import Blueprint, jsonify, session
 from db import get_db_connection
+from services.notes_service import (
+    generate_personalised_notes,
+    save_personalised_notes
+)
 
 learning_bp = Blueprint("learning", __name__)
 
@@ -37,11 +41,53 @@ def get_notes(attempt_id):
 
         note = cursor.fetchone()
 
-        if not note:
-            return jsonify({"error": "Notes not found."}), 404
+        if note:
+            note["weak_skills_json"] = parse_json(note["weak_skills_json"])
+            note["notes_json"] = parse_json(note["notes_json"])
+            notes_content = note["notes_json"]
+        else:
+            notes_content = None
 
-        note["weak_skills_json"] = parse_json(note["weak_skills_json"])
-        note["notes_json"] = parse_json(note["notes_json"])
+        if (
+            not isinstance(notes_content, dict)
+            or not notes_content.get("key_concepts")
+        ):
+            cursor.execute("""
+                SELECT year_level, subject, topic, performance_json
+                FROM quiz_attempts
+                WHERE attempt_id = %s
+                  AND student_id = %s
+                  AND quiz_type = 'default'
+            """, (attempt_id, student_id))
+            attempt = cursor.fetchone()
+            if not attempt:
+                return jsonify({"error": "Quiz attempt not found."}), 404
+
+            performance = parse_json(attempt["performance_json"]) or {}
+            performance.update({
+                "year": attempt["year_level"],
+                "subject": attempt["subject"],
+                "topic": attempt["topic"]
+            })
+            performance.setdefault("weak_skills", {})
+
+            notes_content = generate_personalised_notes(performance)
+            save_personalised_notes(
+                student_id,
+                attempt_id,
+                performance,
+                notes_content
+            )
+            note = {
+                "attempt_id": attempt_id,
+                "subject": attempt["subject"],
+                "topic": attempt["topic"],
+                "weak_skills_json": performance["weak_skills"],
+                "notes_json": notes_content
+            }
+
+        if note and not isinstance(note.get("notes_json"), dict):
+            note["notes_json"] = parse_json(note["notes_json"])
 
         return jsonify(note), 200
 
