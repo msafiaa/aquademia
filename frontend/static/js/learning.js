@@ -117,6 +117,7 @@
     Object.keys(tabs).forEach(function (name) {
       var isTarget = name === tabName;
       tabs[name].classList.toggle("active", isTarget);
+      tabs[name].setAttribute("aria-selected", String(isTarget));
       panels[name].hidden = !isTarget;
     });
 
@@ -284,124 +285,258 @@
     adaptiveContainer.innerHTML =
       '<p style="color: var(--aq-muted);">Menyemak status soalan adaptif untuk percubaan #' + attemptId + '...</p>';
 
-    var btnSubmitAdaptive = document.getElementById("btn-submit-adaptive");
-    btnSubmitAdaptive.hidden = true;
-    btnSubmitAdaptive.disabled = false;
-    btnSubmitAdaptive.textContent = "Hantar Latihan Adaptif";
-
-    fetch("/api/adaptive/" + attemptId, { credentials: "same-origin" })
-      .then(function (res) {
-        return res.json().then(function (data) {
-          if (!res.ok) throw new Error(data.error || "Gagal memuatkan soalan adaptif.");
-          return data;
-        });
+    Promise.all([
+      fetch("/api/adaptive/" + attemptId, { credentials: "same-origin" }),
+      fetch("/api/adaptive/" + attemptId + "/history", { credentials: "same-origin" })
+    ])
+      .then(function (responses) {
+        return Promise.all(responses.map(function (res) {
+          return res.json().then(function (data) {
+            if (!res.ok) throw new Error(data.error || "Gagal memuatkan latihan.");
+            return data;
+          });
+        }));
       })
-      .then(function (data) {
-        var questions = (data && data.questions) || [];
+      .then(function (results) {
+        var questions = (results[0] && results[0].questions) || [];
+        var history = (results[1] && results[1].history) || [];
         if (!questions.length) {
           adaptiveContainer.innerHTML =
-            '<p style="color: var(--aq-muted);">Soalan latihan adaptif belum tersedia untuk percubaan ini. Cuba kuiz lain atau kembali kemudian.</p>';
+            '<div class="adaptive-empty-state">' +
+            '<span aria-hidden="true">🫧</span>' +
+            '<h3>Belum ada kemahiran untuk dilatih</h3>' +
+            '<p>Untuk kuiz ini, anda belum tersilap jawapan. Cuba latihan daripada kuiz yang ada jawapan salah supaya Aqua boleh fokus pada topik yang perlu dikuatkan.</p>' +
+            '</div>';
           return;
         }
 
         adaptiveContainer.innerHTML =
-          '<div style="text-align:center; padding: 1.5rem;">' +
-          '<img src="/static/images/characters/cutouts/fania-happy.png" style="height:120px; margin-bottom:1rem;">' +
-          '<h3 style="color: var(--aq-ocean);">Cabaran Latihan Adaptif Aqua 🐠</h3>' +
-          '<p style="color: var(--aq-muted); max-width: 50ch; margin: 0 auto 1.5rem;">' +
-          'Jawab soalan ini untuk mengukuhkan kemahiran anda dan mendapatkan ikan serta mutiara.' +
-          '</p>' +
-          '<div id="adaptive-interactive-questions"></div>' +
-          '</div>';
+          '<div class="adaptive-quiz-intro">' +
+          '<div class="adaptive-quiz-mascot"><img src="/static/images/characters/cutouts/fania-happy.png" alt="Aqua"></div>' +
+          '<div class="adaptive-quiz-intro-copy">' +
+          '<span class="adaptive-quiz-kicker">CABARAN KHAS UNTUK ANDA</span>' +
+          '<h3>Jawab satu demi satu bersama Aqua 🐠</h3>' +
+          '<p>Semak jawapan sekarang, kemudian cuba soalan baharu.</p>' +
+          '</div>' +
+          '<div class="adaptive-quiz-count"><strong id="adaptive-question-count">' + history.length + '</strong><span>dijawab</span></div>' +
+          '</div>' +
+          '<div id="adaptive-current-question"></div>' +
+          '<details class="adaptive-history" id="adaptive-history">' +
+          '<summary>📚 Sejarah jawapan <span id="adaptive-history-count"></span></summary>' +
+          '<div class="adaptive-history-list" id="adaptive-history-list"></div>' +
+          '</details>';
 
-        var questionsBox = document.getElementById("adaptive-interactive-questions");
-        questions.forEach(function (question, index) {
-          var fieldset = document.createElement("fieldset");
-          fieldset.className = "adaptive-question";
+        var currentBox = document.getElementById("adaptive-current-question");
+        var historyList = document.getElementById("adaptive-history-list");
+        var historyIds = {};
+        history.forEach(function (item) { historyIds[String(item.adaptive_id)] = true; });
 
-          var legend = document.createElement("legend");
-          legend.textContent = "Soalan " + (index + 1) + ": " + question.question;
-          fieldset.appendChild(legend);
+        function renderHistoryEntry(item, index, prepend) {
+          var entry = document.createElement("article");
+          entry.className = "adaptive-history-entry " + (item.is_correct ? "is-correct" : "is-incorrect");
+          var title = document.createElement("h4");
+          title.textContent = (item.is_correct ? "✅ Betul" : "💪 Perlu cuba lagi") + " · Soalan " + index;
+          var questionText = document.createElement("p");
+          questionText.className = "adaptive-history-question";
+          questionText.textContent = item.question;
+          var answerText = document.createElement("p");
+          answerText.textContent = "Jawapan anda: " + item.selected_answer;
+          var correctText = document.createElement("p");
+          correctText.textContent = "Jawapan betul: " + item.correct_answer;
+          var explanation = document.createElement("p");
+          explanation.textContent = item.explanation || "Semak semula konsep topik ini dalam nota.";
+          entry.appendChild(title);
+          entry.appendChild(questionText);
+          entry.appendChild(answerText);
+          if (!item.is_correct) entry.appendChild(correctText);
+          entry.appendChild(explanation);
+          if (prepend && historyList.firstChild) historyList.insertBefore(entry, historyList.firstChild);
+          else historyList.appendChild(entry);
+        }
 
-          (question.options || []).forEach(function (option) {
+        function updateHistoryCount() {
+          document.getElementById("adaptive-question-count").textContent = history.length;
+          document.getElementById("adaptive-history-count").textContent =
+            history.length ? "(" + history.length + ")" : "";
+        }
+
+        history.forEach(function (item, index) {
+          renderHistoryEntry(item, history.length - index, false);
+        });
+        updateHistoryCount();
+
+        function showQuestion(question) {
+          currentBox.innerHTML =
+            '<div class="adaptive-question-card">' +
+            '<div class="adaptive-question-topline"><span class="adaptive-question-number">' +
+            (history.length + 1) + '</span><span>Soalan baharu</span></div>' +
+            '<h4 class="adaptive-question-prompt"></h4>' +
+            '<div class="adaptive-option-list"></div>' +
+            '<div class="adaptive-feedback" id="adaptive-feedback" hidden></div>' +
+            '<div class="adaptive-question-actions">' +
+            '<button type="button" class="aq-btn aq-btn--primary" id="btn-check-answer">Semak Jawapan</button>' +
+            '<button type="button" class="aq-btn aq-btn--coral" id="btn-next-question" hidden>Soalan seterusnya ➜</button>' +
+            '<p class="adaptive-answer-status" id="adaptive-answer-status" role="status" aria-live="polite"></p>' +
+            '</div></div>';
+
+          var card = currentBox.querySelector(".adaptive-question-card");
+          card.querySelector(".adaptive-question-prompt").textContent = question.question;
+          var optionsBox = card.querySelector(".adaptive-option-list");
+          (question.options || []).forEach(function (option, index) {
             var label = document.createElement("label");
+            label.className = "adaptive-option";
             var input = document.createElement("input");
             input.type = "radio";
-            input.name = "adaptive-answer-" + question.id;
+            input.name = "adaptive-answer-current";
             input.value = option;
+            var letter = document.createElement("span");
+            letter.className = "adaptive-option-letter";
+            letter.textContent = String.fromCharCode(65 + index);
+            var text = document.createElement("span");
+            text.className = "adaptive-option-text";
+            text.textContent = option;
             label.appendChild(input);
-            label.appendChild(document.createTextNode(" " + option));
-            fieldset.appendChild(label);
+            label.appendChild(letter);
+            label.appendChild(text);
+            optionsBox.appendChild(label);
           });
 
-          questionsBox.appendChild(fieldset);
-        });
+          card.querySelector("#btn-check-answer").addEventListener("click", function () {
+            var selected = card.querySelector('input[name="adaptive-answer-current"]:checked');
+            var status = card.querySelector("#adaptive-answer-status");
+            if (!selected) {
+              status.textContent = "Pilih satu jawapan dahulu ya!";
+              return;
+            }
+            var checkButton = card.querySelector("#btn-check-answer");
+            checkButton.disabled = true;
+            checkButton.textContent = "Aqua sedang menyemak...";
+            fetch("/api/adaptive/" + attemptId + "/answer", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              credentials: "same-origin",
+              body: JSON.stringify({ adaptive_id: question.id, answer: selected.value })
+            })
+              .then(function (res) {
+                return res.json().then(function (result) {
+                  if (!res.ok) throw new Error(result.error || "Jawapan tidak dapat disimpan.");
+                  return result;
+                });
+              })
+              .then(function (result) {
+                card.querySelectorAll("input").forEach(function (input) { input.disabled = true; });
+                var feedback = card.querySelector("#adaptive-feedback");
+                feedback.hidden = false;
+                feedback.className = "adaptive-feedback " + (result.is_correct ? "is-correct" : "is-incorrect");
+                var heading = document.createElement("strong");
+                heading.textContent = result.is_correct ? "Betul! Syabas! 🎉" : "Belum tepat, tak apa—jom belajar! 🌱";
+                var answer = document.createElement("p");
+                answer.textContent = "Jawapan yang betul: " + result.correct_answer;
+                var explanation = document.createElement("p");
+                explanation.textContent = result.explanation || "Baca nota topik untuk faham cara mendapat jawapan ini.";
+                feedback.appendChild(heading);
+                if (!result.is_correct) feedback.appendChild(answer);
+                feedback.appendChild(explanation);
 
-        btnSubmitAdaptive.hidden = false;
-        btnSubmitAdaptive.onclick = function () {
-          submitAdaptiveAnswers(attemptId, questions);
-        };
+                result.adaptive_id = question.id;
+                history.unshift(result);
+                historyIds[String(question.id)] = true;
+                renderHistoryEntry(result, history.length, true);
+                updateHistoryCount();
+                checkButton.hidden = true;
+                card.querySelector("#btn-next-question").hidden = false;
+              })
+              .catch(function (error) {
+                checkButton.disabled = false;
+                checkButton.textContent = "Semak Jawapan";
+                status.textContent = error.message;
+              });
+          });
+
+          card.querySelector("#btn-next-question").addEventListener("click", function () {
+            var nextButton = card.querySelector("#btn-next-question");
+            nextButton.disabled = true;
+            nextButton.textContent = "Aqua sedang cipta soalan... 🫧";
+            fetch("/api/adaptive/" + attemptId + "/more", {
+              method: "POST",
+              credentials: "same-origin"
+            })
+              .then(function (res) {
+                return res.json().then(function (result) {
+                  if (!res.ok) throw new Error(result.error || "Soalan baharu tidak dapat dijana.");
+                  return result;
+                });
+              })
+              .then(function (result) {
+                var nextQuestion = (result.questions || [])[0];
+                if (!nextQuestion) throw new Error("Aqua belum menghasilkan soalan. Cuba lagi.");
+                questions.push(nextQuestion);
+                showQuestion(nextQuestion);
+                currentBox.scrollIntoView({ behavior: "smooth", block: "start" });
+              })
+              .catch(function (error) {
+                nextButton.disabled = false;
+                nextButton.textContent = "Cuba jana lagi";
+                card.querySelector("#adaptive-answer-status").textContent = error.message;
+              });
+          });
+        }
+
+        var nextQuestion = questions.find(function (question) {
+          return !historyIds[String(question.id)];
+        });
+        if (nextQuestion) {
+          showQuestion(nextQuestion);
+        } else {
+          document.getElementById("adaptive-current-question").innerHTML =
+            '<div class="adaptive-empty-state"><span aria-hidden="true">🌟</span>' +
+            '<h3>Hebat! Semua soalan sudah dijawab.</h3>' +
+            '<p>Jana soalan baharu bila-bila masa untuk terus berlatih.</p>' +
+            '<button type="button" class="aq-btn aq-btn--primary" id="btn-next-question">Jana soalan baharu</button></div>';
+          document.getElementById("btn-next-question").addEventListener("click", function () {
+            var nextButton = this;
+            nextButton.disabled = true;
+            nextButton.textContent = "Aqua sedang cipta soalan... 🫧";
+            fetch("/api/adaptive/" + attemptId + "/more", {
+              method: "POST",
+              credentials: "same-origin"
+            })
+              .then(function (res) {
+                return res.json().then(function (result) {
+                  if (!res.ok) throw new Error(result.error || "Soalan baharu tidak dapat dijana.");
+                  return result;
+                });
+              })
+              .then(function (result) {
+                var nextQuestion = (result.questions || [])[0];
+                if (!nextQuestion) throw new Error("Aqua belum menghasilkan soalan. Cuba lagi.");
+                questions.push(nextQuestion);
+                showQuestion(nextQuestion);
+                currentBox.scrollIntoView({ behavior: "smooth", block: "start" });
+              })
+              .catch(function (error) {
+                nextButton.disabled = false;
+                nextButton.textContent = "Cuba jana lagi";
+                var message = document.createElement("p");
+                message.className = "adaptive-answer-status";
+                message.textContent = error.message;
+                nextButton.parentNode.appendChild(message);
+              });
+          });
+        }
       })
       .catch(function (error) {
         console.error("Tidak dapat memuatkan latihan adaptif:", error);
         adaptiveContainer.innerHTML =
-          '<p style="color: var(--aq-muted);">Latihan adaptif tidak dapat dimuatkan. Sila muat semula halaman dan cuba lagi.</p>';
-      });
-  }
-
-  function submitAdaptiveAnswers(attemptId, questions) {
-    var btn = document.getElementById("btn-submit-adaptive");
-    var answers = {};
-    for (var i = 0; i < questions.length; i++) {
-      var selected = document.querySelector(
-        'input[name="adaptive-answer-' + questions[i].id + '"]:checked'
-      );
-      if (!selected) {
-        alert("Sila jawab semua soalan latihan adaptif dahulu.");
-        return;
-      }
-      answers[String(questions[i].id)] = selected.value;
-    }
-
-    btn.disabled = true;
-    btn.textContent = "Menilai jawapan adaptif...";
-
-    var payload = {
-      attempt_id: attemptId,
-      answers: answers
-    };
-
-    fetch("/api/adaptive/submit", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "same-origin",
-      body: JSON.stringify(payload)
-    })
-      .then(function (res) {
-        return res.json().then(function (data) {
-          if (!res.ok) throw new Error(data.error || "Gagal menghantar latihan adaptif.");
-          return data;
+          '<div class="adaptive-empty-state">' +
+          '<span aria-hidden="true">🐠</span>' +
+          '<h3>Aqua belum dapat sediakan latihan</h3>' +
+          '<p>Cuba lagi sebentar. Jika masih gagal, semak sambungan AI pada tetapan pelayan.</p>' +
+          '<button type="button" class="aq-btn aq-btn--primary" id="btn-retry-adaptive">Cuba Lagi</button>' +
+          '</div>';
+        document.getElementById("btn-retry-adaptive").addEventListener("click", function () {
+          loadAdaptiveQuiz(attemptId);
         });
-      })
-      .then(function (result) {
-        btn.disabled = false;
-        btn.textContent = "Hantar Latihan Adaptif";
-
-        if (result.reward) {
-          fetch("/api/shop/wallet", { credentials: "same-origin" })
-            .then(function (res) { return res.ok ? res.json() : null; })
-            .then(function (wallet) {
-              if (wallet && typeof wallet.available_pearls !== "undefined") {
-                document.getElementById("user-pearls").textContent = wallet.available_pearls;
-              }
-            });
-        }
-        showRewardModal(result.reward, result.score);
-      })
-      .catch(function (error) {
-        btn.disabled = false;
-        btn.textContent = "Hantar Latihan Adaptif";
-        alert(error.message || "Tidak dapat menghantar latihan adaptif. Sila cuba sebentar lagi.");
       });
   }
 

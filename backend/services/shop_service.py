@@ -45,8 +45,8 @@ def get_student_inventory(student_id):
         cursor.execute(
             """
             SELECT i.inventory_id, i.item_id,
-                   s.item_name, s.category,
-                   s.image_path, i.is_placed,
+                   s.item_name, s.category, s.description,
+                   s.image_path, i.is_placed, i.is_unboxed,
                    i.position_x, i.position_y,
                    i.purchased_at
             FROM student_inventory i
@@ -65,6 +65,7 @@ def get_student_inventory(student_id):
                     item[field] = float(item[field])
 
             item["is_placed"] = bool(item["is_placed"])
+            item["is_unboxed"] = bool(item["is_unboxed"])
             item["purchased_at"] = (
                 item["purchased_at"].isoformat()
             )
@@ -122,8 +123,8 @@ def purchase_decoration(student_id, item_id):
         cursor.execute(
             """
             INSERT INTO student_inventory
-                (student_id, item_id, is_placed)
-            VALUES (%s, %s, FALSE)
+                (student_id, item_id, is_placed, is_unboxed)
+            VALUES (%s, %s, FALSE, FALSE)
             """,
             (student_id, item_id)
         )

@@ -1,12 +1,6 @@
-/* ==========================================================================
-   Aquademia – login & registration
-   Talks to the existing Flask endpoints (URLs are injected by login.html):
-     POST /api/auth/login     {username, password}
-     POST /api/auth/register  {username, password, confirm_password, year_level:int}
-     GET  /api/auth/me        POST /api/auth/logout
-   Validation rules deliberately mirror backend/services/auth_service.py.
-   Vanilla JS, no dependencies.
-   ========================================================================== */
+/* Aquademia – login & registration
+   Endpoints: POST /api/auth/login, POST /api/auth/register, GET /api/auth/me, POST /api/auth/logout
+   Validation mirrors backend/services/auth_service.py. Vanilla JS, no dependencies. */
 (function () {
   "use strict";
 
@@ -21,12 +15,10 @@
     next: root.dataset.nextUrl || ""
   };
 
-  // Same rules as the backend
   var USERNAME_RE = /^[A-Za-z0-9_]{3,30}$/;
   var PW_MIN = 8, PW_MAX = 128;
 
   var $ = function (id) { return document.getElementById(id); };
-
   var forms = $("auth-forms");
   var done = $("auth-done");
   var tabs = { login: $("tab-login"), register: $("tab-register") };
@@ -37,9 +29,7 @@
   var speech = $("mascot-speech");
   var busy = false;
 
-  /* ------------------------------------------------------------------
-     Mascots: Mal & Fania react to what is happening (never shame!)
-     ------------------------------------------------------------------ */
+  /* ---------- Mascots (never shame the student) ---------- */
   var SAY = {
     login:    "Hai! I'm Mal. Ready to dive in?",
     register: "Hi, I'm Fania! Let's make your explorer account.",
@@ -47,20 +37,18 @@
     problem:  "Hmm, let's check that together. You can do it!",
     network:  "Oh no, I can't reach the ocean. Check your internet and try again!"
   };
-
   var mascotImgs = [$("mascot-mal"), $("mascot-fania")];
 
   function setMascots(state, message) {
-    mascots.dataset.state = state;                       // idle | thinking | success
+    mascots.dataset.state = state;
     var pose = state === "thinking" ? "thinking" : "idle";
     mascotImgs.forEach(function (img) {
       var src = img.dataset[pose];
       if (src && img.getAttribute("src") !== src) img.setAttribute("src", src);
     });
-    if (message) speech.textContent = message;           // textContent: always safe
+    if (message) speech.textContent = message;
   }
 
-  // Warm the cache so pose swaps are instant
   window.addEventListener("load", function () {
     mascotImgs.forEach(function (img) {
       ["thinking", "surprised"].forEach(function (k) {
@@ -69,26 +57,18 @@
     });
   });
 
-  /* ------------------------------------------------------------------
-     Small UI helpers
-     ------------------------------------------------------------------ */
-  function errorElFor(input) {
-    return $(input.id + "-error");
-  }
-
+  /* ---------- UI helpers ---------- */
   function setFieldError(input, message) {
-    var el = errorElFor(input);
+    var el = $(input.id + "-error");
     input.setAttribute("aria-invalid", "true");
     if (el) { el.textContent = message; el.hidden = false; }
   }
-
   function clearFieldError(input) {
-    var el = errorElFor(input);
+    var el = $(input.id + "-error");
     delete input.dataset.serverError;
     input.removeAttribute("aria-invalid");
     if (el) { el.textContent = ""; el.hidden = true; }
   }
-
   function setYearError(message) {
     var group = registerForm.querySelector(".year-field");
     var el = $("reg-year-error");
@@ -96,43 +76,34 @@
     el.textContent = message || "";
     el.hidden = !message;
   }
-
   function showAlert(el, message, kind) {
     el.className = "aq-alert aq-alert--" + (kind || "error");
     el.textContent = message;
     el.hidden = false;
   }
-
   function hideAlert(el) { el.hidden = true; el.textContent = ""; }
-
   function clearAll(form) {
     Array.prototype.forEach.call(form.querySelectorAll(".aq-input"), clearFieldError);
     hideAlert(form.querySelector(".aq-alert"));
     if (form === registerForm) setYearError("");
   }
-
   function setBusy(button, on) {
     busy = on;
     button.disabled = on;
     button.setAttribute("aria-busy", on ? "true" : "false");
   }
-
   function resetPasswordToggles() {
     Array.prototype.forEach.call(document.querySelectorAll(".pw-toggle"), function (btn) {
-      var input = $(btn.dataset.toggleFor);
-      input.type = "password";
+      $(btn.dataset.toggleFor).type = "password";
       btn.setAttribute("aria-pressed", "false");
       btn.setAttribute("aria-label", "Show password");
     });
   }
 
-  /* ------------------------------------------------------------------
-     Network: JSON in, JSON out, never throws
-     ------------------------------------------------------------------ */
+  /* ---------- Network: JSON in, JSON out, never throws ---------- */
   function postJSON(url, body) {
     var controller = new AbortController();
     var timer = setTimeout(function () { controller.abort(); }, 15000);
-
     return fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json", "Accept": "application/json" },
@@ -148,16 +119,10 @@
     }).finally(function () { clearTimeout(timer); });
   }
 
-  /* ------------------------------------------------------------------
-     Validation (mirrors the backend)
-     ------------------------------------------------------------------ */
+  /* ---------- Validation (mirrors the backend) ---------- */
   var rules = {
-    "login-username": function (v) {
-      return v.trim() ? "" : "Please type your username.";
-    },
-    "login-password": function (v) {
-      return v ? "" : "Please type your password.";
-    },
+    "login-username": function (v) { return v.trim() ? "" : "Please type your username."; },
+    "login-password": function (v) { return v ? "" : "Please type your password."; },
     "reg-username": function (v) {
       v = v.trim();
       if (!v) return "Please choose a username.";
@@ -182,30 +147,23 @@
     if (message) setFieldError(input, message); else clearFieldError(input);
     return !message;
   }
-
   function selectedYear() {
     var checked = registerForm.querySelector('input[name="year_level"]:checked');
     return checked ? parseInt(checked.value, 10) : null;
   }
 
-  // Validate when the student moves on to ANOTHER TEXT FIELD, and clear an error
-  // as soon as the field becomes valid while typing.
-  //
-  // Important: we deliberately do NOT validate on blur when focus goes to a button,
-  // link, year chip or nowhere (e.g. tapping "Start my adventure!"). Showing or
-  // hiding an error message on mouse-down shifts the layout, so the mouse-up lands
-  // on a different element and the click is lost. The submit handler validates
-  // everything anyway.
+  // Validate only when focus moves to ANOTHER TEXT FIELD. Validating on blur to a button
+  // would shift the layout on mouse-down and swallow the click. Submit validates everything.
   Object.keys(rules).forEach(function (id) {
     var input = $(id);
     input.addEventListener("blur", function (e) {
       var next = e.relatedTarget;
       if (!next || !next.classList || !next.classList.contains("aq-input")) return;
-      if (input.dataset.serverError) return;          // keep "name already taken" until edited
+      if (input.dataset.serverError) return;
       if (input.value !== "" || input.hasAttribute("aria-invalid")) validate(input);
     });
     input.addEventListener("input", function () {
-      delete input.dataset.serverError;               // they're editing: the server message is stale
+      delete input.dataset.serverError;
       if (input.hasAttribute("aria-invalid") && !rules[id](input.value)) clearFieldError(input);
     });
   });
@@ -219,7 +177,7 @@
     r.addEventListener("change", function () { setYearError(""); });
   });
 
-  /* Password meter + live character count (register only) */
+  /* Password meter + character count */
   var meter = $("pw-meter-fill");
   var count = $("pw-count");
   $("reg-password").addEventListener("input", function (e) {
@@ -240,10 +198,7 @@
     btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
   });
 
-  /* ------------------------------------------------------------------
-     Friendly error messages (backend strings are matched, never trusted
-     as HTML: everything is inserted with textContent)
-     ------------------------------------------------------------------ */
+  /* ---------- Friendly server errors (always inserted with textContent) ---------- */
   function showRegisterError(res) {
     var raw = (res.data && res.data.error) || "";
     var u = $("reg-username"), p = $("reg-password"), c = $("reg-confirm");
@@ -271,9 +226,7 @@
     }
   }
 
-  /* ------------------------------------------------------------------
-     Tabs
-     ------------------------------------------------------------------ */
+  /* ---------- Tabs ---------- */
   function setTab(name, focusTab) {
     Object.keys(tabs).forEach(function (key) {
       var active = key === name;
@@ -305,17 +258,13 @@
     if (next !== null) { e.preventDefault(); setTab(order[next], true); }
   });
 
-  /* ------------------------------------------------------------------
-     Celebration: Bubble surge ("bubble naik atas" on success)
-     ------------------------------------------------------------------ */
+  /* ---------- Celebration: bubbles rise while the scene dives from beach to ocean ---------- */
   function triggerBubbleSurge(callback) {
     var surgeLayer = $("bubble-surge");
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     if (!surgeLayer || reduce) {
-      setTimeout(function () {
-        if (callback) callback();
-      }, 400);
+      setTimeout(function () { if (callback) callback(); }, 400);
       return;
     }
 
@@ -323,34 +272,25 @@
     surgeLayer.classList.add("active");
 
     var isSmall = window.innerWidth < 600;
-    var count = isSmall ? 30 : 55;
+    var n = isSmall ? 30 : 55;
 
-    for (var i = 0; i < count; i++) {
+    for (var i = 0; i < n; i++) {
       var b = document.createElement("span");
       b.className = "surge-bubble";
       var size = Math.floor(Math.random() * (isSmall ? 42 : 68)) + 18;
-      var left = (Math.random() * 96).toFixed(1);
-      var dur = (1.1 + Math.random() * 0.75).toFixed(2);
-      var delay = (Math.random() * 0.45).toFixed(2);
-      var sway = (Math.random() * 80 - 40).toFixed(0);
-
       b.style.width = size + "px";
       b.style.height = size + "px";
-      b.style.left = left + "%";
-      b.style.setProperty("--surge-dur", dur + "s");
-      b.style.setProperty("--surge-delay", delay + "s");
-      b.style.setProperty("--sway-x", sway + "px");
+      b.style.left = (Math.random() * 96).toFixed(1) + "%";
+      b.style.setProperty("--surge-dur", (1.1 + Math.random() * 0.75).toFixed(2) + "s");
+      b.style.setProperty("--surge-delay", (Math.random() * 0.45).toFixed(2) + "s");
+      b.style.setProperty("--sway-x", (Math.random() * 80 - 40).toFixed(0) + "px");
       surgeLayer.appendChild(b);
     }
 
-    setTimeout(function () {
-      if (callback) callback();
-    }, 1500);
+    setTimeout(function () { if (callback) callback(); }, 1500);
   }
 
-  /* ------------------------------------------------------------------
-     Success / already-signed-in view
-     ------------------------------------------------------------------ */
+  /* ---------- Success / already-signed-in view ---------- */
   function showDone(student, mode) {
     var name = student && student.username ? student.username : "explorer";
     var heading = mode === "register" ? "Welcome aboard!" : mode === "back" ? "You're already in!" : "You're in!";
@@ -362,20 +302,22 @@
     done.hidden = false;
     $("done-heading").textContent = heading;
     $("done-text").textContent = line;
-    setMascots("success", "Yay! Selamat datang, " + name + "! Jom menyelam! 🌊🫧");
+    setMascots("success", "Yay! Selamat datang, " + name + "! Jom menyelam! \uD83C\uDF0A\uD83E\uDEE7");
     $("done-heading").focus();
+
+    // Beach -> ocean. Already signed in = start underwater with no animation.
+    document.body.classList.add(mode === "back" ? "is-underwater" : "is-diving");
 
     if (URLS.next && mode !== "back") {
       $("done-text").textContent = line + " Bersedia... menyelam ke Aquademia!";
-      triggerBubbleSurge(function () {
-        window.location.assign(URLS.next);
-      });
+      triggerBubbleSurge(function () { window.location.assign(URLS.next); });
     } else if (URLS.next) {
       window.location.assign(URLS.next);
     }
   }
 
   function showForms() {
+    document.body.classList.remove("is-diving", "is-underwater");   // back up to the beach
     done.hidden = true;
     forms.hidden = false;
     loginForm.reset();
@@ -389,9 +331,7 @@
     $("login-username").focus();
   }
 
-  /* ------------------------------------------------------------------
-     Login
-     ------------------------------------------------------------------ */
+  /* ---------- Login ---------- */
   loginForm.addEventListener("submit", function (e) {
     e.preventDefault();
     if (busy) return;
@@ -431,10 +371,7 @@
     });
   });
 
-  /* ------------------------------------------------------------------
-     Register (then log in automatically using the existing login API,
-     because /api/auth/register does not start a session by itself)
-     ------------------------------------------------------------------ */
+  /* ---------- Register (then log in automatically; register doesn't start a session) ---------- */
   registerForm.addEventListener("submit", function (e) {
     e.preventDefault();
     if (busy) return;
@@ -468,7 +405,7 @@
       username: username,
       password: password,
       confirm_password: c.value,
-      year_level: year                      // must be an integer for the backend
+      year_level: year
     }).then(function (res) {
       if (res.network) {
         setBusy(button, false);
@@ -483,7 +420,6 @@
         return;
       }
 
-      // Account created -> sign in with the same details
       return postJSON(URLS.login, { username: username, password: password }).then(function (loginRes) {
         setBusy(button, false);
         if (loginRes.ok) {
@@ -491,7 +427,6 @@
           resetPasswordToggles();
           showDone(loginRes.data.student || res.data.student, "register");
         } else {
-          // Account exists but auto-login failed: send them to the login tab
           registerForm.reset();
           setTab("login");
           $("login-username").value = username;
@@ -502,31 +437,21 @@
     });
   });
 
-  /* ------------------------------------------------------------------
-     Logout (from the "you're in" screen)
-     ------------------------------------------------------------------ */
+  /* ---------- Logout ---------- */
   $("logout-btn").addEventListener("click", function () {
     if (busy) return;
     var button = $("logout-btn");
     setBusy(button, true);
     postJSON(URLS.logout, {}).then(function (res) {
       setBusy(button, false);
-      if (res.ok) {
-        showForms();
-      } else {
-        $("done-text").textContent = "We couldn't log you out just now. Please try again.";
-      }
+      if (res.ok) showForms();
+      else $("done-text").textContent = "We couldn't log you out just now. Please try again.";
     });
   });
 
-  /* ------------------------------------------------------------------
-     Start-up
-     ------------------------------------------------------------------ */
+  /* ---------- Start-up ---------- */
   setTab(root.dataset.initialTab === "register" ? "register" : "login");
-  // setTab() updates the URL; keep it tidy but don't steal focus on load.
 
-  // Only ask the server who we are when a session cookie exists
-  // (avoids a pointless 401 in the console for first-time visitors).
   if (root.dataset.hasSession === "true") {
     fetch(URLS.me, { credentials: "same-origin" })
       .then(function (r) { return r.ok ? r.json() : null; })

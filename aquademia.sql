@@ -38,6 +38,20 @@ CREATE TABLE `adaptive_questions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
+-- Table structure for table `adaptive_practice_answers`
+--
+
+CREATE TABLE `adaptive_practice_answers` (
+  `answer_id` bigint(20) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `source_attempt_id` int(11) NOT NULL,
+  `adaptive_id` int(11) NOT NULL,
+  `selected_answer` varchar(255) NOT NULL,
+  `is_correct` tinyint(1) NOT NULL,
+  `answered_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
 -- Dumping data for table `adaptive_questions`
 --
 
@@ -265,6 +279,7 @@ CREATE TABLE `student_inventory` (
   `student_id` int(11) NOT NULL,
   `item_id` int(11) NOT NULL,
   `is_placed` tinyint(1) NOT NULL DEFAULT 0,
+  `is_unboxed` tinyint(1) NOT NULL DEFAULT 1,
   `position_x` decimal(6,3) DEFAULT NULL,
   `position_y` decimal(6,3) DEFAULT NULL,
   `purchased_at` timestamp NOT NULL DEFAULT current_timestamp()
@@ -311,6 +326,14 @@ INSERT INTO `student_rewards` (`reward_id`, `student_id`, `attempt_id`, `fish_ty
 ALTER TABLE `adaptive_questions`
   ADD PRIMARY KEY (`adaptive_id`),
   ADD KEY `attempt_id` (`attempt_id`);
+
+--
+-- Indexes for table `adaptive_practice_answers`
+--
+ALTER TABLE `adaptive_practice_answers`
+  ADD PRIMARY KEY (`answer_id`),
+  ADD UNIQUE KEY `uq_adaptive_practice_student_question` (`student_id`,`adaptive_id`),
+  ADD KEY `idx_adaptive_practice_source` (`student_id`,`source_attempt_id`,`answered_at`);
 
 --
 -- Indexes for table `learning_notes`
@@ -388,6 +411,12 @@ ALTER TABLE `student_rewards`
 --
 ALTER TABLE `adaptive_questions`
   MODIFY `adaptive_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
+--
+-- AUTO_INCREMENT for table `adaptive_practice_answers`
+--
+ALTER TABLE `adaptive_practice_answers`
+  MODIFY `answer_id` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `learning_notes`

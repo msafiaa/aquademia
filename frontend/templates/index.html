@@ -183,8 +183,8 @@
 {% set cut = 'images/characters/cutouts/' %}
 <div class="dash-container">
   <!-- Top Bar -->
-  <header class="dash-header">
-    <a href="/index" class="dash-brand">
+  <header class="aq-page-header dash-header">
+    <a href="/index" class="aq-header-start dash-brand">
       <svg viewBox="0 0 48 48" width="36" height="36" aria-hidden="true" focusable="false">
         <circle cx="24" cy="24" r="21" fill="#e6fbff" stroke="#0d8aa6" stroke-width="3"/>
         <ellipse cx="17" cy="15" rx="6" ry="3.5" fill="#fff" opacity=".9" transform="rotate(-30 17 15)"/>
@@ -194,8 +194,16 @@
       <span>Aquademia</span>
     </a>
 
-    <div class="dash-user-bar">
-      <div class="pearl-pill" title="Baki Mutiara">
+    <div class="aq-header-brand">
+      <span class="aq-header-brand-icon" aria-hidden="true">🏠</span>
+      <span class="aq-header-brand__text">
+        <strong>Pangkalan Utama</strong>
+        <small>Lautan Pembelajaran Aquademia</small>
+      </span>
+    </div>
+
+    <div class="aq-header-end dash-user-bar">
+      <div class="aq-header-pearl pearl-pill" title="Baki Mutiara">
         <span>🐚</span>
         <span id="user-pearls">...</span>
         <span>Mutiara</span>

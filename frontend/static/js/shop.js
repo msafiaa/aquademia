@@ -26,6 +26,16 @@
   var btnCatalogFavorite = document.getElementById("btn-catalog-favorite");
   var btnCatalogPlace = document.getElementById("btn-catalog-place");
   var btnCatalogBuy = document.getElementById("btn-catalog-buy");
+  var shopDialog = document.getElementById("shop-dialog");
+  var shopDialogItem = document.getElementById("shop-dialog-item");
+  var shopDialogTitle = document.getElementById("shop-dialog-title");
+  var shopDialogCopy = document.getElementById("shop-dialog-copy");
+  var shopDialogPrice = document.getElementById("shop-dialog-price");
+  var shopDialogBalance = document.getElementById("shop-dialog-balance");
+  var shopDialogConfirm = document.getElementById("shop-dialog-confirm");
+  var shopDialogCancel = document.getElementById("shop-dialog-cancel");
+  var shopDialogReturnFocus = null;
+  var shopDialogAction = null;
   var activeCatalogItem = null;
   var selectedCatalogCategory = "Semua";
   var goalItemId = null;
@@ -354,9 +364,9 @@
     catalogPreviewTank.appendChild(ghost);
 
     var movePreview = function (event) {
-      var rect = catalogPreviewTank.getBoundingClientRect();
-      previewCoords.x = Math.max(0.03, Math.min(0.97, (event.clientX - rect.left) / rect.width));
-      previewCoords.y = Math.max(0.2, Math.min(0.9, (event.clientY - rect.top) / rect.height));
+      var coords = getTankCoordinates(catalogPreviewTank, event);
+      previewCoords.x = Math.max(0.03, Math.min(0.97, coords.x));
+      previewCoords.y = Math.max(0.2, Math.min(0.9, coords.y));
       ghost.style.left = (previewCoords.x * 100) + "%";
       ghost.style.top = (previewCoords.y * 100) + "%";
     };
@@ -370,6 +380,16 @@
     };
   }
 
+  function getTankCoordinates(tank, event) {
+    var rect = tank.getBoundingClientRect();
+    var width = tank.clientWidth;
+    var height = tank.clientHeight;
+    return {
+      x: (event.clientX - rect.left - tank.clientLeft) / width,
+      y: (event.clientY - rect.top - tank.clientTop) / height
+    };
+  }
+
   function closeCatalogItem() {
     catalogModal.hidden = true;
     activeCatalogItem = null;
@@ -380,13 +400,32 @@
      ------------------------------------------------------------------ */
   function handlePurchase(item) {
     if (currentPearls < item.price) {
-      alert("Mutiara tidak mencukupi! Anda memerlukan " + item.price + " mutiara tetapi baki anda hanya " + currentPearls + " mutiara. Selesaikan lebih banyak kuiz untuk mengumpul mutiara!");
+      showShopDialog({
+        title: "Mutiara belum cukup!",
+        copy: "Tak apa! Jawab beberapa kuiz lagi untuk kumpul mutiara dan bawa pulang " + item.item_name + ".",
+        emoji: itemEmoji(item),
+        actionLabel: "Jom kuiz!",
+        cancelLabel: "Nanti dulu",
+        price: item.price,
+        balance: currentPearls,
+        action: function () { window.location.assign("/quiz"); }
+      });
       return;
     }
 
-    var ok = confirm("Adakah anda pasti mahu membeli \"" + item.item_name + "\" dengan harga " + item.price + " mutiara?");
-    if (!ok) return;
+    showShopDialog({
+      title: "Bawa pulang hiasan ini?",
+      copy: "Mal akan sediakan parcel comel untuk " + item.item_name + ". Nak beli sekarang?",
+      emoji: itemEmoji(item),
+      actionLabel: "Ya, beli!",
+      cancelLabel: "Nanti dulu",
+      price: item.price,
+      balance: currentPearls,
+      action: function () { submitPurchase(item); }
+    });
+  }
 
+  function submitPurchase(item) {
     fetch("/api/shop/purchase", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -399,25 +438,78 @@
           return result;
         });
       })
-      .then(function (result) {
+      .then(function () {
+        closeShopDialog();
         closeCatalogItem();
-        setShopMessage("Terima kasih! " + item.item_name + " akan mencantikkan akuarium anda.");
+        setShopMessage("Parcel " + item.item_name + " sedang menunggu di akuarium. Buka akuarium untuk unboxing!");
         loadWallet();
         loadInventory();
-        openPlacementModal({
-          inventory_id: result.inventory_id,
-          item_id: item.item_id,
-          item_name: item.item_name,
-          image_path: item.image_path,
-          is_placed: false,
-          position_x: null,
-          position_y: null
-        });
       })
       .catch(function (error) {
-        alert(error.message || "Ralat semasa berhubung dengan kedai lautan. Sila cuba lagi!");
+        closeShopDialog();
+        showShopDialog({
+          title: "Alamak, pembelian belum berjaya",
+          copy: error.message || "Kedai bawah laut tak dapat dihubungi. Cuba lagi sebentar lagi, ya!",
+          emoji: "🫧",
+          actionLabel: "Baik!",
+          action: closeShopDialog
+        });
       });
   }
+
+  function showShopDialog(options) {
+    shopDialogReturnFocus = document.activeElement;
+    shopDialogTitle.textContent = options.title;
+    shopDialogCopy.textContent = options.copy;
+    shopDialogItem.textContent = options.emoji || "🫧";
+    shopDialogPrice.hidden = typeof options.price !== "number";
+    shopDialogBalance.hidden = typeof options.balance !== "number";
+    shopDialogPrice.textContent = typeof options.price === "number"
+      ? "🐚 " + options.price + " mutiara"
+      : "";
+    shopDialogBalance.textContent = typeof options.balance === "number"
+      ? "Baki anda: 🐚 " + options.balance
+      : "";
+    shopDialogCancel.hidden = !options.cancelLabel;
+    shopDialogCancel.textContent = options.cancelLabel || "";
+    shopDialogConfirm.textContent = options.actionLabel || "Baik!";
+    shopDialogConfirm.disabled = false;
+    shopDialogAction = options.action || closeShopDialog;
+    shopDialog.hidden = false;
+    shopDialog.classList.remove("is-opening");
+    shopDialog.offsetHeight;
+    shopDialog.classList.add("is-opening");
+    shopDialogConfirm.focus();
+  }
+
+  function closeShopDialog() {
+    shopDialog.hidden = true;
+    shopDialog.classList.remove("is-opening");
+    shopDialogConfirm.disabled = false;
+    shopDialogAction = null;
+    if (shopDialogReturnFocus && typeof shopDialogReturnFocus.focus === "function") {
+      shopDialogReturnFocus.focus();
+    }
+  }
+
+  shopDialogConfirm.addEventListener("click", function () {
+    var action = shopDialogAction;
+    if (action) {
+      shopDialogConfirm.disabled = true;
+      action();
+    }
+  });
+  shopDialogCancel.addEventListener("click", closeShopDialog);
+  shopDialog.addEventListener("click", function (event) {
+    if (event.target === shopDialog && !shopDialogConfirm.disabled) {
+      closeShopDialog();
+    }
+  });
+  document.addEventListener("keydown", function (event) {
+    if (event.key === "Escape" && !shopDialog.hidden && !shopDialogConfirm.disabled) {
+      closeShopDialog();
+    }
+  });
 
   /* ------------------------------------------------------------------
      Render Inventory
@@ -439,7 +531,9 @@
 
       var statusText = inv.is_placed
         ? '<span style="color: var(--aq-success); font-weight:700;">&check; Di Akuarium</span>'
-        : '<span style="color: var(--aq-muted); font-weight:700;">Dalam Simpanan</span>';
+        : inv.is_unboxed === false
+          ? '<span style="color: var(--aq-ocean); font-weight:700;">📦 Parcel menunggu dibuka</span>'
+          : '<span style="color: var(--aq-muted); font-weight:700;">Dalam Simpanan</span>';
 
       card.innerHTML =
         '<div class="item-img-container shop-inventory-emoji" aria-hidden="true">' +
@@ -450,11 +544,15 @@
         '<div class="item-bottom-bar">' +
         '  ' + statusText +
         '  <button type="button" class="aq-btn aq-btn--primary btn-place" style="min-height:36px; padding:0.35rem 0.9rem; font-size:0.85rem;">' +
-        '    Urus Kedudukan' +
+        '    ' + (inv.is_unboxed === false ? 'Buka Parcel' : 'Urus Kedudukan') +
         '  </button>' +
         '</div>';
 
       card.querySelector(".btn-place").addEventListener("click", function () {
+        if (inv.is_unboxed === false) {
+          window.location.assign("/aquarium");
+          return;
+        }
         openPlacementModal(inv);
       });
 
@@ -484,12 +582,10 @@
   }
 
   miniTankPreview.addEventListener("click", function (e) {
-    var rect = miniTankPreview.getBoundingClientRect();
-    var clickX = (e.clientX - rect.left) / rect.width;
-    var clickY = (e.clientY - rect.top) / rect.height;
+    var coords = getTankCoordinates(miniTankPreview, e);
 
-    selectedCoords.x = Math.max(0.05, Math.min(clickX, 0.95));
-    selectedCoords.y = Math.max(0.2, Math.min(clickY, 0.9)); // inside tank bounds
+    selectedCoords.x = Math.max(0.05, Math.min(coords.x, 0.95));
+    selectedCoords.y = Math.max(0.2, Math.min(coords.y, 0.9));
     updateMarkerPos();
   });
 
@@ -513,11 +609,16 @@
         btnSavePlacement.disabled = false;
         placementModal.classList.remove("active");
         loadInventory();
-        alert("Kedudukan " + activeInventoryItem.item_name + " di akuarium telah berjaya dikemaskini!");
+        setShopMessage("Yeay! Kedudukan " + activeInventoryItem.item_name + " sudah dikemas kini.");
       })
-      .catch(function () {
+      .catch(function (error) {
         btnSavePlacement.disabled = false;
-        alert("Gagal mengemaskini kedudukan. Sila cuba lagi.");
+        showShopDialog({
+          title: "Kedudukan belum disimpan",
+          copy: error.message || "Cuba lagi sebentar lagi, ya!",
+          emoji: "🫧",
+          actionLabel: "Baik!"
+        });
       });
   });
 
@@ -539,11 +640,16 @@
         btnRemovePlacement.disabled = false;
         placementModal.classList.remove("active");
         loadInventory();
-        alert(activeInventoryItem.item_name + " telah disimpan semula ke inventori.");
+        setShopMessage(activeInventoryItem.item_name + " sudah disimpan semula dalam inventori.");
       })
-      .catch(function () {
+      .catch(function (error) {
         btnRemovePlacement.disabled = false;
-        alert("Gagal mengeluarkan hiasan. Sila cuba lagi.");
+        showShopDialog({
+          title: "Hiasan belum dikeluarkan",
+          copy: error.message || "Cuba lagi sebentar lagi, ya!",
+          emoji: "🫧",
+          actionLabel: "Baik!"
+        });
       });
   });
 

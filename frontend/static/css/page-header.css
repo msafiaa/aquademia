@@ -1,0 +1,210 @@
+/* Shared glass header used across the Aquademia pages. */
+.aq-page-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-areas: "start brand end";
+  align-items: center;
+  gap: 1rem;
+  min-height: 72px;
+  padding: 0.55rem 1rem;
+  margin-bottom: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  border-radius: 24px;
+  color: #fff;
+  background: linear-gradient(115deg, rgba(5, 65, 99, 0.82), rgba(7, 126, 158, 0.66));
+  box-shadow: 0 8px 24px rgba(0, 40, 70, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.aq-header-start { grid-area: start; justify-self: start; }
+
+.aq-header-back {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.55rem;
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.aq-header-back:hover { color: #fff; }
+
+.aq-header-back-icon,
+.aq-header-brand-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+  font-size: 1.25rem;
+}
+
+.aq-header-brand {
+  grid-area: brand;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-self: center;
+  gap: 0.65rem;
+  color: #fff;
+}
+
+.aq-page-header .learning-brand { margin: 0; }
+.aq-page-header .aq-header-back-icon,
+.aq-page-header .aq-header-brand-icon {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.aq-header-brand__text,
+.shop-brand__text {
+  display: grid;
+  line-height: 1.15;
+}
+
+.aq-header-brand strong,
+.shop-brand__text strong {
+  color: #fff;
+  font-family: var(--aq-font-display);
+  font-size: 1.15rem;
+  white-space: nowrap;
+}
+
+.aq-header-brand small,
+.aq-header-brand__text > span,
+.shop-brand__text small {
+  margin-top: 0.2rem;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.aq-header-end {
+  grid-area: end;
+  display: flex;
+  align-items: center;
+  justify-self: end;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.aq-page-header .aq-header-pearl {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.3rem 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: 999px;
+  color: #5b4300;
+  background: linear-gradient(135deg, #fff2a3, #ffd86b);
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 40, 70, 0.12);
+}
+
+.aq-page-header .aq-header-pearl strong,
+.aq-page-header .aq-header-pearl #user-pearls {
+  color: inherit;
+}
+
+.aq-page-header .user-greeting {
+  color: #fff;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.aq-page-header .aq-header-start.dash-brand {
+  color: #fff;
+  font-size: 1.2rem;
+}
+
+.page-dashboard .aq-page-header .aq-header-end { gap: 0.65rem; }
+.page-dashboard .aq-page-header .aq-header-end .aq-btn {
+  min-height: 40px;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.88rem;
+  white-space: nowrap;
+}
+
+/* Preserve the world screen's game controls while using the shared ocean-glass look. */
+.page-world .hud-top-bar {
+  border-color: rgba(255, 255, 255, 0.55);
+  border-radius: 24px;
+  color: #fff;
+  background: linear-gradient(115deg, rgba(5, 65, 99, 0.88), rgba(7, 126, 158, 0.74));
+  box-shadow: 0 8px 24px rgba(0, 40, 70, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.page-world .hud-brand,
+.page-world .hud-user__text strong,
+.page-world .hud-user__text small { color: #fff; }
+
+.page-world .hud-divider { background: rgba(255, 255, 255, 0.3); }
+
+.page-world .hud-icon-btn,
+.page-world .hud-settings-btn {
+  border-color: rgba(255, 255, 255, 0.48);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.page-world .hud-icon-btn:hover,
+.page-world .hud-settings-btn:hover {
+  color: #5b4300;
+  background: #ffd86b;
+}
+
+@media (max-width: 760px) {
+  .aq-page-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "start end" "brand brand";
+    gap: 0.55rem 0.75rem;
+    padding: 0.55rem 0.75rem;
+  }
+
+  .aq-header-brand { justify-self: center; }
+  .aq-header-end { gap: 0.5rem; }
+  .aq-page-header .user-greeting { font-size: 0.88rem; }
+
+  .page-dashboard .aq-page-header {
+    grid-template-columns: 1fr;
+    grid-template-areas: "start" "brand" "end";
+  }
+
+  .page-dashboard .aq-header-start,
+  .page-dashboard .aq-header-brand,
+  .page-dashboard .aq-header-end { justify-self: center; }
+
+  .page-dashboard .aq-page-header .aq-header-end {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .page-dashboard .aq-page-header .user-greeting { display: none; }
+}
+
+@media (max-width: 480px) {
+  .aq-page-header { gap: 0.45rem; }
+  .aq-header-back { gap: 0.35rem; font-size: 0.82rem; }
+  .aq-header-back-icon,
+  .aq-header-brand-icon { width: 36px; height: 36px; }
+  .aq-header-brand { gap: 0.45rem; }
+  .aq-header-brand strong,
+  .shop-brand__text strong { font-size: 1rem; }
+  .aq-header-brand small,
+  .aq-header-brand__text > span,
+  .shop-brand__text small { font-size: 0.7rem; }
+  .aq-page-header .aq-header-pearl { min-height: 38px; gap: 0.25rem; padding: 0.25rem 0.55rem; font-size: 0.82rem; }
+  .aq-page-header .user-greeting { font-size: 0.78rem; }
+}

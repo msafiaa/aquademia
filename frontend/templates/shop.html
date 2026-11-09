@@ -10,20 +10,20 @@
 {% block content %}
 <div class="shop-shell">
   <!-- Top Navigation Header -->
-  <header class="shop-nav-header">
-    <a href="/index" class="shop-back-link" aria-label="Kembali ke pangkalan utama">
-      <span class="shop-back-link__icon" aria-hidden="true">&larr;</span>
+  <header class="aq-page-header shop-nav-header">
+    <a href="/index" class="aq-header-start aq-header-back shop-back-link" aria-label="Kembali ke pangkalan utama">
+      <span class="aq-header-back-icon shop-back-link__icon" aria-hidden="true">&larr;</span>
       <span>Pangkalan Utama</span>
     </a>
-    <div class="shop-brand">
-      <span class="shop-brand__icon" aria-hidden="true">🫧</span>
+    <div class="aq-header-brand shop-brand">
+      <span class="aq-header-brand-icon shop-brand__icon" aria-hidden="true">🫧</span>
       <span class="shop-brand__text">
         <strong>Kedai Bawah Laut</strong>
         <small>Hias akuarium impian anda</small>
       </span>
     </div>
-    <div class="shop-nav-user">
-      <div class="shop-pearl-balance" title="Baki mutiara anda">
+    <div class="aq-header-end shop-nav-user">
+      <div class="aq-header-pearl shop-pearl-balance" title="Baki mutiara anda">
         <span aria-hidden="true">🐚</span>
         <strong id="user-pearls">0</strong>
         <span>Mutiara</span>
@@ -86,6 +86,26 @@
       <button type="button" class="aq-btn aq-btn--primary" id="btn-catalog-place" hidden>Letak yang dimiliki</button>
       <button type="button" class="aq-btn aq-btn--coral" id="btn-catalog-buy">Beli</button>
       <button type="button" class="aq-btn aq-btn--ghost" id="btn-catalog-close">Tutup</button>
+    </div>
+  </section>
+</div>
+
+<div class="shop-dialog-overlay" id="shop-dialog" hidden>
+  <section class="shop-dialog-card" role="dialog" aria-modal="true" aria-labelledby="shop-dialog-title" aria-describedby="shop-dialog-copy">
+    <span class="shop-dialog-sparkle shop-dialog-sparkle--one" aria-hidden="true">✦</span>
+    <span class="shop-dialog-sparkle shop-dialog-sparkle--two" aria-hidden="true">✧</span>
+    <div class="shop-dialog-friends">
+      <img src="{{ url_for('static', filename='images/characters/cutouts/mal-happy.png') }}" alt="" class="shop-dialog-mascot">
+      <span class="shop-dialog-item" id="shop-dialog-item" aria-hidden="true">🐚</span>
+    </div>
+    <p class="shop-dialog-eyebrow" id="shop-dialog-eyebrow">MISI KEDAI BAWAH LAUT</p>
+    <h2 id="shop-dialog-title">Beli hiasan ini?</h2>
+    <p id="shop-dialog-copy"></p>
+    <div class="shop-dialog-price" id="shop-dialog-price" hidden></div>
+    <p class="shop-dialog-balance" id="shop-dialog-balance" hidden></p>
+    <div class="shop-dialog-actions">
+      <button type="button" class="aq-btn aq-btn--ghost" id="shop-dialog-cancel">Tak jadi</button>
+      <button type="button" class="aq-btn aq-btn--coral" id="shop-dialog-confirm">Ya, beli!</button>
     </div>
   </section>
 </div>
