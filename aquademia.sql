@@ -265,6 +265,7 @@ CREATE TABLE `student_inventory` (
   `student_id` int(11) NOT NULL,
   `item_id` int(11) NOT NULL,
   `is_placed` tinyint(1) NOT NULL DEFAULT 0,
+  `is_unboxed` tinyint(1) NOT NULL DEFAULT 1,
   `position_x` decimal(6,3) DEFAULT NULL,
   `position_y` decimal(6,3) DEFAULT NULL,
   `purchased_at` timestamp NOT NULL DEFAULT current_timestamp()

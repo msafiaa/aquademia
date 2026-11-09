@@ -11,7 +11,8 @@ from services.shop_service import (
 
 from services.decoration_service import (
     DecorationError,
-    update_decoration_placement
+    update_decoration_placement,
+    unbox_decoration
 )
 
 
@@ -108,5 +109,28 @@ def shop_place():
         )
         return jsonify(result)
 
+    except DecorationError as error:
+        return jsonify({"error": str(error)}), 400
+
+
+@shop_bp.route("/api/shop/unbox", methods=["POST"])
+def shop_unbox():
+    student_id = current_student_id()
+
+    if not student_id:
+        return jsonify({"error": "Not logged in."}), 401
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify({"error": "Invalid JSON body."}), 400
+
+    inventory_id = data.get("inventory_id")
+
+    if type(inventory_id) is not int or inventory_id <= 0:
+        return jsonify({"error": "Invalid inventory_id."}), 400
+
+    try:
+        return jsonify(unbox_decoration(student_id, inventory_id))
     except DecorationError as error:
         return jsonify({"error": str(error)}), 400

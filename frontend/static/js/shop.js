@@ -399,20 +399,11 @@
           return result;
         });
       })
-      .then(function (result) {
+      .then(function () {
         closeCatalogItem();
-        setShopMessage("Terima kasih! " + item.item_name + " akan mencantikkan akuarium anda.");
+        setShopMessage("Parcel " + item.item_name + " sedang menunggu di akuarium. Buka akuarium untuk unboxing!");
         loadWallet();
         loadInventory();
-        openPlacementModal({
-          inventory_id: result.inventory_id,
-          item_id: item.item_id,
-          item_name: item.item_name,
-          image_path: item.image_path,
-          is_placed: false,
-          position_x: null,
-          position_y: null
-        });
       })
       .catch(function (error) {
         alert(error.message || "Ralat semasa berhubung dengan kedai lautan. Sila cuba lagi!");
@@ -439,7 +430,9 @@
 
       var statusText = inv.is_placed
         ? '<span style="color: var(--aq-success); font-weight:700;">&check; Di Akuarium</span>'
-        : '<span style="color: var(--aq-muted); font-weight:700;">Dalam Simpanan</span>';
+        : inv.is_unboxed === false
+          ? '<span style="color: var(--aq-ocean); font-weight:700;">📦 Parcel menunggu dibuka</span>'
+          : '<span style="color: var(--aq-muted); font-weight:700;">Dalam Simpanan</span>';
 
       card.innerHTML =
         '<div class="item-img-container shop-inventory-emoji" aria-hidden="true">' +
@@ -450,11 +443,15 @@
         '<div class="item-bottom-bar">' +
         '  ' + statusText +
         '  <button type="button" class="aq-btn aq-btn--primary btn-place" style="min-height:36px; padding:0.35rem 0.9rem; font-size:0.85rem;">' +
-        '    Urus Kedudukan' +
+        '    ' + (inv.is_unboxed === false ? 'Buka Parcel' : 'Urus Kedudukan') +
         '  </button>' +
         '</div>';
 
       card.querySelector(".btn-place").addEventListener("click", function () {
+        if (inv.is_unboxed === false) {
+          window.location.assign("/aquarium");
+          return;
+        }
         openPlacementModal(inv);
       });
 

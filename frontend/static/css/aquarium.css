@@ -219,3 +219,863 @@
   font-size: 0.85rem;
   color: var(--aq-muted);
 }
+
+/* Page layout */
+.aquarium-shell {
+  max-width: 1160px;
+  padding: max(1.25rem, env(safe-area-inset-top)) 1.5rem max(3rem, env(safe-area-inset-bottom));
+}
+
+.aquarium-nav-header {
+  gap: 1rem;
+  min-height: 72px;
+  padding: 0.75rem 1.25rem;
+  background: rgba(255, 250, 245, 0.96);
+}
+
+.aquarium-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: var(--aq-ocean);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.aquarium-back-link > span:first-child {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--aq-foam);
+  font-size: 1.2rem;
+}
+
+.aquarium-pearl-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 42px;
+  padding: 0.4rem 0.9rem;
+  border: 1px solid rgba(11, 111, 164, 0.14);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--aq-ocean-deep);
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 3px 10px rgba(6, 58, 90, 0.08);
+}
+
+.aquarium-pearl-pill #user-pearls {
+  color: var(--aq-ocean);
+}
+
+.aquarium-intro {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin: 2rem 0 1.35rem;
+  color: #fff;
+}
+
+.aquarium-eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--aq-teal);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+}
+
+.aquarium-intro .aquarium-eyebrow,
+.tank-heading .aquarium-eyebrow {
+  color: #d7faff;
+}
+
+.aquarium-intro h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  text-shadow: 0 3px 12px rgba(6, 58, 90, 0.24);
+}
+
+.aquarium-intro-copy {
+  margin: 0.55rem 0 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.05rem;
+}
+
+.aquarium-shop-link,
+.collection-quiz-link {
+  flex: 0 0 auto;
+  min-height: 48px;
+  padding: 0.65rem 1.2rem;
+  font-size: 1rem;
+  text-decoration: none;
+}
+
+.aquarium-stats-ribbon {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-bottom: 2rem;
+}
+
+.aquarium-stat-card {
+  min-height: 96px;
+  padding: 1.05rem 1.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  background: rgba(255, 250, 245, 0.96);
+  box-shadow: 0 8px 20px rgba(6, 58, 90, 0.12);
+}
+
+.aquarium-stat-card--fish .stat-pill-icon { color: #e56c83; }
+.aquarium-stat-card--pearls .stat-pill-icon { color: #45a7bf; }
+.aquarium-stat-card--decor .stat-pill-icon { color: #39a878; }
+
+.tank-controls-bar {
+  align-items: end;
+  margin-bottom: 0.9rem;
+}
+
+.tank-heading h2 {
+  color: #fff;
+  font-size: clamp(1.45rem, 3vw, 2rem);
+  text-shadow: 0 2px 8px rgba(6, 58, 90, 0.35);
+}
+
+.tank-fish-count {
+  margin: 0.25rem 0 0;
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.view-tabs-group {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem;
+  max-width: 100%;
+  padding: 0.35rem;
+  border: 1px solid rgba(255, 255, 255, 0.48);
+  background: rgba(4, 55, 80, 0.5);
+  box-shadow: 0 6px 18px rgba(4, 45, 70, 0.16);
+  backdrop-filter: blur(8px);
+}
+
+.view-btn {
+  min-height: 42px;
+  padding: 0.5rem 0.85rem;
+  color: #e7fbff;
+  font-family: var(--aq-font);
+  font-size: 0.9rem;
+}
+
+.view-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.view-btn.active {
+  background: #fff;
+  color: var(--aq-ocean);
+  box-shadow: 0 3px 10px rgba(3, 43, 62, 0.22);
+}
+
+.view-btn--monthly {
+  border-left: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+.aquarium-tank-container {
+  isolation: isolate;
+  height: clamp(360px, 48vw, 520px);
+  margin-bottom: 2rem;
+  border: 6px solid rgba(255, 255, 255, 0.82);
+  border-radius: 30px;
+  box-shadow: 0 18px 42px rgba(5, 48, 73, 0.3), inset 0 0 55px rgba(7, 72, 108, 0.35);
+  background:
+    radial-gradient(ellipse at 50% 12%, rgba(205, 250, 255, 0.52), transparent 40%),
+    linear-gradient(180deg, #51c7d7 0%, #1599b5 39%, #0c6389 78%, #07445e 100%);
+}
+
+.aquarium-tank-container::before {
+  position: absolute;
+  z-index: 1;
+  inset: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 23px;
+  content: "";
+  pointer-events: none;
+}
+
+.tank-light {
+  position: absolute;
+  z-index: 0;
+  top: -30%;
+  width: 27%;
+  height: 85%;
+  background: linear-gradient(180deg, rgba(255,255,255,.2), transparent);
+  filter: blur(12px);
+  pointer-events: none;
+  transform: rotate(20deg);
+}
+
+.tank-light--one { left: 18%; }
+.tank-light--two { left: 54%; opacity: 0.55; transform: rotate(-17deg); }
+
+.tank-watermark {
+  position: absolute;
+  z-index: 0;
+  top: 24px;
+  right: 28px;
+  color: rgba(255, 255, 255, 0.32);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.24em;
+  pointer-events: none;
+}
+
+.aquarium-sandbed {
+  z-index: 3;
+  height: 58px;
+  border-top-width: 4px;
+  border-radius: 50% 50% 0 0 / 18% 18% 0 0;
+  background:
+    radial-gradient(ellipse at 18% 28%, rgba(255,255,255,.4) 0 2px, transparent 3px),
+    radial-gradient(ellipse at 70% 48%, rgba(255,255,255,.32) 0 2px, transparent 3px),
+    linear-gradient(180deg, #f3d89b 0%, #d2ad69 100%);
+  background-size: 44px 26px, 61px 31px, auto;
+}
+
+.tank-swimming-fish {
+  z-index: 4;
+  width: clamp(68px, 8vw, 104px);
+  height: auto;
+  max-height: 94px;
+  object-fit: contain;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  filter: drop-shadow(0 5px 5px rgba(0, 45, 68, 0.2));
+}
+
+.tank-placed-decoration {
+  z-index: 5;
+  font-size: clamp(2.4rem, 5vw, 3.6rem);
+}
+
+.empty-tank-message {
+  position: absolute;
+  z-index: 6;
+  top: 48%;
+  left: 50%;
+  width: min(390px, calc(100% - 2rem));
+  padding: 1rem 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 24px;
+  background: rgba(4, 55, 80, 0.36);
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 2px 5px rgba(0, 35, 54, 0.4);
+  transform: translate(-50%, -50%);
+  backdrop-filter: blur(7px);
+}
+
+.empty-tank-mascot {
+  height: 92px;
+  margin-bottom: 0.35rem;
+  filter: drop-shadow(0 5px 8px rgba(0, 0, 0, 0.26));
+}
+
+.empty-tank-message h3 {
+  font-size: 1.2rem;
+}
+
+.empty-tank-message p {
+  margin: 0.4rem 0 0;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.92rem;
+}
+
+.fish-collection-card {
+  padding: clamp(1.25rem, 3vw, 2rem);
+}
+
+.collection-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+
+.collection-heading h2 {
+  color: var(--aq-ocean);
+  font-size: 1.55rem;
+}
+
+.collection-description {
+  margin: 0.35rem 0 0;
+  color: var(--aq-muted);
+  font-size: 0.95rem;
+}
+
+.fish-item-card {
+  overflow: hidden;
+  border: 1px solid #d5edf1;
+  border-radius: 20px;
+  box-shadow: 0 4px 14px rgba(6, 58, 90, 0.07);
+}
+
+.fish-thumb-img {
+  height: 130px;
+  padding: 0.35rem;
+  object-fit: contain;
+  object-position: center;
+  background: radial-gradient(ellipse, rgba(91, 207, 220, 0.15), transparent 70%);
+}
+
+.fish-item-name {
+  font-size: 1.05rem;
+}
+
+@media (max-width: 760px) {
+  .aquarium-shell { padding-right: 1rem; padding-left: 1rem; }
+  .aquarium-intro { align-items: start; }
+  .tank-controls-bar { align-items: start; }
+  .view-tabs-group { justify-content: flex-start; border-radius: 20px; }
+  .view-btn { flex: 1 1 auto; }
+  .view-btn--monthly { border-left: 0; }
+}
+
+@media (max-width: 560px) {
+  .aquarium-nav-header { flex-wrap: wrap; justify-content: space-between; }
+  .user-greeting { flex-basis: 100%; text-align: right; }
+  .aquarium-intro { flex-direction: column; gap: 1rem; margin-top: 1.5rem; }
+  .aquarium-shop-link { width: 100%; }
+  .aquarium-stats-ribbon { grid-template-columns: 1fr; gap: 0.65rem; }
+  .aquarium-stat-card { min-height: 76px; padding: 0.75rem 1rem; }
+  .stat-pill-icon { font-size: 1.8rem; }
+  .view-tabs-group { width: 100%; }
+  .view-btn { min-width: 40%; }
+  .aquarium-tank-container { height: 390px; border-width: 4px; border-radius: 23px; }
+  .collection-heading { align-items: stretch; flex-direction: column; }
+  .collection-quiz-link { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tank-swimming-fish { animation: none; }
+}
+
+/* A brighter, storybook-style expedition for young explorers */
+.aquarium-intro {
+  position: relative;
+  min-height: 220px;
+  align-items: center;
+  overflow: hidden;
+  padding: 1.6rem 2rem;
+  border: 3px solid rgba(255, 255, 255, 0.84);
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 8% 12%, rgba(255, 216, 107, 0.42) 0 42px, transparent 43px),
+    radial-gradient(circle at 80% 100%, rgba(25, 196, 212, 0.3), transparent 34%),
+    linear-gradient(120deg, #087b9f, #14a8bb 63%, #63c8cb);
+  box-shadow: 0 14px 28px rgba(6, 58, 90, 0.2), inset 0 2px 0 rgba(255, 255, 255, 0.24);
+}
+
+.aquarium-intro::after {
+  position: absolute;
+  right: 22%;
+  bottom: -62px;
+  width: 150px;
+  height: 150px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.aquarium-intro-copy-block {
+  position: relative;
+  z-index: 1;
+  max-width: 650px;
+}
+
+.aquarium-intro .aquarium-eyebrow {
+  color: #fff3bb;
+  font-size: 0.8rem;
+}
+
+.aquarium-intro h1 {
+  font-size: clamp(2.1rem, 4.5vw, 3.35rem);
+  text-shadow: 0 3px 0 rgba(4, 87, 118, 0.34);
+}
+
+.aquarium-intro-copy {
+  max-width: 540px;
+  margin-top: 0.45rem;
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  font-weight: 700;
+}
+
+.aquarium-hero-friend {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex: 0 0 auto;
+  align-self: end;
+}
+
+.aquarium-hero-mascot {
+  display: block;
+  width: auto;
+  height: 152px;
+  filter: drop-shadow(0 9px 5px rgba(4, 55, 80, 0.24));
+}
+
+.aquarium-speech-bubble {
+  position: relative;
+  padding: 0.65rem 0.9rem;
+  border: 2px solid #fff;
+  border-radius: 18px 18px 5px 18px;
+  background: #fff8df;
+  color: #734f12;
+  font-size: 0.92rem;
+  font-weight: 900;
+  line-height: 1.25;
+  text-align: center;
+  transform: translateY(-30px) rotate(-3deg);
+}
+
+.aquarium-stats-ribbon {
+  gap: 1rem;
+}
+
+.aquarium-stat-card {
+  position: relative;
+  overflow: hidden;
+  min-height: 104px;
+  border-width: 2px;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.aquarium-stat-card:hover {
+  transform: translateY(-3px) rotate(-0.5deg);
+  box-shadow: 0 12px 24px rgba(6, 58, 90, 0.16);
+}
+
+.aquarium-stat-card .stat-pill-icon {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 20px;
+  background: #e6fbff;
+}
+
+.aquarium-stat-card--fish .stat-pill-icon { background: #fff0e9; }
+.aquarium-stat-card--pearls .stat-pill-icon { background: #e7f8ff; }
+.aquarium-stat-card--decor .stat-pill-icon { background: #e9f9ee; }
+
+.stat-pill-val {
+  font-size: 1.9rem;
+}
+
+.stat-pill-lbl {
+  font-size: 0.92rem;
+}
+
+.explorer-mission {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  margin: 0 0 2rem;
+  padding: 1rem 1.25rem;
+  border: 2px solid rgba(255, 255, 255, 0.84);
+  border-radius: 24px;
+  background: linear-gradient(105deg, #fff5cd, #fffaf0 55%, #f1fffa);
+  box-shadow: 0 9px 22px rgba(6, 58, 90, 0.12);
+}
+
+.mission-medal {
+  display: grid;
+  width: 64px;
+  height: 64px;
+  place-items: center;
+  border: 3px solid #fff;
+  border-radius: 22px;
+  background: #ffe9a7;
+  box-shadow: inset 0 -4px 0 rgba(187, 129, 25, 0.12);
+  font-size: 2rem;
+  transform: rotate(-5deg);
+}
+
+.mission-copy .aquarium-eyebrow {
+  margin-bottom: 0.1rem;
+  color: #9c6715;
+}
+
+.mission-copy h2 {
+  color: #654516;
+  font-size: 1.15rem;
+}
+
+.mission-copy > p:not(.aquarium-eyebrow) {
+  margin: 0.15rem 0 0.45rem;
+  color: #6b5b40;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.mission-progress-track {
+  height: 12px;
+  overflow: hidden;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #e9dfc3;
+  box-shadow: inset 0 1px 3px rgba(75, 58, 27, 0.13);
+}
+
+.mission-progress-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ffae46, #ff6e75);
+  transition: width 450ms ease;
+}
+
+.mission-badges {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.mission-badge {
+  display: grid;
+  width: 43px;
+  height: 43px;
+  place-items: center;
+  border: 2px dashed #c9c1ad;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  filter: grayscale(1);
+  opacity: 0.48;
+  transform: scale(0.94);
+  transition: transform 180ms ease, opacity 180ms ease, filter 180ms ease;
+}
+
+.mission-badge.is-earned {
+  border: 2px solid #fff;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(85, 65, 24, 0.16);
+  filter: none;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.tank-heading .aquarium-eyebrow {
+  font-size: 0.76rem;
+}
+
+.tank-heading h2 {
+  text-shadow: 0 2px 0 rgba(4, 55, 80, 0.28), 0 4px 9px rgba(4, 55, 80, 0.22);
+}
+
+.view-tabs-group {
+  border: 2px solid rgba(255, 255, 255, 0.62);
+  background: rgba(5, 68, 91, 0.74);
+}
+
+.view-btn {
+  min-height: 46px;
+  padding: 0.55rem 0.9rem;
+  border: 2px solid transparent;
+  font-size: 0.95rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.view-btn.active {
+  border-color: #ffda7c;
+  background: #fff8dd;
+  color: #075f83;
+  box-shadow: 0 3px 0 #e7b64f, 0 5px 10px rgba(3, 43, 62, 0.2);
+}
+
+.view-btn:focus-visible {
+  outline-color: #ffdf71;
+}
+
+.tank-bubble-field {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.tank-bubble-field span {
+  position: absolute;
+  bottom: -35px;
+  width: 17px;
+  height: 17px;
+  border: 2px solid rgba(255, 255, 255, 0.54);
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.7), rgba(255,255,255,.12) 65%);
+  animation: tank-bubble-rise 8s linear infinite;
+}
+
+.tank-bubble-field span:nth-child(1) { left: 12%; animation-delay: -1s; }
+.tank-bubble-field span:nth-child(2) { left: 29%; width: 10px; height: 10px; animation-delay: -5s; }
+.tank-bubble-field span:nth-child(3) { left: 51%; width: 13px; height: 13px; animation-delay: -3s; }
+.tank-bubble-field span:nth-child(4) { left: 68%; animation-delay: -7s; }
+.tank-bubble-field span:nth-child(5) { left: 82%; width: 11px; height: 11px; animation-delay: -2s; }
+.tank-bubble-field span:nth-child(6) { left: 92%; width: 8px; height: 8px; animation-delay: -6s; }
+
+@keyframes tank-bubble-rise {
+  0% { opacity: 0; transform: translate3d(0, 0, 0); }
+  15% { opacity: 0.75; }
+  85% { opacity: 0.55; }
+  100% { opacity: 0; transform: translate3d(12px, -520px, 0); }
+}
+
+.empty-tank-message {
+  border: 2px solid rgba(255, 255, 255, 0.72);
+  background: rgba(4, 69, 92, 0.76);
+}
+
+.fish-collection-card {
+  border-color: #fff;
+}
+
+.collection-heading h2 {
+  font-size: 1.75rem;
+}
+
+.fish-item-card {
+  position: relative;
+  border-width: 2px;
+  border-color: #d3edf2;
+  background: linear-gradient(180deg, #fff 0%, #f6fdff 100%);
+}
+
+.fish-item-card:nth-child(3n + 2) {
+  border-color: #f3d9a1;
+  background: linear-gradient(180deg, #fff 0%, #fffaf0 100%);
+}
+
+.fish-item-card:nth-child(3n) {
+  border-color: #d8e8d2;
+  background: linear-gradient(180deg, #fff 0%, #f6fff4 100%);
+}
+
+.fish-item-meta {
+  font-weight: 700;
+}
+
+@media (max-width: 760px) {
+  .aquarium-intro {
+    min-height: 190px;
+    padding: 1.35rem;
+  }
+
+  .aquarium-hero-mascot { height: 126px; }
+  .aquarium-speech-bubble { font-size: 0.82rem; }
+  .view-btn { min-width: 0; }
+}
+
+@media (max-width: 560px) {
+  .aquarium-intro {
+    min-height: 0;
+    align-items: start;
+    padding: 1.25rem 1.1rem 0.5rem;
+  }
+
+  .aquarium-intro-copy-block { padding-bottom: 0.8rem; }
+  .aquarium-intro h1 { max-width: 260px; font-size: 2rem; }
+  .aquarium-intro-copy { max-width: 270px; font-size: 0.96rem; }
+  .aquarium-hero-friend { position: absolute; right: 0.45rem; bottom: 0; }
+  .aquarium-hero-mascot { height: 100px; }
+  .aquarium-speech-bubble { padding: 0.45rem 0.55rem; font-size: 0.72rem; }
+  .explorer-mission {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.7rem;
+    padding: 0.85rem;
+  }
+  .mission-medal { width: 48px; height: 48px; border-radius: 16px; font-size: 1.55rem; }
+  .mission-copy h2 { font-size: 1.05rem; }
+  .mission-copy > p:not(.aquarium-eyebrow) { font-size: 0.82rem; }
+  .mission-badges { grid-column: 2; justify-content: flex-start; }
+  .mission-badge { width: 36px; height: 36px; font-size: 0.9rem; }
+  .view-btn { flex: 1 1 42%; min-height: 44px; padding: 0.45rem; font-size: 0.84rem; }
+  .view-btn--monthly { flex: 1 1 42%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tank-bubble-field span { animation: none; }
+  .mission-progress-fill,
+  .mission-badge,
+  .aquarium-stat-card { transition: none; }
+}
+
+.parcel-modal {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 1.25rem;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(116, 229, 237, 0.3), transparent 38%),
+    rgba(4, 38, 64, 0.78);
+  backdrop-filter: blur(7px);
+}
+
+.parcel-arrival-scene {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 35%;
+  overflow: hidden;
+  border-bottom: 5px solid rgba(255, 255, 255, 0.45);
+  background: linear-gradient(180deg, #8ee3e6 0%, #c9f3e7 84%, #e8dfb0 85%);
+}
+
+.parcel-crane {
+  position: absolute;
+  top: 10px;
+  left: calc(50% - 155px);
+  color: #825221;
+  font-size: clamp(4rem, 11vw, 7rem);
+  filter: drop-shadow(0 5px 0 rgba(79, 63, 28, 0.14));
+}
+
+.parcel-crane-cable {
+  position: absolute;
+  top: 22px;
+  left: calc(50% + 45px);
+  width: 3px;
+  height: calc(100% - 16px);
+  background: repeating-linear-gradient(to bottom, #715735 0 8px, transparent 8px 13px);
+}
+
+.parcel-sea-line {
+  position: absolute;
+  right: -5%;
+  bottom: -34px;
+  left: -5%;
+  height: 70px;
+  border-radius: 50% 50% 0 0;
+  background: #168bac;
+  box-shadow: inset 0 8px 0 rgba(255, 255, 255, 0.28);
+}
+
+.parcel-card {
+  position: relative;
+  z-index: 1;
+  width: min(440px, 100%);
+  margin-top: 5rem;
+  padding: 1.5rem 1.5rem 1.35rem;
+  border: 4px solid #fff;
+  border-radius: 30px;
+  background: linear-gradient(180deg, #fffdf6, #f1fbff);
+  box-shadow: 0 18px 48px rgba(0, 27, 44, 0.35);
+  text-align: center;
+}
+
+.parcel-sticker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  background: #fff0c1;
+  color: #78501b;
+  font-size: 0.73rem;
+  font-weight: 900;
+  letter-spacing: 0.09em;
+}
+
+.parcel-box {
+  display: grid;
+  width: 122px;
+  height: 122px;
+  place-items: center;
+  margin: 0.35rem auto 0.2rem;
+  border-radius: 36px;
+  background: radial-gradient(circle, #fff0c6 0%, #ffe0a0 68%, #ffd37f 100%);
+  font-size: 5rem;
+  filter: drop-shadow(0 9px 5px rgba(71, 75, 67, 0.18));
+  transform-origin: 50% 100%;
+}
+
+.parcel-modal.is-arriving .parcel-box {
+  animation: parcel-drop 850ms cubic-bezier(.2, .75, .3, 1.25) both;
+}
+
+.parcel-box--opened {
+  animation: parcel-pop 420ms cubic-bezier(.2, .8, .3, 1.35) both;
+  background: radial-gradient(circle, #fff7c8, #c7f5e1 72%);
+}
+
+.parcel-card .aquarium-eyebrow {
+  margin: 0.5rem 0 0.25rem;
+  color: var(--aq-teal);
+}
+
+.parcel-card h2 {
+  color: var(--aq-ocean-deep);
+  font-size: 1.65rem;
+}
+
+.parcel-card #parcel-copy {
+  margin: 0.55rem 0 0;
+  color: var(--aq-muted);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.parcel-status {
+  min-height: 1.4em;
+  margin: 0.5rem 0 0;
+  color: var(--aq-success);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.parcel-action {
+  width: 100%;
+  margin-top: 0.55rem;
+  font-size: 1.05rem;
+}
+
+.parcel-action[disabled] {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+@keyframes parcel-drop {
+  0% { opacity: 0; transform: translateY(-42vh) rotate(-12deg) scale(.7); }
+  72% { opacity: 1; transform: translateY(12px) rotate(5deg) scale(1.05); }
+  86% { transform: translateY(-7px) rotate(-3deg) scale(.98); }
+  100% { transform: translateY(0) rotate(0) scale(1); }
+}
+
+@keyframes parcel-pop {
+  0% { transform: scale(.65) rotate(-10deg); }
+  72% { transform: scale(1.15) rotate(5deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+
+@media (max-width: 560px) {
+  .parcel-arrival-scene { height: 30%; }
+  .parcel-card { margin-top: 3rem; padding: 1.2rem 1rem 1rem; }
+  .parcel-box { width: 104px; height: 104px; font-size: 4.3rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .parcel-modal.is-arriving .parcel-box,
+  .parcel-box--opened { animation: none; }
+}
