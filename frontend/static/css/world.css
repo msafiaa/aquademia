@@ -197,8 +197,12 @@ body.page-world {
   position: absolute;
   top: calc(max(0.7rem, env(safe-area-inset-top)) + 3.7rem);
   left: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   pointer-events: auto;
 }
+.hud-aquaplan-btn { text-decoration: none; }
 .controls-panel {
   position: absolute;
   top: calc(100% + 0.5rem);

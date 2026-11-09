@@ -1008,7 +1008,7 @@
   .learning-hero-copy > p:not(.learning-eyebrow) { max-width: 33ch; font-size: 0.9rem; }
   .learning-hero-friend { min-width: 90px; margin-right: -0.5rem; }
   .learning-hero-mascot { width: 120px; max-height: 150px; }
-  .learning-speech-bubble { top: 4px; right: -2px; padding: 0.45rem 0.55rem; font-size: 0.68rem; }
+  .learning-speech-bubble { top: 4px; right: auto; left: -11.5rem; padding: 0.45rem 0.55rem; font-size: 0.68rem; }
   .learning-hero-tags { gap: 0.3rem; }
   .learning-hero-tags span { padding: 0.35rem 0.5rem; font-size: 0.68rem; }
   .learning-tabs { gap: 0.45rem; }
