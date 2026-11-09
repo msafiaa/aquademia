@@ -106,6 +106,7 @@
     loadStudentInfo();
     setupLogout();
     setupHelp();
+    setupSettings();
 
     // Check Opening Cinematic
     checkCinematicIntro();
@@ -420,6 +421,149 @@
     noticeTimer = setTimeout(function () { bannerWrap.classList.remove("notice"); }, 2500);
   }
 
+  /* ------------------------------------------------------------------
+     Settings dialog: change username / year, change password, log out
+     ------------------------------------------------------------------ */
+  var ERROR_MS = {
+    "Username already exists.": "Nama pengguna itu sudah digunakan. Cuba yang lain.",
+    "Current password is incorrect.": "Kata laluan semasa tidak betul.",
+    "Passwords do not match.": "Dua kata laluan baharu tidak sama.",
+    "Password must be between 12 and 128 characters.": "Kata laluan baharu mesti 12 hingga 128 aksara.",
+    "Username must be 3-30 characters and contain only letters, numbers or underscores.":
+      "Nama pengguna mesti 3-30 aksara (huruf, nombor atau garis bawah sahaja).",
+    "Year level must be 4, 5 or 6.": "Tahun mesti 4, 5 atau 6."
+  };
+
+  function postJSON(url, body) {
+    return fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "same-origin",
+      body: JSON.stringify(body)
+    }).then(function (res) {
+      return res.json().catch(function () { return {}; }).then(function (data) {
+        return { ok: res.ok, status: res.status, data: data };
+      });
+    });
+  }
+
+  function setMsg(el, text, kind) {
+    el.textContent = text || "";
+    el.className = "settings-msg" + (kind ? " " + kind : "");
+  }
+
+  function setupSettings() {
+    var modal = document.getElementById("settings-modal");
+    var btnOpen = document.getElementById("btn-settings");
+    if (!modal || !btnOpen) return;
+
+    var btnClose = document.getElementById("btn-settings-close");
+    var backdrop = document.getElementById("settings-backdrop");
+    var formProfile = document.getElementById("form-profile");
+    var formPassword = document.getElementById("form-password");
+    var fUser = document.getElementById("set-username");
+    var msgProfile = document.getElementById("msg-profile");
+    var msgPassword = document.getElementById("msg-password");
+    var pwCurrent = document.getElementById("set-pw-current");
+    var pwNew = document.getElementById("set-pw-new");
+    var pwConfirm = document.getElementById("set-pw-confirm");
+
+    function selectedYear() {
+      var r = formProfile.querySelector('input[name="set-year"]:checked');
+      return r ? parseInt(r.value, 10) : null;
+    }
+
+    function openModal() {
+      var st = currentStudent || {};
+      fUser.value = st.username || "";
+      Array.prototype.forEach.call(formProfile.querySelectorAll('input[name="set-year"]'), function (r) {
+        r.checked = parseInt(r.value, 10) === st.year_level;
+      });
+      pwCurrent.value = pwNew.value = pwConfirm.value = "";
+      setMsg(msgProfile, "");
+      setMsg(msgPassword, "");
+      fUser.removeAttribute("aria-invalid");
+      modal.hidden = false;
+      if (input && typeof input.clear === "function") input.clear(); // no stuck movement keys
+      setTimeout(function () { fUser.focus(); }, 30);
+    }
+
+    function closeModal() {
+      modal.hidden = true;
+      btnOpen.focus();
+    }
+
+    btnOpen.addEventListener("click", openModal);
+    btnClose.addEventListener("click", closeModal);
+    backdrop.addEventListener("click", closeModal);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && !modal.hidden) closeModal();
+    });
+
+    function handleResult(res, msgEl, onOk) {
+      if (res.status === 401) { window.location.assign("/login"); return; }
+      if (res.ok) { onOk(res.data); return; }
+      var raw = (res.data && res.data.error) || "";
+      setMsg(msgEl, ERROR_MS[raw] || raw || "Sesuatu tidak kena. Cuba lagi.", "err");
+    }
+
+    formProfile.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var username = fUser.value.trim();
+      var year = selectedYear();
+      var st = currentStudent || {};
+
+      if (!/^[A-Za-z0-9_]{3,30}$/.test(username)) {
+        fUser.setAttribute("aria-invalid", "true");
+        setMsg(msgProfile, ERROR_MS["Username must be 3-30 characters and contain only letters, numbers or underscores."], "err");
+        return;
+      }
+      fUser.removeAttribute("aria-invalid");
+      if (year === null) { setMsg(msgProfile, "Sila pilih tahun anda.", "err"); return; }
+      if (username === st.username && year === st.year_level) {
+        setMsg(msgProfile, "Tiada perubahan untuk disimpan.", "");
+        return;
+      }
+
+      var body = {};
+      if (username !== st.username) body.username = username;
+      if (year !== st.year_level) body.year_level = year;
+
+      setMsg(msgProfile, "Menyimpan...", "");
+      postJSON("/api/auth/update-profile", body).then(function (res) {
+        handleResult(res, msgProfile, function (data) {
+          applyStudent(data.student);
+          setMsg(msgProfile, "Profil berjaya dikemas kini! ✅", "ok");
+        });
+      }, function () { setMsg(msgProfile, "Tiada sambungan. Cuba lagi.", "err"); });
+    });
+
+    formPassword.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (!pwCurrent.value) { setMsg(msgPassword, "Sila taip kata laluan semasa.", "err"); return; }
+      if (pwNew.value.length < 12 || pwNew.value.length > 128) {
+        setMsg(msgPassword, ERROR_MS["Password must be between 12 and 128 characters."], "err");
+        return;
+      }
+      if (pwNew.value !== pwConfirm.value) {
+        setMsg(msgPassword, ERROR_MS["Passwords do not match."], "err");
+        return;
+      }
+
+      setMsg(msgPassword, "Menyimpan...", "");
+      postJSON("/api/auth/change-password", {
+        current_password: pwCurrent.value,
+        new_password: pwNew.value,
+        confirm_password: pwConfirm.value
+      }).then(function (res) {
+        handleResult(res, msgPassword, function () {
+          pwCurrent.value = pwNew.value = pwConfirm.value = "";
+          setMsg(msgPassword, "Kata laluan berjaya ditukar! ✅", "ok");
+        });
+      }, function () { setMsg(msgPassword, "Tiada sambungan. Cuba lagi.", "err"); });
+    });
+  }
+
   function setupLogout() {
     var btn = document.getElementById("btn-logout");
     if (!btn) return;
@@ -436,17 +580,24 @@
     });
   }
 
+  var currentStudent = null;
+
+  // Show the student's name / year / avatar initial in the top bar
+  function applyStudent(st) {
+    currentStudent = st;
+    var nameEl = document.getElementById("user-display");
+    var yearEl = document.getElementById("user-year");
+    var avatarEl = document.getElementById("user-avatar");
+    if (nameEl) nameEl.textContent = "Hai, " + st.username + "!";
+    if (yearEl) yearEl.textContent = st.year_level ? "Tahun " + st.year_level : "";
+    if (avatarEl) avatarEl.textContent = String(st.username || "?").charAt(0);
+  }
+
   function loadStudentInfo() {
     fetch("/api/auth/me", { credentials: "same-origin" })
       .then(function (res) { return res.json(); })
       .then(function (data) {
-        if (data && data.student) {
-          document.getElementById("user-display").textContent = "Hai, " + data.student.username + "!";
-          var yearEl = document.getElementById("user-year");
-          if (yearEl && data.student.year_level) yearEl.textContent = "Tahun " + data.student.year_level;
-          var avatarEl = document.getElementById("user-avatar");
-          if (avatarEl) avatarEl.textContent = String(data.student.username || "?").charAt(0);
-        }
+        if (data && data.student) applyStudent(data.student);
       });
 
     fetch("/api/shop/wallet", { credentials: "same-origin" })

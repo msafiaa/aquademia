@@ -2,7 +2,9 @@ from flask import Blueprint, jsonify, request, session
 
 from services.auth_service import (
     register_student,
-    authenticate_student
+    authenticate_student,
+    update_student_profile,
+    change_student_password
 )
 
 from services.auth_service import register_student
@@ -123,3 +125,71 @@ def logout():
     return jsonify({
         "message": "Logged out successfully!"
     }), 200
+
+
+@auth_bp.route("/api/auth/update-profile", methods=["POST"])
+def update_profile():
+    student_id = session.get("student_id")
+
+    if student_id is None:
+        return jsonify({"error": "Not logged in."}), 401
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify({"error": "Invalid JSON request."}), 400
+
+    try:
+        student = update_student_profile(
+            student_id,
+            data.get("username"),
+            data.get("year_level")
+        )
+
+        return jsonify({
+            "message": "Profile updated!",
+            "student": student
+        }), 200
+
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+
+    except Exception as error:
+        print("PROFILE UPDATE ERROR:", repr(error))
+
+        return jsonify({"error": "Unable to update profile."}), 500
+
+
+@auth_bp.route("/api/auth/change-password", methods=["POST"])
+def change_password():
+    student_id = session.get("student_id")
+
+    if student_id is None:
+        return jsonify({"error": "Not logged in."}), 401
+
+    data = request.get_json(silent=True)
+
+    if not isinstance(data, dict):
+        return jsonify({"error": "Invalid JSON request."}), 400
+
+    new_password = data.get("new_password")
+
+    if new_password != data.get("confirm_password"):
+        return jsonify({"error": "Passwords do not match."}), 400
+
+    try:
+        change_student_password(
+            student_id,
+            data.get("current_password"),
+            new_password
+        )
+
+        return jsonify({"message": "Password changed!"}), 200
+
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
+
+    except Exception as error:
+        print("PASSWORD CHANGE ERROR:", repr(error))
+
+        return jsonify({"error": "Unable to change password."}), 500
