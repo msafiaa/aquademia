@@ -1,0 +1,551 @@
+--- orig/quiz.html	2026-11-09 03:52:20.476725820 +0000
++++ aquademia/frontend/templates/quiz.html	2026-11-09 03:52:20.492979000 +0000
+@@ -29,28 +29,42 @@
+   </header>
+ 
+   <!-- VIEW 1: Topic Selection -->
+-  <section class="topic-selector-card bubble-panel" id="view-selector">
+-    <h1 style="color: var(--aq-ocean); font-size: 2rem; margin-bottom: 0.5rem;">Pilih Pengembaraan Kuiz Anda! 🌊</h1>
+-    <p style="color: var(--aq-muted); max-width: 50ch; margin: 0 auto 1.5rem;">
+-      Pilih mata pelajaran dan topik di bawah. Selesaikan kuiz untuk mengumpul mutiara dan membuka kunci ikan baharu!
+-    </p>
+-
+-    <!-- Subject Tabs -->
+-    <div class="subject-tabs" role="tablist">
+-      <button type="button" class="subject-tab active" id="tab-math">📐 Matematik</button>
+-      <button type="button" class="subject-tab" id="tab-science">🔬 Sains</button>
++  <section class="selector-stage" id="view-selector">
++    <div class="host">
++      <img class="host__mascot" src="{{ url_for('static', filename=cut ~ 'mal-happy.png') }}" alt="">
++      <p class="host__say" id="host-say" aria-live="polite">Hai! Nak selam topik mana hari ni?</p>
+     </div>
+ 
+-    <!-- Topics Grid -->
+-    <div class="topics-grid" id="topics-container">
+-      <!-- Populated dynamically by quiz.js -->
++    <!-- Subject doors -->
++    <div class="doors" role="group" aria-label="Mata pelajaran">
++      <button type="button" class="door active" id="tab-math" aria-pressed="true">
++        <span class="door__ico" aria-hidden="true">📐</span><span>Matematik</span>
++      </button>
++      <button type="button" class="door" id="tab-science" aria-pressed="false">
++        <span class="door__ico" aria-hidden="true">🔬</span><span>Sains</span>
++      </button>
+     </div>
+ 
+-    <div style="margin-top: 2rem;">
+-      <button type="button" class="aq-btn aq-btn--primary" id="btn-start-quiz" style="min-width: 220px;">
+-        <span>Mula Menyelam!</span>
+-      </button>
++    <!-- Adaptive practice (uses the student's latest quiz attempt) -->
++    <button type="button" class="adapt" id="adapt-card" hidden>
++      <span class="adapt__ico" aria-hidden="true">🧭</span>
++      <span class="adapt__txt">
++        <span class="adapt__title">Latihan Adaptif</span>
++        <span class="adapt__sub" id="adapt-sub"></span>
++      </span>
++      <span class="adapt__go" aria-hidden="true">Mula &rarr;</span>
++    </button>
++
++    <!-- Topic progress -->
++    <div class="topic-prog" id="topic-progress" hidden>
++      <span id="prog-text"></span>
++      <div class="topic-prog__track"><div id="prog-fill"></div></div>
+     </div>
++
++    <!-- Topics Grid (populated dynamically by quiz.js) -->
++    <div class="topics-grid" id="topics-container"></div>
++
++    <button type="button" class="go-btn" id="btn-start-quiz">Mula Menyelam! 🫧</button>
+   </section>
+ 
+   <!-- VIEW 2: Empty State (When no questions exist for selected topic) -->
+--- orig/quiz.css	2026-11-09 03:52:20.476751982 +0000
++++ aquademia/frontend/static/css/quiz.css	2026-11-09 03:57:44.858867393 +0000
+@@ -318,4 +318,149 @@
+   gap: 1rem;
+   justify-content: center;
+   margin-top: 2rem;
+-}
+\ No newline at end of file
++}
++
++/* ==========================================================================
++   Topic picker redesign (VIEW 1) - playful, for primary school pupils
++   ========================================================================== */
++.selector-stage { margin-bottom: 2rem; }
++
++.host { display: flex; align-items: center; gap: 0.9rem; margin: 0.5rem 0 0.75rem; }
++.host__mascot {
++  height: 132px; width: auto; flex: none;
++  filter: drop-shadow(0 6px 8px rgba(6, 58, 90, 0.35));
++  animation: sel-bob 3.2s ease-in-out infinite;
++}
++.host__say {
++  position: relative; margin: 0; max-width: 34rem;
++  padding: 0.6rem 1.1rem; border-radius: 22px;
++  background: #fff; color: var(--aq-ocean-deep);
++  font-family: var(--aq-font-display); font-size: clamp(1.05rem, 3.2vw, 1.4rem);
++  box-shadow: 0 5px 0 rgba(6, 58, 90, 0.16);
++}
++.host__say::before {
++  content: ""; position: absolute; left: -11px; top: 50%; margin-top: -10px;
++  border: 10px solid transparent; border-left: 0; border-right-color: #fff;
++}
++
++.doors { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin: 1rem 0; }
++.door {
++  display: flex; align-items: center; justify-content: center; gap: 0.6rem;
++  min-height: var(--aq-tap); padding: 0.7rem 0.75rem; cursor: pointer;
++  font-family: var(--aq-font-display); font-size: clamp(1.15rem, 3.6vw, 1.6rem);
++  color: #fff; text-shadow: 0 1px 3px rgba(6, 58, 90, 0.5);
++  background: rgba(255, 255, 255, 0.24); backdrop-filter: blur(6px);
++  border: 3px solid rgba(255, 255, 255, 0.6); border-radius: 26px;
++  transition: transform 0.15s var(--aq-ease);
++}
++.door__ico { font-size: 1.9rem; line-height: 1; }
++.door.active {
++  background: linear-gradient(180deg, #ffe27a, #ffb300); color: var(--aq-ocean-deep);
++  text-shadow: none; border-color: #fff; transform: translateY(-3px);
++  box-shadow: 0 6px 0 rgba(150, 80, 0, 0.3);
++}
++.door:active { transform: scale(0.97); }
++
++.adapt {
++  position: relative; display: flex; align-items: center; gap: 1rem; width: 100%;
++  margin: 0.25rem 0 0.5rem; padding: 0.85rem 1.25rem; text-align: left; cursor: pointer;
++  color: var(--aq-ocean-deep); border: 0; border-radius: 26px;
++  background: linear-gradient(100deg, #fff1b8, #ffc83d 60%, #ffab40);
++  box-shadow: 0 7px 0 #c77f00, var(--aq-shadow);
++  transition: transform 0.18s var(--aq-ease);
++}
++.adapt:hover:not(:disabled) { transform: translateY(-3px); }
++.adapt:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 3px 0 #c77f00; }
++.adapt:disabled { cursor: default; background: rgba(255, 255, 255, 0.55); box-shadow: var(--aq-shadow-sm); }
++.adapt[hidden] { display: none; }
++.adapt__ico { font-size: 2.6rem; line-height: 1; animation: sel-bob 3.5s ease-in-out infinite; }
++.adapt__txt { display: flex; flex-direction: column; flex: 1; min-width: 0; }
++.adapt__title { font-family: var(--aq-font-display); font-size: clamp(1.3rem, 4vw, 1.75rem); line-height: 1.1; }
++.adapt__sub { font-size: 0.98rem; margin-top: 0.15rem; }
++.adapt__go {
++  flex: none; padding: 0.2rem 1rem; border-radius: 999px; background: #fff;
++  font-family: var(--aq-font-display); font-size: 1.05rem;
++}
++.adapt:disabled .adapt__go { display: none; }
++
++.topic-prog {
++  display: flex; align-items: center; gap: 0.75rem; margin: 0.75rem 0.25rem 0;
++  color: #fff; font-family: var(--aq-font-display); font-size: 1.1rem;
++  text-shadow: 0 1px 3px rgba(6, 58, 90, 0.5);
++}
++.topic-prog[hidden] { display: none; }
++.topic-prog__track { flex: 1; height: 16px; border-radius: 999px; background: rgba(6, 58, 90, 0.35); overflow: hidden; }
++.topic-prog__track div {
++  height: 100%; width: 0; border-radius: 999px; transition: width 0.4s var(--aq-ease);
++  background: linear-gradient(90deg, #fff3b0, var(--aq-sun));
++}
++
++#view-selector .topics-grid {
++  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1.1rem; margin: 1.1rem 0;
++}
++.tcard {
++  position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 0.1rem;
++  min-height: 170px; padding: 1rem 1rem 0.9rem; overflow: hidden; cursor: pointer; text-align: left;
++  color: #fff; border: 0; border-radius: 26px; background: var(--c);
++  box-shadow: 0 8px 0 var(--cd), 0 14px 22px rgba(6, 40, 70, 0.25);
++  transition: transform 0.18s cubic-bezier(.3, 1.6, .5, 1), box-shadow 0.18s;
++}
++.tcard::after {
++  content: ""; position: absolute; right: -28px; top: -28px; width: 104px; height: 104px;
++  border-radius: 50%; background: rgba(255, 255, 255, 0.18);
++}
++.tcard:hover { transform: translateY(-5px) rotate(-1deg); }
++.tcard:active { transform: translateY(3px); box-shadow: 0 4px 0 var(--cd); }
++.tcard__ico { font-size: 2.9rem; line-height: 1.1; filter: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.2)); }
++.tcard__name { font-family: var(--aq-font-display); font-size: 1.45rem; line-height: 1.1; text-shadow: 0 2px 0 rgba(0, 0, 0, 0.18); margin-top: 0.2rem; }
++.tcard__desc { font-size: 0.95rem; opacity: 0.95; }
++.tcard__stars { margin-top: auto; padding-top: 0.4rem; font-size: 1.3rem; letter-spacing: 2px; }
++.tcard__stars .off { filter: grayscale(1) brightness(1.7); opacity: 0.5; }
++.tcard.selected { outline: 5px solid #fff; outline-offset: 3px; transform: translateY(-5px) scale(1.03); }
++.tcard.selected::before {
++  content: "\2714"; position: absolute; left: 10px; top: 10px; z-index: 2;
++  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
++  background: #fff; color: var(--cd); font-weight: 700;
++}
++
++.go-btn {
++  display: block; margin: 1.5rem auto 0; padding: 0.7rem 2.8rem 0.55rem; cursor: pointer;
++  font-family: var(--aq-font-display); font-size: 1.6rem; color: var(--aq-ocean-deep);
++  background: linear-gradient(180deg, #ffe27a, #ffb300); border: 0; border-radius: 999px;
++  box-shadow: 0 8px 0 #c77f00, var(--aq-shadow); animation: sel-pulse 2.2s ease-in-out infinite;
++}
++.go-btn:active:not(:disabled) { transform: translateY(5px); box-shadow: 0 3px 0 #c77f00; }
++.go-btn:disabled { animation: none; opacity: 0.65; cursor: default; }
++
++.burst {
++  position: fixed; z-index: 50; pointer-events: none; border-radius: 50%;
++  border: 2px solid #fff; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.9), rgba(255,255,255,.2));
++  animation: sel-pop 1s ease-out forwards;
++}
++@keyframes sel-bob { 50% { transform: translateY(-8px) rotate(-3deg); } }
++@keyframes sel-pulse { 50% { transform: scale(1.04); } }
++@keyframes sel-pop { to { transform: translate(var(--x), var(--y)) scale(1.6); opacity: 0; } }
++
++.door:focus-visible, .adapt:focus-visible, .tcard:focus-visible, .go-btn:focus-visible {
++  outline: 4px solid #fff; outline-offset: 3px;
++}
++
++@media (max-width: 560px) {
++  .host__mascot { height: 96px; }
++  #view-selector .topics-grid { grid-template-columns: 1fr 1fr; gap: 0.8rem; }
++  .tcard { min-height: 150px; padding: 0.8rem; }
++  .tcard__name { font-size: 1.2rem; }
++  .tcard__ico { font-size: 2.3rem; }
++  .adapt__go { display: none; }
++}
++@media (prefers-reduced-motion: reduce) {
++  .host__mascot, .adapt__ico, .go-btn { animation: none; }
++  .tcard, .door, .adapt, .topic-prog__track div { transition: none; }
++}
++
++/* Quiz page uses a plain ocean gradient instead of the photo background */
++.page-quiz .aq-scene {
++  background:
++    radial-gradient(ellipse 60% 40% at 20% 0%, rgba(255, 255, 255, 0.35), transparent 60%),
++    linear-gradient(180deg, #5ee0ee 0%, #1fa6c9 35%, #0b6d9c 70%, #084b73 100%);
++}
+--- orig/quiz.js	2026-11-09 03:52:20.476765109 +0000
++++ aquademia/frontend/static/js/quiz.js	2026-11-09 04:04:32.286362412 +0000
+@@ -40,6 +40,12 @@
+   var tabScience = document.getElementById("tab-science");
+   var topicsContainer = document.getElementById("topics-container");
+   var btnStartQuiz = document.getElementById("btn-start-quiz");
++  var hostSay = document.getElementById("host-say");
++  var adaptCard = document.getElementById("adapt-card");
++  var adaptSub = document.getElementById("adapt-sub");
++  var progWrap = document.getElementById("topic-progress");
++  var progText = document.getElementById("prog-text");
++  var progFill = document.getElementById("prog-fill");
+ 
+   // Quiz player controls
+   var quizCategoryTitle = document.getElementById("quiz-category-title");
+@@ -61,6 +67,8 @@
+   var currentIndex = 0;
+   var studentAnswers = {}; // { question_id: selected_option }
+   var completedResult = null;
++  var historyList = null; // null = not loaded (no stars/progress shown)
++  var lastList = [];      // topics currently drawn
+ 
+   // Preset topics for Year 4-6
+   var TOPICS = {
+@@ -111,6 +119,17 @@
+       }
+     });
+ 
++  // Past attempts -> stars, topic progress and the adaptive card.
++  // Uses the existing read-only /api/learning/history route.
++  fetch("/api/learning/history", { credentials: "same-origin" })
++    .then(function (r) { return r.ok ? r.json() : null; })
++    .then(function (d) {
++      if (!d || !Array.isArray(d.history)) return;
++      historyList = d.history;
++      if (lastList.length) { drawTopicCards(lastList); } else { updateAdaptive(); }
++    })
++    .catch(function () { /* stars and adaptive card simply stay hidden */ });
++
+   /* ------------------------------------------------------------------
+      Subject & Topic Selection
+      ------------------------------------------------------------------ */
+@@ -118,6 +137,9 @@
+     currentSubject = sub;
+     tabMath.classList.toggle("active", sub === "Mathematics");
+     tabScience.classList.toggle("active", sub === "Science");
++    tabMath.setAttribute("aria-pressed", String(sub === "Mathematics"));
++    tabScience.setAttribute("aria-pressed", String(sub === "Science"));
++    say(sub === "Mathematics" ? "Masuk Gua Nombor! Pilih satu topik." : "Masuk Gua Penyelidik! Apa nak kaji hari ni?");
+     renderTopicCards();
+   }
+ 
+@@ -128,6 +150,7 @@
+ 
+   function renderTopicCards() {
+     topicRequestId++; // cancels any topic request still in flight
++    lastList = [];
+ 
+     if (currentSubject === "Science") {
+       loadScienceTopics();
+@@ -135,7 +158,7 @@
+     }
+ 
+     drawTopicCards((TOPICS[currentSubject] || []).map(function (t) {
+-      return { name: t.name, label: t.label, meta: t.name + " \u2022 " + t.desc };
++      return { name: t.name, label: t.label, desc: t.desc };
+     }));
+   }
+ 
+@@ -146,6 +169,8 @@
+ 
+     currentTopic = null;
+     btnStartQuiz.disabled = true;
++    progWrap.hidden = true;
++    adaptCard.hidden = true;
+     topicsContainer.innerHTML = '<p class="topics-status">Menyelam mencari topik...</p>';
+ 
+     fetch("/api/topics?subject=Science&year=" + encodeURIComponent(year), { credentials: "same-origin" })
+@@ -161,43 +186,226 @@
+         }
+ 
+         drawTopicCards(list.map(function (t) {
+-          return { name: t.topic, label: t.topic, meta: "Tahun " + year + " \u2022 " + t.count + " soalan" };
++          return { name: t.topic, label: t.topic, desc: t.count + " soalan" };
+         }));
+       });
+   }
+ 
++  /* ------------------------------------------------------------------
++     Topic cards: colours, icons, stars
++     ------------------------------------------------------------------ */
++  var PALETTE = [
++    ["#d4532f", "#9c3a1f"], ["#0d8aa6", "#095f73"], ["#7b4fd1", "#55329b"], ["#1e9a78", "#13694f"],
++    ["#d6407f", "#9b2a59"], ["#2f7fd1", "#1e5594"], ["#b9740a", "#80500a"]
++  ];
++  // Icons follow the topic's meaning (not random sea creatures)
++  var MATH_ICONS = { Addition: "\u2795", Subtraction: "\u2796", Multiplication: "\u2716\uFE0F", Division: "\u2797", Fractions: "\uD83C\uDF55" };
++  // Exact icons per topic name (lower-case). Edit here to change an icon.
++  var SCI_EXACT = {
++    "kemahiran saintifik": "\uD83E\uDDEA",
++    "manusia": "\uD83E\uDDCD",
++    "mikroorganisma": "\uD83E\uDDA0",
++    "interaksi antara hidupan": "\uD83D\uDC1D",
++    "pemeliharaan dan pemulihan": "\uD83C\uDF33",
++    "daya": "\uD83D\uDCAA",
++    "kelajuan": "\uD83C\uDFCE\uFE0F",
++    "teknologi pengawetan makanan": "\uD83E\uDD6B",
++    "bahan buangan": "\uD83D\uDDD1\uFE0F",
++    "gerhana": "\uD83C\uDF11",
++    "galaksi": "\uD83C\uDF0C",
++    "kestabilan dan kekuatan": "\uD83C\uDFD7\uFE0F",
++    "teknologi": "\uD83E\uDD16",
++    // Year 4 and Year 5 topics
++    "haiwan": "\uD83D\uDC18",
++    "tumbuh-tumbuhan": "\uD83C\uDF31",
++    "elektrik": "\uD83D\uDCA1",
++    "haba": "\uD83D\uDD25",
++    "pengaratan": "\uD83D\uDD29",
++    "jirim": "\uD83E\uDDCA",
++    "fasa bulan dan buruj": "\uD83C\uDF19",
++    "mesin": "\u2699\uFE0F",
++    "sifat cahaya": "\uD83D\uDD26",
++    "bunyi": "\uD83D\uDD0A",
++    "tenaga": "\u26A1",
++    "bahan": "\uD83E\uDDF1",
++    "bumi": "\uD83C\uDF0D"
++  };
++  var SCI_ICONS = [
++    [/plant|tumbuh|botani/i, "\uD83C\uDF31"],
++    [/living|hidup|survival|kemandirian|adapt|penyesuaian/i, "\uD83C\uDF3F"],
++    [/animal|haiwan|vertebr|invertebr/i, "\uD83D\uDC3E"],
++    [/human|manusia|body|badan/i, "\uD83E\uDDB4"],
++    [/sense|deria/i, "\uD83D\uDC40"], [/micro|mikro|bacteria|kuman/i, "\uD83E\uDDA0"],
++    [/force|daya|geseran|friction|motion|gerak/i, "\uD83D\uDE80"],
++    [/energy|tenaga|electric|elektrik/i, "\u26A1"],
++    [/matter|jirim|state|keadaan|solid|pepejal|material|bahan/i, "\uD83E\uDDCA"],
++    [/water|air\b|cecair|liquid/i, "\uD83D\uDCA7"],
++    [/light|cahaya|shadow|bayang/i, "\uD83D\uDD26"], [/sound|bunyi|getaran/i, "\uD83D\uDD14"],
++    [/heat|haba|temperature|suhu/i, "\uD83C\uDF21\uFE0F"], [/magnet/i, "\uD83E\uDDF2"],
++    [/earth|bumi|space|angkasa|planet|solar/i, "\uD83E\uDE90"], [/weather|cuaca|climate|iklim/i, "\u26C5"],
++    [/soil|tanah|rock|batu/i, "\uD83E\uDEA8"], [/food|makanan|nutri|pemakanan/i, "\uD83C\uDF4E"],
++    [/machine|mesin|tuas|lever/i, "\u2699\uFE0F"], [/environment|alam sekitar|pencemaran|pollut/i, "\uD83C\uDF0D"]
++  ];
++
++  function iconFor(name) {
++    if (MATH_ICONS[name]) return MATH_ICONS[name];
++    var key = String(name || "").trim().toLowerCase().replace(/\s+/g, " ").replace(/\s*-\s*/g, "-");
++    if (currentSubject === "Science" && SCI_EXACT[key]) return SCI_EXACT[key];
++    for (var i = 0; i < SCI_ICONS.length; i++) {
++      if (SCI_ICONS[i][0].test(name)) return SCI_ICONS[i][1];
++    }
++    // Neutral subject icon when a topic name is not recognised
++    return currentSubject === "Science" ? "\uD83D\uDD2C" : "\uD83D\uDD22";
++  }
++
++  // 0 = not tried yet, 1-3 = best score so far (>=90 -> 3, >=70 -> 2, else 1), -1 = unknown
++  function starsFor(name) {
++    if (!historyList) return -1;
++    var year = (currentStudent && currentStudent.year_level) || 4;
++    var best = -1;
++    historyList.forEach(function (a) {
++      if (a.subject === currentSubject && a.topic === name && Number(a.year_level) === Number(year)) {
++        best = Math.max(best, Number(a.score));
++      }
++    });
++    if (best < 0) return 0;
++    return best >= 90 ? 3 : best >= 70 ? 2 : 1;
++  }
++
++  function say(text) { if (hostSay) hostSay.textContent = text; }
++
++  function labelFor(topic) {
++    for (var i = 0; i < lastList.length; i++) { if (lastList[i].name === topic) return lastList[i].label; }
++    return topic;
++  }
++
++  function updateAdaptive() {
++    if (!adaptCard) return;
++    if (historyList === null) { adaptCard.hidden = true; return; }
++
++    var latest = null;
++    for (var i = 0; i < historyList.length; i++) {   // history is newest first
++      if (historyList[i].subject === currentSubject) { latest = historyList[i]; break; }
++    }
++    adaptCard.hidden = false;
++
++    if (!latest) {
++      adaptCard.disabled = true;
++      adaptSub.textContent = "Buat satu kuiz dulu. Lepas tu latihan khas untuk kau akan siap.";
++      adaptCard.onclick = null;
++      return;
++    }
++    adaptCard.disabled = false;
++    adaptSub.textContent = "Latihan khas berdasarkan kuiz terakhir kau: " + labelFor(latest.topic);
++    adaptCard.onclick = function () {
++      window.location.assign("/learning?attempt_id=" + encodeURIComponent(latest.attempt_id) + "&tab=adaptive");
++    };
++  }
++
+   function drawTopicCards(list) {
++    lastList = list;
+     topicsContainer.innerHTML = "";
+-    if (!list.length) { btnStartQuiz.disabled = true; return; }
++    if (!list.length) { btnStartQuiz.disabled = true; progWrap.hidden = true; updateAdaptive(); return; }
+ 
+     btnStartQuiz.disabled = false;
+-    currentTopic = list[0].name;
++    var stillThere = list.some(function (t) { return t.name === currentTopic; });
++    if (!stillThere) currentTopic = list[0].name;
+ 
++    var done = 0;
+     list.forEach(function (t, idx) {
+-      var btn = document.createElement("div");
+-      btn.className = "topic-btn" + (idx === 0 ? " selected" : "");
++      var stars = starsFor(t.name);
++      if (stars > 0) done++;
++      var pal = PALETTE[idx % PALETTE.length];
++
++      var btn = document.createElement("button");
++      btn.type = "button";
++      btn.className = "tcard" + (t.name === currentTopic ? " selected" : "");
++      btn.style.setProperty("--c", pal[0]);
++      btn.style.setProperty("--cd", pal[1]);
++      btn.setAttribute("aria-pressed", t.name === currentTopic ? "true" : "false");
++
++      var ico = document.createElement("span");
++      ico.className = "tcard__ico";
++      ico.setAttribute("aria-hidden", "true");
++      ico.textContent = iconFor(t.name, idx);
+ 
+-      var name = document.createElement("div");
+-      name.className = "topic-btn__name";
++      var name = document.createElement("span");
++      name.className = "tcard__name";
+       name.textContent = t.label;
+ 
+-      var meta = document.createElement("div");
+-      meta.className = "topic-btn__meta";
+-      meta.textContent = t.meta;
++      var desc = document.createElement("span");
++      desc.className = "tcard__desc";
++      desc.textContent = t.desc;
+ 
++      btn.appendChild(ico);
+       btn.appendChild(name);
+-      btn.appendChild(meta);
++      btn.appendChild(desc);
++
++      if (stars >= 0) {
++        var st = document.createElement("span");
++        st.className = "tcard__stars";
++        st.setAttribute("aria-label", stars + " daripada 3 bintang");
++        for (var k = 0; k < 3; k++) {
++          var star = document.createElement("span");
++          star.textContent = "\u2B50";
++          if (k >= stars) star.className = "off";
++          st.appendChild(star);
++        }
++        btn.appendChild(st);
++      }
++
++      function hint() {
++        if (stars === 0) say("Topik " + t.label + " belum dicuba. Jom!");
++        else if (stars > 0 && stars < 3) say(t.label + ": kau dah ada " + stars + " bintang. Boleh dapat 3!");
++        else if (stars === 3) say(t.label + ": 3 bintang! Hebat, kau memang jaguh!");
++        else say("Jom selam topik " + t.label + "!");
++      }
++      btn.addEventListener("mouseenter", hint);
++      btn.addEventListener("focus", hint);
+       btn.addEventListener("click", function () {
+-        Array.prototype.forEach.call(topicsContainer.children, function (c) { c.classList.remove("selected"); });
++        Array.prototype.forEach.call(topicsContainer.children, function (c) {
++          c.classList.remove("selected");
++          c.setAttribute("aria-pressed", "false");
++        });
+         btn.classList.add("selected");
++        btn.setAttribute("aria-pressed", "true");
+         currentTopic = t.name;
++        hint();
+       });
+       topicsContainer.appendChild(btn);
+     });
++
++    if (historyList) {
++      progWrap.hidden = false;
++      progText.textContent = done + "/" + list.length + " topik selesai";
++      progFill.style.width = Math.round((done / list.length) * 100) + "%";
++    } else {
++      progWrap.hidden = true;
++    }
++    updateAdaptive();
++  }
++
++  // Small bubble burst when the dive starts (skipped for reduced motion)
++  function burst(el) {
++    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
++    var r = el.getBoundingClientRect();
++    for (var i = 0; i < 12; i++) {
++      var b = document.createElement("i");
++      var size = 12 + Math.random() * 24;
++      b.className = "burst";
++      b.style.width = b.style.height = size + "px";
++      b.style.left = (r.left + Math.random() * r.width) + "px";
++      b.style.top = (r.top + r.height / 2) + "px";
++      b.style.setProperty("--x", (Math.random() * 120 - 60) + "px");
++      b.style.setProperty("--y", (-80 - Math.random() * 140) + "px");
++      document.body.appendChild(b);
++      setTimeout(function (n) { return function () { n.remove(); }; }(b), 1000);
++    }
+   }
+ 
+   btnStartQuiz.addEventListener("click", function () {
+     if (!currentTopic) return;
++    burst(btnStartQuiz);
+     loadQuestions();
+   });
+ 
+@@ -217,7 +425,7 @@
+       .then(function (res) { return res.json(); })
+       .then(function (data) {
+         btnStartQuiz.disabled = false;
+-        btnStartQuiz.textContent = "Mula Menyelam!";
++        btnStartQuiz.textContent = "Mula Menyelam! \uD83E\uDEE7";
+ 
+         if (!Array.isArray(data) || data.length === 0) {
+           showEmptyState();
+@@ -231,7 +439,7 @@
+       })
+       .catch(function () {
+         btnStartQuiz.disabled = false;
+-        btnStartQuiz.textContent = "Mula Menyelam!";
++        btnStartQuiz.textContent = "Mula Menyelam! \uD83E\uDEE7";
+         showEmptyState();
+       });
+   }

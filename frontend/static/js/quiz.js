@@ -40,6 +40,12 @@
   var tabScience = document.getElementById("tab-science");
   var topicsContainer = document.getElementById("topics-container");
   var btnStartQuiz = document.getElementById("btn-start-quiz");
+  var hostSay = document.getElementById("host-say");
+  var adaptCard = document.getElementById("adapt-card");
+  var adaptSub = document.getElementById("adapt-sub");
+  var progWrap = document.getElementById("topic-progress");
+  var progText = document.getElementById("prog-text");
+  var progFill = document.getElementById("prog-fill");
 
   // Quiz player controls
   var quizCategoryTitle = document.getElementById("quiz-category-title");
@@ -61,6 +67,8 @@
   var currentIndex = 0;
   var studentAnswers = {}; // { question_id: selected_option }
   var completedResult = null;
+  var historyList = null; // null = not loaded (no stars/progress shown)
+  var lastList = [];      // topics currently drawn
 
   // Preset topics for Year 4-6
   var TOPICS = {
@@ -111,6 +119,17 @@
       }
     });
 
+  // Past attempts -> stars, topic progress and the adaptive card.
+  // Uses the existing read-only /api/learning/history route.
+  fetch("/api/learning/history", { credentials: "same-origin" })
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (d) {
+      if (!d || !Array.isArray(d.history)) return;
+      historyList = d.history;
+      if (lastList.length) { drawTopicCards(lastList); } else { updateAdaptive(); }
+    })
+    .catch(function () { /* stars and adaptive card simply stay hidden */ });
+
   /* ------------------------------------------------------------------
      Subject & Topic Selection
      ------------------------------------------------------------------ */
@@ -118,6 +137,9 @@
     currentSubject = sub;
     tabMath.classList.toggle("active", sub === "Mathematics");
     tabScience.classList.toggle("active", sub === "Science");
+    tabMath.setAttribute("aria-pressed", String(sub === "Mathematics"));
+    tabScience.setAttribute("aria-pressed", String(sub === "Science"));
+    say(sub === "Mathematics" ? "Masuk Gua Nombor! Pilih satu topik." : "Masuk Gua Penyelidik! Apa nak kaji hari ni?");
     renderTopicCards();
   }
 
@@ -128,6 +150,7 @@
 
   function renderTopicCards() {
     topicRequestId++; // cancels any topic request still in flight
+    lastList = [];
 
     if (currentSubject === "Science") {
       loadScienceTopics();
@@ -135,7 +158,7 @@
     }
 
     drawTopicCards((TOPICS[currentSubject] || []).map(function (t) {
-      return { name: t.name, label: t.label, meta: t.name + " \u2022 " + t.desc };
+      return { name: t.name, label: t.label, desc: t.desc };
     }));
   }
 
@@ -146,6 +169,8 @@
 
     currentTopic = null;
     btnStartQuiz.disabled = true;
+    progWrap.hidden = true;
+    adaptCard.hidden = true;
     topicsContainer.innerHTML = '<p class="topics-status">Menyelam mencari topik...</p>';
 
     fetch("/api/topics?subject=Science&year=" + encodeURIComponent(year), { credentials: "same-origin" })
@@ -161,43 +186,226 @@
         }
 
         drawTopicCards(list.map(function (t) {
-          return { name: t.topic, label: t.topic, meta: "Tahun " + year + " \u2022 " + t.count + " soalan" };
+          return { name: t.topic, label: t.topic, desc: t.count + " soalan" };
         }));
       });
   }
 
+  /* ------------------------------------------------------------------
+     Topic cards: colours, icons, stars
+     ------------------------------------------------------------------ */
+  var PALETTE = [
+    ["#d4532f", "#9c3a1f"], ["#0d8aa6", "#095f73"], ["#7b4fd1", "#55329b"], ["#1e9a78", "#13694f"],
+    ["#d6407f", "#9b2a59"], ["#2f7fd1", "#1e5594"], ["#b9740a", "#80500a"]
+  ];
+  // Icons follow the topic's meaning (not random sea creatures)
+  var MATH_ICONS = { Addition: "\u2795", Subtraction: "\u2796", Multiplication: "\u2716\uFE0F", Division: "\u2797", Fractions: "\uD83C\uDF55" };
+  // Exact icons per topic name (lower-case). Edit here to change an icon.
+  var SCI_EXACT = {
+    "kemahiran saintifik": "\uD83E\uDDEA",
+    "manusia": "\uD83E\uDDCD",
+    "mikroorganisma": "\uD83E\uDDA0",
+    "interaksi antara hidupan": "\uD83D\uDC1D",
+    "pemeliharaan dan pemulihan": "\uD83C\uDF33",
+    "daya": "\uD83D\uDCAA",
+    "kelajuan": "\uD83C\uDFCE\uFE0F",
+    "teknologi pengawetan makanan": "\uD83E\uDD6B",
+    "bahan buangan": "\uD83D\uDDD1\uFE0F",
+    "gerhana": "\uD83C\uDF11",
+    "galaksi": "\uD83C\uDF0C",
+    "kestabilan dan kekuatan": "\uD83C\uDFD7\uFE0F",
+    "teknologi": "\uD83E\uDD16",
+    // Year 4 and Year 5 topics
+    "haiwan": "\uD83D\uDC18",
+    "tumbuh-tumbuhan": "\uD83C\uDF31",
+    "elektrik": "\uD83D\uDCA1",
+    "haba": "\uD83D\uDD25",
+    "pengaratan": "\uD83D\uDD29",
+    "jirim": "\uD83E\uDDCA",
+    "fasa bulan dan buruj": "\uD83C\uDF19",
+    "mesin": "\u2699\uFE0F",
+    "sifat cahaya": "\uD83D\uDD26",
+    "bunyi": "\uD83D\uDD0A",
+    "tenaga": "\u26A1",
+    "bahan": "\uD83E\uDDF1",
+    "bumi": "\uD83C\uDF0D"
+  };
+  var SCI_ICONS = [
+    [/plant|tumbuh|botani/i, "\uD83C\uDF31"],
+    [/living|hidup|survival|kemandirian|adapt|penyesuaian/i, "\uD83C\uDF3F"],
+    [/animal|haiwan|vertebr|invertebr/i, "\uD83D\uDC3E"],
+    [/human|manusia|body|badan/i, "\uD83E\uDDB4"],
+    [/sense|deria/i, "\uD83D\uDC40"], [/micro|mikro|bacteria|kuman/i, "\uD83E\uDDA0"],
+    [/force|daya|geseran|friction|motion|gerak/i, "\uD83D\uDE80"],
+    [/energy|tenaga|electric|elektrik/i, "\u26A1"],
+    [/matter|jirim|state|keadaan|solid|pepejal|material|bahan/i, "\uD83E\uDDCA"],
+    [/water|air\b|cecair|liquid/i, "\uD83D\uDCA7"],
+    [/light|cahaya|shadow|bayang/i, "\uD83D\uDD26"], [/sound|bunyi|getaran/i, "\uD83D\uDD14"],
+    [/heat|haba|temperature|suhu/i, "\uD83C\uDF21\uFE0F"], [/magnet/i, "\uD83E\uDDF2"],
+    [/earth|bumi|space|angkasa|planet|solar/i, "\uD83E\uDE90"], [/weather|cuaca|climate|iklim/i, "\u26C5"],
+    [/soil|tanah|rock|batu/i, "\uD83E\uDEA8"], [/food|makanan|nutri|pemakanan/i, "\uD83C\uDF4E"],
+    [/machine|mesin|tuas|lever/i, "\u2699\uFE0F"], [/environment|alam sekitar|pencemaran|pollut/i, "\uD83C\uDF0D"]
+  ];
+
+  function iconFor(name) {
+    if (MATH_ICONS[name]) return MATH_ICONS[name];
+    var key = String(name || "").trim().toLowerCase().replace(/\s+/g, " ").replace(/\s*-\s*/g, "-");
+    if (currentSubject === "Science" && SCI_EXACT[key]) return SCI_EXACT[key];
+    for (var i = 0; i < SCI_ICONS.length; i++) {
+      if (SCI_ICONS[i][0].test(name)) return SCI_ICONS[i][1];
+    }
+    // Neutral subject icon when a topic name is not recognised
+    return currentSubject === "Science" ? "\uD83D\uDD2C" : "\uD83D\uDD22";
+  }
+
+  // 0 = not tried yet, 1-3 = best score so far (>=90 -> 3, >=70 -> 2, else 1), -1 = unknown
+  function starsFor(name) {
+    if (!historyList) return -1;
+    var year = (currentStudent && currentStudent.year_level) || 4;
+    var best = -1;
+    historyList.forEach(function (a) {
+      if (a.subject === currentSubject && a.topic === name && Number(a.year_level) === Number(year)) {
+        best = Math.max(best, Number(a.score));
+      }
+    });
+    if (best < 0) return 0;
+    return best >= 90 ? 3 : best >= 70 ? 2 : 1;
+  }
+
+  function say(text) { if (hostSay) hostSay.textContent = text; }
+
+  function labelFor(topic) {
+    for (var i = 0; i < lastList.length; i++) { if (lastList[i].name === topic) return lastList[i].label; }
+    return topic;
+  }
+
+  function updateAdaptive() {
+    if (!adaptCard) return;
+    if (historyList === null) { adaptCard.hidden = true; return; }
+
+    var latest = null;
+    for (var i = 0; i < historyList.length; i++) {   // history is newest first
+      if (historyList[i].subject === currentSubject) { latest = historyList[i]; break; }
+    }
+    adaptCard.hidden = false;
+
+    if (!latest) {
+      adaptCard.disabled = true;
+      adaptSub.textContent = "Buat satu kuiz dulu. Lepas tu latihan khas untuk kau akan siap.";
+      adaptCard.onclick = null;
+      return;
+    }
+    adaptCard.disabled = false;
+    adaptSub.textContent = "Latihan khas berdasarkan kuiz terakhir kau: " + labelFor(latest.topic);
+    adaptCard.onclick = function () {
+      window.location.assign("/learning?attempt_id=" + encodeURIComponent(latest.attempt_id) + "&tab=adaptive");
+    };
+  }
+
   function drawTopicCards(list) {
+    lastList = list;
     topicsContainer.innerHTML = "";
-    if (!list.length) { btnStartQuiz.disabled = true; return; }
+    if (!list.length) { btnStartQuiz.disabled = true; progWrap.hidden = true; updateAdaptive(); return; }
 
     btnStartQuiz.disabled = false;
-    currentTopic = list[0].name;
+    var stillThere = list.some(function (t) { return t.name === currentTopic; });
+    if (!stillThere) currentTopic = list[0].name;
 
+    var done = 0;
     list.forEach(function (t, idx) {
-      var btn = document.createElement("div");
-      btn.className = "topic-btn" + (idx === 0 ? " selected" : "");
+      var stars = starsFor(t.name);
+      if (stars > 0) done++;
+      var pal = PALETTE[idx % PALETTE.length];
 
-      var name = document.createElement("div");
-      name.className = "topic-btn__name";
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "tcard" + (t.name === currentTopic ? " selected" : "");
+      btn.style.setProperty("--c", pal[0]);
+      btn.style.setProperty("--cd", pal[1]);
+      btn.setAttribute("aria-pressed", t.name === currentTopic ? "true" : "false");
+
+      var ico = document.createElement("span");
+      ico.className = "tcard__ico";
+      ico.setAttribute("aria-hidden", "true");
+      ico.textContent = iconFor(t.name, idx);
+
+      var name = document.createElement("span");
+      name.className = "tcard__name";
       name.textContent = t.label;
 
-      var meta = document.createElement("div");
-      meta.className = "topic-btn__meta";
-      meta.textContent = t.meta;
+      var desc = document.createElement("span");
+      desc.className = "tcard__desc";
+      desc.textContent = t.desc;
 
+      btn.appendChild(ico);
       btn.appendChild(name);
-      btn.appendChild(meta);
+      btn.appendChild(desc);
+
+      if (stars >= 0) {
+        var st = document.createElement("span");
+        st.className = "tcard__stars";
+        st.setAttribute("aria-label", stars + " daripada 3 bintang");
+        for (var k = 0; k < 3; k++) {
+          var star = document.createElement("span");
+          star.textContent = "\u2B50";
+          if (k >= stars) star.className = "off";
+          st.appendChild(star);
+        }
+        btn.appendChild(st);
+      }
+
+      function hint() {
+        if (stars === 0) say("Topik " + t.label + " belum dicuba. Jom!");
+        else if (stars > 0 && stars < 3) say(t.label + ": kau dah ada " + stars + " bintang. Boleh dapat 3!");
+        else if (stars === 3) say(t.label + ": 3 bintang! Hebat, kau memang jaguh!");
+        else say("Jom selam topik " + t.label + "!");
+      }
+      btn.addEventListener("mouseenter", hint);
+      btn.addEventListener("focus", hint);
       btn.addEventListener("click", function () {
-        Array.prototype.forEach.call(topicsContainer.children, function (c) { c.classList.remove("selected"); });
+        Array.prototype.forEach.call(topicsContainer.children, function (c) {
+          c.classList.remove("selected");
+          c.setAttribute("aria-pressed", "false");
+        });
         btn.classList.add("selected");
+        btn.setAttribute("aria-pressed", "true");
         currentTopic = t.name;
+        hint();
       });
       topicsContainer.appendChild(btn);
     });
+
+    if (historyList) {
+      progWrap.hidden = false;
+      progText.textContent = done + "/" + list.length + " topik selesai";
+      progFill.style.width = Math.round((done / list.length) * 100) + "%";
+    } else {
+      progWrap.hidden = true;
+    }
+    updateAdaptive();
+  }
+
+  // Small bubble burst when the dive starts (skipped for reduced motion)
+  function burst(el) {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    var r = el.getBoundingClientRect();
+    for (var i = 0; i < 12; i++) {
+      var b = document.createElement("i");
+      var size = 12 + Math.random() * 24;
+      b.className = "burst";
+      b.style.width = b.style.height = size + "px";
+      b.style.left = (r.left + Math.random() * r.width) + "px";
+      b.style.top = (r.top + r.height / 2) + "px";
+      b.style.setProperty("--x", (Math.random() * 120 - 60) + "px");
+      b.style.setProperty("--y", (-80 - Math.random() * 140) + "px");
+      document.body.appendChild(b);
+      setTimeout(function (n) { return function () { n.remove(); }; }(b), 1000);
+    }
   }
 
   btnStartQuiz.addEventListener("click", function () {
     if (!currentTopic) return;
+    burst(btnStartQuiz);
     loadQuestions();
   });
 
@@ -217,7 +425,7 @@
       .then(function (res) { return res.json(); })
       .then(function (data) {
         btnStartQuiz.disabled = false;
-        btnStartQuiz.textContent = "Mula Menyelam!";
+        btnStartQuiz.textContent = "Mula Menyelam! \uD83E\uDEE7";
 
         if (!Array.isArray(data) || data.length === 0) {
           showEmptyState();
@@ -231,7 +439,7 @@
       })
       .catch(function () {
         btnStartQuiz.disabled = false;
-        btnStartQuiz.textContent = "Mula Menyelam!";
+        btnStartQuiz.textContent = "Mula Menyelam! \uD83E\uDEE7";
         showEmptyState();
       });
   }

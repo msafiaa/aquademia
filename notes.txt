@@ -1,0 +1,4 @@
+90% ke atas: 3 bintang
+70% ke atas: 2 bintang
+Kurang 70%: 1 bintang
+Belum cuba: 0 bintang

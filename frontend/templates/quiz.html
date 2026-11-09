@@ -29,28 +29,42 @@
   </header>
 
   <!-- VIEW 1: Topic Selection -->
-  <section class="topic-selector-card bubble-panel" id="view-selector">
-    <h1 style="color: var(--aq-ocean); font-size: 2rem; margin-bottom: 0.5rem;">Pilih Pengembaraan Kuiz Anda! 🌊</h1>
-    <p style="color: var(--aq-muted); max-width: 50ch; margin: 0 auto 1.5rem;">
-      Pilih mata pelajaran dan topik di bawah. Selesaikan kuiz untuk mengumpul mutiara dan membuka kunci ikan baharu!
-    </p>
-
-    <!-- Subject Tabs -->
-    <div class="subject-tabs" role="tablist">
-      <button type="button" class="subject-tab active" id="tab-math">📐 Matematik</button>
-      <button type="button" class="subject-tab" id="tab-science">🔬 Sains</button>
+  <section class="selector-stage" id="view-selector">
+    <div class="host">
+      <img class="host__mascot" src="{{ url_for('static', filename=cut ~ 'mal-happy.png') }}" alt="">
+      <p class="host__say" id="host-say" aria-live="polite">Hai! Nak selam topik mana hari ni?</p>
     </div>
 
-    <!-- Topics Grid -->
-    <div class="topics-grid" id="topics-container">
-      <!-- Populated dynamically by quiz.js -->
-    </div>
-
-    <div style="margin-top: 2rem;">
-      <button type="button" class="aq-btn aq-btn--primary" id="btn-start-quiz" style="min-width: 220px;">
-        <span>Mula Menyelam!</span>
+    <!-- Subject doors -->
+    <div class="doors" role="group" aria-label="Mata pelajaran">
+      <button type="button" class="door active" id="tab-math" aria-pressed="true">
+        <span class="door__ico" aria-hidden="true">📐</span><span>Matematik</span>
+      </button>
+      <button type="button" class="door" id="tab-science" aria-pressed="false">
+        <span class="door__ico" aria-hidden="true">🔬</span><span>Sains</span>
       </button>
     </div>
+
+    <!-- Adaptive practice (uses the student's latest quiz attempt) -->
+    <button type="button" class="adapt" id="adapt-card" hidden>
+      <span class="adapt__ico" aria-hidden="true">🧭</span>
+      <span class="adapt__txt">
+        <span class="adapt__title">Latihan Adaptif</span>
+        <span class="adapt__sub" id="adapt-sub"></span>
+      </span>
+      <span class="adapt__go" aria-hidden="true">Mula &rarr;</span>
+    </button>
+
+    <!-- Topic progress -->
+    <div class="topic-prog" id="topic-progress" hidden>
+      <span id="prog-text"></span>
+      <div class="topic-prog__track"><div id="prog-fill"></div></div>
+    </div>
+
+    <!-- Topics Grid (populated dynamically by quiz.js) -->
+    <div class="topics-grid" id="topics-container"></div>
+
+    <button type="button" class="go-btn" id="btn-start-quiz">Mula Menyelam! 🫧</button>
   </section>
 
   <!-- VIEW 2: Empty State (When no questions exist for selected topic) -->
