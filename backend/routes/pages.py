@@ -60,6 +60,13 @@ def learning_page():
     return render_template("learning.html")
 
 
+@pages_bp.route("/aquaplan")
+def aqua_plan_page():
+    if not session.get("student_id"):
+        return redirect(url_for("pages.login_page"))
+    return render_template("aqua_plan.html")
+
+
 @pages_bp.route("/aquarium")
 def aquarium_page():
     if not session.get("student_id"):

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}AquaPlan — Misi Belajar Pintar{% endblock %}
+{% block body_class %}page-aquaplan{% endblock %}
+{% block head_extra %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/aqua-plan.css', v=6) }}">
+{% endblock %}
+
+{% block content %}
+<main class="ap-shell">
+  <header class="ap-header">
+    <a class="ap-back" href="/index" aria-label="Kembali ke dunia Aquademia">← <span>Dunia Aquademia</span></a>
+    <a class="ap-brand" href="/aquaplan"><span aria-hidden="true">🫧</span> AquaPlan</a>
+    <a class="ap-wallet" href="/shop" aria-label="Lihat kedai">🐚 <span id="ap-pearls">—</span></a>
+  </header>
+
+  <section class="ap-hero">
+    <div class="ap-hero__copy">
+      <p class="ap-eyebrow">EJEN MISI BELAJAR PERIBADI</p>
+      <h1>Belajar sikit-sikit,<br><span>menang besar!</span></h1>
+      <p id="ap-intro">Mal akan susun misi ikut masa lapang dan jawapan kuiz kamu — kemudian ulang topik pada masa yang sesuai supaya lebih mudah ingat.</p>
+      <div class="ap-agent-tags">
+        <span>🧠 Fokus ikut prestasi</span>
+        <span>🔁 Ulang kaji Hari 1 · 3 · 7</span>
+        <span>⏱️ Ikut masa kamu</span>
+      </div>
+    </div>
+    <div class="ap-mascot">
+      <div class="ap-speech" id="ap-speech">Hai! Jom rancang misi minggu ini.</div>
+      <img src="{{ url_for('static', filename='images/characters/cutouts/mal-thinking.png') }}" alt="Mal sedang berfikir tentang pelan belajar kamu">
+    </div>
+  </section>
+
+  <section class="ap-builder" id="ap-builder" aria-labelledby="ap-builder-title">
+    <div class="ap-section-heading">
+      <div>
+        <p class="ap-eyebrow">LANGKAH 1 · TETAPKAN RENTAK</p>
+        <h2 id="ap-builder-title">Minggu kamu macam mana?</h2>
+      </div>
+      <span class="ap-step-badge">Boleh dikemas kini bila-bila</span>
+    </div>
+    <form id="ap-form">
+      <fieldset class="ap-fieldset">
+        <legend>Hari yang kamu lapang</legend>
+        <div class="ap-weekdays">
+          {% for day in [
+            ("0", "Isn", "Isnin"), ("1", "Sel", "Selasa"),
+            ("2", "Rab", "Rabu"), ("3", "Kha", "Khamis"),
+            ("4", "Jum", "Jumaat"), ("5", "Sab", "Sabtu"),
+            ("6", "Ahd", "Ahad")
+          ] %}
+          <label class="ap-day-choice">
+            <input type="checkbox" name="free_days" value="{{ day[0] }}" {% if day[0] in ["0", "2", "4"] %}checked{% endif %}>
+            <span><strong>{{ day[1] }}</strong><small>{{ day[2] }}</small></span>
+          </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <div class="ap-form-bottom">
+        <label class="ap-select-field">
+          <span>Masa belajar sehari</span>
+          <select id="ap-minutes" name="minutes_per_day">
+            <option value="10">10 minit · santai</option>
+            <option value="20" selected>20 minit · seimbang</option>
+            <option value="30">30 minit · fokus</option>
+          </select>
+        </label>
+        <label class="ap-select-field">
+          <span>Tarikh peperiksaan <small>(jika ada)</small></span>
+          <input id="ap-exam-date" name="exam_date" type="date">
+        </label>
+        <button class="ap-build-button" type="submit" id="ap-build-button">
+          <span>🐚</span> Bina misi minggu ini
+        </button>
+      </div>
+      <p class="ap-form-error" id="ap-form-error" role="alert" hidden></p>
+    </form>
+  </section>
+
+  <section class="ap-plan-section" aria-labelledby="ap-plan-title">
+    <div class="ap-section-heading ap-plan-heading">
+      <div>
+        <p class="ap-eyebrow">LANGKAH 2 · MISI KAMU</p>
+        <h2 id="ap-plan-title">Pelan 7 hari</h2>
+      </div>
+      <div class="ap-plan-actions">
+        <button class="ap-edit-button" type="button" id="ap-edit-button" hidden>✏️ Edit jadual</button>
+        <div class="ap-progress-wrap" id="ap-progress-wrap" hidden>
+          <span id="ap-progress-label">0 / 0 tugasan</span>
+          <div class="ap-progress-track"><span id="ap-progress-bar"></span></div>
+        </div>
+      </div>
+    </div>
+    <div class="ap-status" id="ap-status" role="status">Sedang memeriksa keadaan lautan...</div>
+    <div class="ap-reasoning" id="ap-reasoning" hidden></div>
+    <div class="ap-week-grid" id="ap-week-grid"></div>
+  </section>
+
+  <footer class="ap-footer">
+    <span>🫧 AquaPlan belajar daripada kuiz kamu, bukan teka-teka.</span>
+    <a href="/learning">Lihat ruang pembelajaran →</a>
+  </footer>
+</main>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for('static', filename='js/aqua-plan.js', v=3) }}" defer></script>
+{% endblock %}

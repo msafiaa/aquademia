@@ -21,6 +21,16 @@ def get_pearl_balance(connection, student_id):
 
         cursor.execute(
             """
+            SELECT COALESCE(SUM(pearls_earned), 0) AS earned
+            FROM aqua_plan_rewards
+            WHERE student_id = %s
+            """,
+            (student_id,)
+        )
+        earned += int(cursor.fetchone()["earned"])
+
+        cursor.execute(
+            """
             SELECT COALESCE(SUM(amount), 0) AS spent
             FROM pearl_transactions
             WHERE student_id = %s
