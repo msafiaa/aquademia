@@ -106,8 +106,8 @@
   fetch("/api/shop/wallet", { credentials: "same-origin" })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
-      if (d && typeof d.pearls !== "undefined") {
-        document.getElementById("user-pearls").textContent = d.pearls;
+      if (d && typeof d.available_pearls !== "undefined") {
+        document.getElementById("user-pearls").textContent = d.available_pearls;
       }
     });
 
@@ -399,6 +399,22 @@
     var score = Math.round(result.score || 0);
     document.getElementById("res-score-number").textContent = score + "%";
     document.getElementById("res-correct-count").textContent = result.correct_answers + " daripada " + result.total_questions + " betul";
+    var rewardMessage = document.getElementById("res-reward-message");
+    if (result.reward) {
+      rewardMessage.textContent =
+        "Tahniah! Anda mendapat " + result.reward.fish_type + " dan " +
+        result.reward.pearls_earned + " mutiara.";
+      rewardMessage.hidden = false;
+      fetch("/api/shop/wallet", { credentials: "same-origin" })
+        .then(function (res) { return res.ok ? res.json() : null; })
+        .then(function (wallet) {
+          if (wallet && typeof wallet.available_pearls !== "undefined") {
+            document.getElementById("user-pearls").textContent = wallet.available_pearls;
+          }
+        });
+    } else {
+      rewardMessage.hidden = true;
+    }
 
     // Mascot emotion & greeting
     var mascotImg = document.getElementById("res-mascot-img");

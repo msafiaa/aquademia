@@ -1,5 +1,6 @@
 
 from db import get_db_connection
+from services.reward_service import award_missing_quiz_rewards
 from services.wallet_service import get_pearl_balance
 
 
@@ -27,6 +28,7 @@ def get_shop_items():
 
 
 def get_student_wallet(student_id):
+    award_missing_quiz_rewards(student_id)
     connection = get_db_connection()
 
     try:

@@ -603,8 +603,8 @@
     fetch("/api/shop/wallet", { credentials: "same-origin" })
       .then(function (res) { return res.json(); })
       .then(function (d) {
-        if (d && typeof d.pearls !== "undefined") {
-          document.getElementById("user-pearls").textContent = d.pearls;
+        if (d && typeof d.available_pearls !== "undefined") {
+          document.getElementById("user-pearls").textContent = d.available_pearls;
         }
       });
   }

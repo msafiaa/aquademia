@@ -17,6 +17,7 @@ from services.notes_service import (
 from services.performance_service import analyze_performance
 from services.quiz_service import get_default_questions, get_topics
 from services.question_validator import validate_adaptive_questions
+from services.reward_service import award_quiz_reward
 
 
 quiz_bp = Blueprint("quiz", __name__)
@@ -109,6 +110,13 @@ def submit_quiz():
     attempt_id = save_quiz_attempt(student_id, result)
 
     result["attempt_id"] = attempt_id
+    try:
+        result["reward"] = award_quiz_reward(attempt_id)
+        result["reward_status"] = "available"
+    except Exception as error:
+        print("QUIZ REWARD ERROR:", repr(error))
+        result["reward"] = None
+        result["reward_status"] = "unavailable"
 
     
     # Generate explanations for completed quiz questions

@@ -74,8 +74,8 @@
     fetch("/api/shop/wallet", { credentials: "same-origin" })
       .then(function (res) { return res.json(); })
       .then(function (data) {
-        if (data && typeof data.pearls !== "undefined") {
-          currentPearls = data.pearls;
+        if (data && typeof data.available_pearls !== "undefined") {
+          currentPearls = data.available_pearls;
           userPearlsEl.textContent = currentPearls;
           userPearlsHeaderEl.textContent = currentPearls;
         }

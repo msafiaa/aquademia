@@ -105,8 +105,8 @@
   fetch("/api/shop/wallet", { credentials: "same-origin" })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
-      if (d && typeof d.pearls !== "undefined") {
-        document.getElementById("user-pearls").textContent = d.pearls;
+      if (d && typeof d.available_pearls !== "undefined") {
+        document.getElementById("user-pearls").textContent = d.available_pearls;
       }
     });
 
@@ -391,8 +391,8 @@
           fetch("/api/shop/wallet", { credentials: "same-origin" })
             .then(function (res) { return res.ok ? res.json() : null; })
             .then(function (wallet) {
-              if (wallet && typeof wallet.pearls !== "undefined") {
-                document.getElementById("user-pearls").textContent = wallet.pearls;
+              if (wallet && typeof wallet.available_pearls !== "undefined") {
+                document.getElementById("user-pearls").textContent = wallet.available_pearls;
               }
             });
         }

@@ -47,8 +47,8 @@
   fetch("/api/shop/wallet", { credentials: "same-origin" })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (d) {
-      if (d && typeof d.pearls !== "undefined") {
-        document.getElementById("user-pearls").textContent = d.pearls;
+      if (d && typeof d.available_pearls !== "undefined") {
+        document.getElementById("user-pearls").textContent = d.available_pearls;
       }
     });
 
