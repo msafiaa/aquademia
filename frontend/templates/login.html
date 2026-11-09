@@ -4,11 +4,29 @@
 {% block body_class %}page-auth{% endblock %}
 
 {% block head_extra %}
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
 {% endblock %}
 
 {% block content %}
 {% set cut = 'images/characters/cutouts/' %}
+
+{% macro eye(target) %}
+<button type="button" class="pw-toggle" data-toggle-for="{{ target }}" aria-label="Show password" aria-pressed="false">
+  <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+    <path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+    <circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path class="slash" d="M3 3l18 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+  </svg>
+</button>
+{% endmacro %}
+
+<!-- Scene: beach on top, ocean below. Slides up after login so the student "dives" in. -->
+<div class="scene" aria-hidden="true">
+  <div class="scene__land"></div>
+  <div class="scene__sea"></div>
+</div>
+
 <main class="auth-shell"
       id="auth-root"
       data-initial-tab="{{ initial_tab }}"
@@ -21,14 +39,11 @@
 
   <!-- ===== Left: brand + mascots ===== -->
   <section class="auth-stage" aria-label="Welcome to Aquademia">
-    <h1 class="auth-brand">
-      <svg class="auth-brand__icon" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true" focusable="false">
-        <circle cx="24" cy="24" r="21" fill="#e6fbff" stroke="#0d8aa6" stroke-width="3"/>
-        <ellipse cx="17" cy="15" rx="6" ry="3.5" fill="#fff" opacity=".9" transform="rotate(-30 17 15)"/>
-        <circle cx="31" cy="30" r="3" fill="#7fe0ea"/>
-        <circle cx="24" cy="33" r="1.8" fill="#7fe0ea"/>
-      </svg>
-      <span>Aquademia</span>
+    <h1 class="auth-brand" aria-label="Aquademia">
+      <span class="auth-brand__icon" aria-hidden="true">🫧</span>
+      <span class="auth-brand__letters" aria-hidden="true">
+        {%- for ch in "Aquademia" %}<i style="--i:{{ loop.index0 }}">{{ ch }}</i>{% endfor -%}
+      </span>
     </h1>
     <p class="auth-tagline">
       <strong>Selamat datang!</strong>
@@ -57,7 +72,7 @@
   </section>
 
   <!-- ===== Right: forms ===== -->
-  <section class="auth-card bubble-panel" aria-labelledby="auth-heading">
+  <section class="auth-card" aria-labelledby="auth-heading">
     <div id="auth-forms">
       <div class="tabs" role="tablist" aria-label="Log in or create an account">
         <button type="button" class="tab" role="tab" id="tab-login"
@@ -69,7 +84,7 @@
       <!-- ---------- LOG IN ---------- -->
       <div class="tab-panel" id="panel-login" role="tabpanel" aria-labelledby="tab-login">
         <h2 class="auth-heading" id="auth-heading">Welcome back, explorer!</h2>
-        <p class="auth-sub">Log in to continue your ocean adventure.</p>
+        <p class="auth-sub">Log in, then dive from the beach into the ocean!</p>
 
         <form id="login-form" novalidate>
           <div class="aq-alert aq-alert--error" id="login-alert" role="alert" hidden></div>
@@ -89,20 +104,13 @@
               <input class="aq-input" id="login-password" name="password" type="password"
                      autocomplete="current-password" maxlength="128" required
                      aria-describedby="login-password-error">
-              <button type="button" class="pw-toggle" data-toggle-for="login-password"
-                      aria-label="Show password" aria-pressed="false">
-                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-                  <path class="eye" d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                  <circle class="eye" cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
-                  <path class="slash" d="M3 3l18 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-                </svg>
-              </button>
+              {{ eye('login-password') }}
             </div>
             <p class="field-error" id="login-password-error" hidden></p>
           </div>
 
           <button class="aq-btn aq-btn--primary aq-btn--block" type="submit" id="login-submit">
-            <span class="aq-btn__label">Dive in!</span>
+            <span class="aq-btn__label">Dive in! 🚀</span>
             <span class="aq-spinner" aria-hidden="true"></span>
           </button>
         </form>
@@ -146,14 +154,7 @@
               <input class="aq-input" id="reg-password" name="password" type="password"
                      autocomplete="new-password" maxlength="128" required
                      aria-describedby="reg-password-hint reg-password-error">
-              <button type="button" class="pw-toggle" data-toggle-for="reg-password"
-                      aria-label="Show password" aria-pressed="false">
-                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-                  <path class="eye" d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                  <circle class="eye" cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
-                  <path class="slash" d="M3 3l18 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-                </svg>
-              </button>
+              {{ eye('reg-password') }}
             </div>
             <div class="pw-meter" aria-hidden="true"><span id="pw-meter-fill"></span></div>
             <p class="field-hint" id="reg-password-hint">
@@ -169,20 +170,13 @@
               <input class="aq-input" id="reg-confirm" name="confirm_password" type="password"
                      autocomplete="new-password" maxlength="128" required
                      aria-describedby="reg-confirm-error">
-              <button type="button" class="pw-toggle" data-toggle-for="reg-confirm"
-                      aria-label="Show password" aria-pressed="false">
-                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
-                  <path class="eye" d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                  <circle class="eye" cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
-                  <path class="slash" d="M3 3l18 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
-                </svg>
-              </button>
+              {{ eye('reg-confirm') }}
             </div>
             <p class="field-error" id="reg-confirm-error" hidden></p>
           </div>
 
           <button class="aq-btn aq-btn--coral aq-btn--block" type="submit" id="register-submit">
-            <span class="aq-btn__label">Start my adventure!</span>
+            <span class="aq-btn__label">Start my adventure! 🐠</span>
             <span class="aq-spinner" aria-hidden="true"></span>
           </button>
         </form>
@@ -203,7 +197,7 @@
   </section>
 </main>
 
-<!-- Celebration rising bubbles layer ("bubble naik atas") -->
+<!-- Celebration rising bubbles layer -->
 <div class="bubble-surge-overlay" id="bubble-surge" aria-hidden="true"></div>
 {% endblock %}
 
