@@ -75,11 +75,13 @@ def get_explanations(attempt_id):
             return jsonify({"error": "Quiz attempt not found."}), 404
 
         cursor.execute("""
-            SELECT explanation_id, question_id, student_answer,
-                   correct_answer, is_correct, explanation
-            FROM question_explanations
-            WHERE attempt_id = %s AND student_id = %s
-            ORDER BY explanation_id
+            SELECT qe.explanation_id, qe.question_id, qe.student_answer,
+                   qe.correct_answer, qe.is_correct, qe.explanation,
+                   q.question_text
+            FROM question_explanations qe
+            LEFT JOIN questions q ON q.question_id = qe.question_id
+            WHERE qe.attempt_id = %s AND qe.student_id = %s
+            ORDER BY qe.explanation_id
         """, (attempt_id, student_id))
 
         explanations = cursor.fetchall()

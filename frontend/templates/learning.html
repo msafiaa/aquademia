@@ -4,6 +4,7 @@
 {% block body_class %}page-learning{% endblock %}
 
 {% block head_extra %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/learning.css') }}">
 {% endblock %}
 
@@ -171,5 +172,6 @@
 {% endblock %}
 
 {% block scripts %}
+  <script src="{{ url_for('static', filename='js/aq-render.js') }}" defer></script>
   <script src="{{ url_for('static', filename='js/learning.js') }}" defer></script>
 {% endblock %}

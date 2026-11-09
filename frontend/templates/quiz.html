@@ -4,6 +4,7 @@
 {% block body_class %}page-quiz{% endblock %}
 
 {% block head_extra %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/review.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/quiz.css') }}">
 {% endblock %}
 
@@ -159,5 +160,6 @@
 {% endblock %}
 
 {% block scripts %}
+  <script src="{{ url_for('static', filename='js/aq-render.js') }}" defer></script>
   <script src="{{ url_for('static', filename='js/quiz.js') }}" defer></script>
 {% endblock %}

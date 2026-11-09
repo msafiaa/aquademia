@@ -75,6 +75,14 @@
   text-align: left;
 }
 
+.topics-status {
+  grid-column: 1 / -1;
+  margin: 1rem 0;
+  text-align: center;
+  color: var(--aq-muted);
+  font-weight: 700;
+}
+
 .topic-btn {
   display: flex;
   flex-direction: column;
@@ -160,6 +168,7 @@
   border-radius: var(--aq-radius-sm);
   overflow: hidden;
   border: 2px solid #b6e3ec;
+  background: #fff;
 }
 .question-image-box img {
   width: 100%;

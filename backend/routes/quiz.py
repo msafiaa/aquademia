@@ -15,11 +15,25 @@ from services.notes_service import (
 )
 
 from services.performance_service import analyze_performance
-from services.quiz_service import get_default_questions
+from services.quiz_service import get_default_questions, get_topics
 from services.question_validator import validate_adaptive_questions
 
 
 quiz_bp = Blueprint("quiz", __name__)
+
+
+@quiz_bp.route("/api/topics", methods=["GET"])
+def list_topics():
+    if session.get("student_id") is None:
+        return jsonify({"error": "Login required."}), 401
+
+    year = request.args.get("year", default=4, type=int)
+    subject = request.args.get("subject", "Science")
+
+    if year not in (4, 5, 6):
+        return jsonify({"error": "Invalid year"}), 400
+
+    return jsonify(get_topics(year, subject))
 
 
 @quiz_bp.route("/api/questions", methods=["GET"])

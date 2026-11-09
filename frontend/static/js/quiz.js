@@ -99,17 +99,69 @@
   tabMath.addEventListener("click", function () { setSubject("Mathematics"); });
   tabScience.addEventListener("click", function () { setSubject("Science"); });
 
+  var topicRequestId = 0;
+
   function renderTopicCards() {
+    topicRequestId++; // cancels any topic request still in flight
+
+    if (currentSubject === "Science") {
+      loadScienceTopics();
+      return;
+    }
+
+    drawTopicCards((TOPICS[currentSubject] || []).map(function (t) {
+      return { name: t.name, label: t.label, meta: t.name + " \u2022 " + t.desc };
+    }));
+  }
+
+  // Science topics come from the questions table, for this student's year
+  function loadScienceTopics() {
+    var reqId = topicRequestId;
+    var year = (currentStudent && currentStudent.year_level) || 4;
+
+    currentTopic = null;
+    btnStartQuiz.disabled = true;
+    topicsContainer.innerHTML = '<p class="topics-status">Menyelam mencari topik...</p>';
+
+    fetch("/api/topics?subject=Science&year=" + encodeURIComponent(year), { credentials: "same-origin" })
+      .then(function (res) { return res.ok ? res.json() : []; })
+      .catch(function () { return []; })
+      .then(function (list) {
+        if (reqId !== topicRequestId) return; // user switched tab meanwhile
+
+        if (!Array.isArray(list) || list.length === 0) {
+          topicsContainer.innerHTML =
+            '<p class="topics-status">Belum ada topik Sains untuk Tahun ' + year + '.</p>';
+          return;
+        }
+
+        drawTopicCards(list.map(function (t) {
+          return { name: t.topic, label: t.topic, meta: "Tahun " + year + " \u2022 " + t.count + " soalan" };
+        }));
+      });
+  }
+
+  function drawTopicCards(list) {
     topicsContainer.innerHTML = "";
-    var list = TOPICS[currentSubject] || [];
+    if (!list.length) { btnStartQuiz.disabled = true; return; }
+
+    btnStartQuiz.disabled = false;
     currentTopic = list[0].name;
 
     list.forEach(function (t, idx) {
       var btn = document.createElement("div");
       btn.className = "topic-btn" + (idx === 0 ? " selected" : "");
-      btn.innerHTML =
-        '<div class="topic-btn__name">' + t.label + '</div>' +
-        '<div class="topic-btn__meta">' + t.name + ' &bull; ' + t.desc + '</div>';
+
+      var name = document.createElement("div");
+      name.className = "topic-btn__name";
+      name.textContent = t.label;
+
+      var meta = document.createElement("div");
+      meta.className = "topic-btn__meta";
+      meta.textContent = t.meta;
+
+      btn.appendChild(name);
+      btn.appendChild(meta);
       btn.addEventListener("click", function () {
         Array.prototype.forEach.call(topicsContainer.children, function (c) { c.classList.remove("selected"); });
         btn.classList.add("selected");
@@ -120,6 +172,7 @@
   }
 
   btnStartQuiz.addEventListener("click", function () {
+    if (!currentTopic) return;
     loadQuestions();
   });
 
@@ -334,13 +387,14 @@
 
     if (Array.isArray(result.question_results)) {
       result.question_results.forEach(function (q, idx) {
-        var item = document.createElement("div");
-        item.className = "review-item " + (q.is_correct ? "correct" : "incorrect");
-        item.innerHTML =
-          '<div class="review-q-title">Soalan ' + (idx + 1) + ': ' + (q.is_correct ? 'Betul &check;' : 'Salah &cross;') + '</div>' +
-          '<div class="review-ans">Jawapan anda: <strong>' + q.student_answer + '</strong></div>' +
-          (q.explanation ? '<div class="review-exp"><strong>Penerangan AI Aqua:</strong> ' + q.explanation + '</div>' : '');
-        breakdownContainer.appendChild(item);
+        breakdownContainer.appendChild(window.AqRender.reviewCard({
+          index: idx + 1,
+          question: q.question,
+          studentAnswer: q.student_answer,
+          correctAnswer: q.correct_answer,
+          isCorrect: !!q.is_correct,
+          explanation: q.explanation
+        }));
       });
     }
 

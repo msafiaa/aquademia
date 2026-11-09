@@ -4,6 +4,8 @@
 (function () {
   "use strict";
 
+  var R = window.AqRender;
+
   // Elements
   var tabs = {
     notes: document.getElementById("tab-notes"),
@@ -119,6 +121,61 @@
   }
 
   /* ------------------------------------------------------------------
+     Structured, kid-friendly notes
+     ------------------------------------------------------------------ */
+  var CONCEPT_ICONS = ["💡", "🔍", "🧩", "🌟", "🐚", "🧠"];
+
+  function renderNotes(box, content) {
+    box.className = "notes-content-box nt-wrap";
+
+    if (!content || typeof content !== "object" || !Array.isArray(content.key_concepts)) {
+      box.innerHTML = '<div class="md">' + R.markdown(typeof content === "string" ? content : "Tiada nota tambahan.") + "</div>";
+      return;
+    }
+
+    var html = "";
+
+    html +=
+      '<div class="nt-hero">' +
+        '<img class="nt-hero__avatar" src="/static/images/characters/cutouts/fania-happy.png" alt="Aqua">' +
+        "<div>" +
+          "<h4>" + R.esc(content.title || "Nota Revisi") + "</h4>" +
+          '<div class="md">' + R.markdown(content.summary) + "</div>" +
+        "</div>" +
+      "</div>";
+
+    if (content.key_concepts.length) {
+      html += '<h4 class="nt-section-title">🧠 Konsep Penting</h4><div class="nt-grid">';
+      content.key_concepts.forEach(function (c, i) {
+        html +=
+          '<div class="nt-card">' +
+            "<h5><span class=\"nt-card__icon\">" + CONCEPT_ICONS[i % CONCEPT_ICONS.length] + "</span>" + R.esc(c.heading) + "</h5>" +
+            '<div class="md">' + R.markdown(c.explanation) + "</div>" +
+          "</div>";
+      });
+      html += "</div>";
+    }
+
+    var ex = content.worked_example;
+    if (ex && Array.isArray(ex.steps) && ex.steps.length) {
+      html += '<h4 class="nt-section-title">✏️ Contoh Penyelesaian</h4><div class="nt-example">';
+      html += '<p class="nt-example__q">' + R.esc(ex.question) + "</p><ol class=\"nt-steps\">";
+      ex.steps.forEach(function (s) { html += "<li>" + R.esc(s) + "</li>"; });
+      html += "</ol>";
+      if (ex.answer) html += '<span class="nt-answer">Jawapan: ' + R.esc(ex.answer) + "</span>";
+      html += "</div>";
+    }
+
+    if (Array.isArray(content.revision_tips) && content.revision_tips.length) {
+      html += '<h4 class="nt-section-title">🌈 Tip Ulang Kaji</h4><ul class="nt-tips">';
+      content.revision_tips.forEach(function (t) { html += "<li><span>" + R.esc(t) + "</span></li>"; });
+      html += "</ul>";
+    }
+
+    box.innerHTML = html;
+  }
+
+  /* ------------------------------------------------------------------
      Load Attempt Data (Notes, Weak Skills, Explanations)
      ------------------------------------------------------------------ */
   function loadAttemptData(attemptId) {
@@ -143,30 +200,13 @@
           weakSkills.forEach(function (s) {
             var tag = document.createElement("span");
             tag.className = "skill-tag";
-            tag.textContent = "⚠️ " + s;
+            tag.textContent = "🎯 " + R.prettySkill(s);
             skillsBox.appendChild(tag);
           });
         }
 
         // Render notes content
-        var notesBox = document.getElementById("notes-container");
-        var content = note.notes_json;
-        if (typeof content === "object" && content !== null) {
-          var html = "";
-          Object.keys(content).forEach(function (k) {
-            html += "<h3>" + k + "</h3>";
-            if (Array.isArray(content[k])) {
-              html += "<ul>";
-              content[k].forEach(function (item) { html += "<li>" + item + "</li>"; });
-              html += "</ul>";
-            } else {
-              html += "<p>" + content[k] + "</p>";
-            }
-          });
-          notesBox.innerHTML = html;
-        } else {
-          notesBox.innerHTML = "<p>" + (content || "Tiada nota tambahan.") + "</p>";
-        }
+        renderNotes(document.getElementById("notes-container"), note.notes_json);
       });
 
     // Load Explanations
@@ -181,14 +221,23 @@
           return;
         }
 
+        var rightCount = list.filter(function (e) { return e.is_correct; }).length;
+        var summary = document.createElement("div");
+        summary.className = "rv-summary";
+        summary.innerHTML =
+          '<span class="rv-summary__pill rv-summary__pill--right">✅ ' + rightCount + ' betul</span>' +
+          '<span class="rv-summary__pill rv-summary__pill--wrong">💪 ' + (list.length - rightCount) + ' perlu disemak</span>';
+        box.appendChild(summary);
+
         list.forEach(function (exp, idx) {
-          var item = document.createElement("div");
-          item.className = "review-item " + (exp.is_correct ? "correct" : "incorrect");
-          item.innerHTML =
-            '<div class="review-q-title">Soalan ' + (idx + 1) + ': ' + (exp.is_correct ? 'Betul &check;' : 'Salah &cross;') + '</div>' +
-            '<div class="review-ans">Jawapan anda: <strong>' + exp.student_answer + '</strong> | Jawapan betul: <strong>' + exp.correct_answer + '</strong></div>' +
-            '<div class="review-exp"><strong>Penerangan AI Aqua:</strong> ' + (exp.explanation || "Analisis soalan.") + '</div>';
-          box.appendChild(item);
+          box.appendChild(R.reviewCard({
+            index: idx + 1,
+            question: exp.question_text,
+            studentAnswer: exp.student_answer,
+            correctAnswer: exp.correct_answer,
+            isCorrect: !!exp.is_correct,
+            explanation: exp.explanation
+          }));
         });
       });
 
@@ -302,7 +351,9 @@
 
     msg.innerHTML =
       '<div class="chat-avatar"><img src="' + avatarSrc + '" alt="' + role + '"></div>' +
-      '<div class="chat-bubble-text">' + escapeHTML(text) + '</div>';
+      (role === "assistant"
+        ? '<div class="chat-bubble-text md">' + R.markdown(text) + '</div>'
+        : '<div class="chat-bubble-text">' + escapeHTML(text) + '</div>');
 
     chatMessagesArea.appendChild(msg);
     chatMessagesArea.scrollTop = chatMessagesArea.scrollHeight;

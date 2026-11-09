@@ -123,6 +123,16 @@ def ask_aqua(student_id, attempt_id, message, history=None):
         revealing answers.
         - Use appropriate Malaysian educational terminology.
 
+        FORMAT (very important, the reply is shown in a small chat bubble):
+        - Start with the answer or a short friendly sentence.
+        - Use short paragraphs (1 to 3 sentences each).
+        - You may use **bold** for key words and simple lists
+        ("- " bullets or "1." numbered steps), each item on its own line.
+        - Do NOT use headings (#), tables, horizontal lines (---) or code blocks.
+        - Use at most 2 emojis.
+        - Keep replies under about 150 words. When explaining several quiz
+        mistakes, cover at most 3 at a time and offer to continue with the rest.
+
         SAFETY AND ACCURACY:
         - Never reveal answers to unfinished adaptive quizzes.
         - Never invent student performance data or scientific facts.
