@@ -16,19 +16,11 @@
 
   // Fish images mapping
   var FISH_IMAGES = {
-<<<<<<< HEAD
-    "Royal Betta": "/static/images/fish/fish-1-2.png",
-    "Angelfish": "/static/images/fish/fish-2.png",
-    "Clownfish": "/static/images/fish/fish-3.png",
-    "Neon Tetra": "/static/images/fish/fish-4.png",
-    "Guppy": "/static/images/fish/fish-5.png"
-=======
     "Royal Betta": "/static/images/fish/transparent/fish-1.png",
     "Angelfish": "/static/images/fish/transparent/fish-2.png",
     "Clownfish": "/static/images/fish/transparent/fish-3.png",
     "Neon Tetra": "/static/images/fish/transparent/fish-4.png",
     "Guppy": "/static/images/fish/transparent/fish-5.png"
->>>>>>> 8c7c64359cc74dfcf08a88d0d00a2078dfbffd3d
   };
 
   function decorationEmoji(item) {
