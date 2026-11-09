@@ -17,6 +17,27 @@
     "Guppy": "/static/images/fish/fish-5.jpg"
   };
 
+  function decorationEmoji(item) {
+    var name = (item.item_name || "").toLowerCase();
+    if (name.indexOf("rock") !== -1 || name.indexOf("stone") !== -1) return "🪨";
+    if (name.indexOf("clam") !== -1) return "🐚";
+    if (name.indexOf("oyster") !== -1) return "🦪";
+    if (name.indexOf("jelly") !== -1) return "🪼";
+    if (name.indexOf("dolphin") !== -1) return "🐬";
+    if (name.indexOf("arch") !== -1) return "🏛️";
+    if (name.indexOf("coral") !== -1) return "🪸";
+    if (name.indexOf("shell") !== -1) return "🐚";
+    if (name.indexOf("chest") !== -1 || name.indexOf("treasure") !== -1) return "💰";
+    if (name.indexOf("ship") !== -1 || name.indexOf("wreck") !== -1) return "🚢";
+    if (name.indexOf("lamp") !== -1 || name.indexOf("light") !== -1) return "💡";
+    if (name.indexOf("flower") !== -1 || name.indexOf("bloom") !== -1) return "🌸";
+    if (name.indexOf("crown") !== -1) return "👑";
+    if (name.indexOf("castle") !== -1) return "🏰";
+    if (name.indexOf("seaweed") !== -1 || name.indexOf("plant") !== -1) return "🌿";
+    if (name.indexOf("starfish") !== -1 || name.indexOf("star") !== -1) return "⭐";
+    return "✨";
+  }
+
   // State
   var currentStudent = null;
   var currentView = "weekly";
@@ -85,18 +106,19 @@
     });
 
     placedDecorations.forEach(function (dec) {
-      var img = document.createElement("img");
-      img.className = "tank-placed-decoration";
-      img.src = dec.image_path || "/static/images/shop/pink_coral.png";
-      img.alt = dec.item_name || "Decoration";
+      var decoration = document.createElement("span");
+      decoration.className = "tank-placed-decoration";
+      decoration.textContent = decorationEmoji(dec);
+      decoration.setAttribute("role", "img");
+      decoration.setAttribute("aria-label", dec.item_name || "Hiasan");
 
       // Position relative inside tank
       var posX = Math.round((dec.position_x !== null ? dec.position_x : 0.5) * 85);
       var posY = Math.round((dec.position_y !== null ? dec.position_y : 0.8) * 45 + 35); // towards bottom
-      img.style.left = Math.max(5, Math.min(posX, 85)) + "%";
-      img.style.top = Math.max(25, Math.min(posY, 75)) + "%";
+      decoration.style.left = Math.max(5, Math.min(posX, 85)) + "%";
+      decoration.style.top = Math.max(25, Math.min(posY, 75)) + "%";
 
-      tankContainer.appendChild(img);
+      tankContainer.appendChild(decoration);
     });
   }
 

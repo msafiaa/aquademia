@@ -214,12 +214,21 @@ CREATE TABLE `shop_items` (
 --
 
 INSERT INTO `shop_items` (`item_id`, `item_name`, `description`, `category`, `price`, `image_path`, `is_active`) VALUES
-(1, 'Pink Coral', 'A beautiful pink coral for your ocean home.', 'Coral', 20, '/static/images/shop/pink_coral.png', 1),
-(2, 'Pearl Shell', 'A magical shell with a shining pearl.', 'Shell', 35, '/static/images/shop/pearl_shell.png', 1),
-(3, 'Treasure Chest', 'A mysterious underwater treasure chest.', 'Treasure', 50, '/static/images/shop/treasure_chest.png', 1),
-(4, 'Sand Castle', 'A lovely sand castle under the sea.', 'Building', 70, '/static/images/shop/sand_castle.png', 1),
-(5, 'Seaweed Garden', 'A relaxing garden of green seaweed.', 'Plant', 15, '/static/images/shop/seaweed.png', 1),
-(6, 'Starfish', 'A colourful starfish decoration.', 'Decoration', 10, '/static/images/shop/starfish.png', 1);
+(1, 'Pink Coral', 'A beautiful pink coral for your ocean home.', 'Coral', 75, '/static/images/shop/pink_coral.png', 1),
+(2, 'Pearl Oyster', 'An oyster holding a bright, precious pearl.', 'Shell', 130, NULL, 1),
+(3, 'Treasure Chest', 'A mysterious underwater treasure chest.', 'Treasure', 175, '/static/images/shop/treasure_chest.png', 1),
+(4, 'Sand Castle', 'A lovely sand castle under the sea.', 'Building', 200, '/static/images/shop/sand_castle.png', 1),
+(5, 'Seaweed Garden', 'A relaxing garden of green seaweed.', 'Plant', 50, '/static/images/shop/seaweed.png', 1),
+(6, 'Starfish', 'A colourful starfish decoration.', 'Decoration', 30, '/static/images/shop/starfish.png', 1),
+(7, 'Giant Clam', 'A cosy giant clam where little fish can hide.', 'Shell', 90, NULL, 1),
+(8, 'Shipwreck', 'An old sunken ship full of ocean secrets.', 'Building', 250, NULL, 1),
+(9, 'Bubble Lamp', 'A glowing lamp to brighten your underwater home.', 'Decoration', 110, NULL, 1),
+(10, 'Coral Rock', 'A smooth ocean rock for fish to rest beside.', 'Decoration', 40, NULL, 1),
+(11, 'Sea Flower', 'A colourful flower that blooms beneath the waves.', 'Plant', 60, NULL, 1),
+(12, 'Golden Crown', 'A treasure fit for the king or queen of the ocean.', 'Treasure', 320, NULL, 1),
+(13, 'Moon Jelly', 'A glowing moon jelly drifting through the blue.', 'Sea Life', 150, NULL, 1),
+(14, 'Dolphin Statue', 'A cheerful dolphin statue for your ocean home.', 'Decoration', 220, NULL, 1),
+(15, 'Coral Arch', 'A grand archway shaped from colourful coral.', 'Building', 280, NULL, 1);
 
 -- --------------------------------------------------------
 

@@ -132,12 +132,12 @@
 /* Tank Placed Decorations */
 .tank-placed-decoration {
   position: absolute;
-  width: 60px;
-  height: 60px;
-  object-fit: contain;
   z-index: 5;
   filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.35));
   transition: transform 0.2s;
+  font-size: 3.25rem;
+  line-height: 1;
+  transform: translate(-50%, -50%);
 }
 
 /* View switcher */

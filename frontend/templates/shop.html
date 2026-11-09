@@ -8,41 +8,41 @@
 {% endblock %}
 
 {% block content %}
-{% set cut = 'images/characters/cutouts/' %}
 <div class="shop-shell">
   <!-- Top Navigation Header -->
   <header class="shop-nav-header">
-    <a href="/index" class="back-link">
-      <span>&larr;</span>
-      <span>Kembali ke Pangkalan Utama</span>
+    <a href="/index" class="shop-back-link" aria-label="Kembali ke pangkalan utama">
+      <span class="shop-back-link__icon" aria-hidden="true">&larr;</span>
+      <span>Pangkalan Utama</span>
     </a>
-
-    <div style="display: flex; align-items: center; gap: 1rem;">
-      <div class="pearl-pill" title="Baki Mutiara">
-        <span>🐚</span>
-        <span id="user-pearls-header">0</span>
+    <div class="shop-brand">
+      <span class="shop-brand__icon" aria-hidden="true">🫧</span>
+      <span class="shop-brand__text">
+        <strong>Kedai Bawah Laut</strong>
+        <small>Hias akuarium impian anda</small>
+      </span>
+    </div>
+    <div class="shop-nav-user">
+      <div class="shop-pearl-balance" title="Baki mutiara anda">
+        <span aria-hidden="true">🐚</span>
+        <strong id="user-pearls">0</strong>
         <span>Mutiara</span>
       </div>
       <span class="user-greeting" id="user-display">Hai, Pengembara!</span>
     </div>
   </header>
 
-  <!-- Shop Hero Banner -->
-  <section class="shop-hero-banner bubble-panel">
-    <div class="shop-hero-text">
-      <h1>Kedai Hiasan Bawah Laut 🐚✨</h1>
-      <p style="color: var(--aq-muted); max-width: 50ch; margin: 0.25rem 0 1rem;">
-        Gunakan mutiara ganjaran kuiz anda untuk membeli karang indah, kulit mutiara, dan istana pasir untuk menghias akuarium peribadi anda!
-      </p>
-      <div class="pearl-pill" style="font-size: 1.15rem; padding: 0.5rem 1.25rem; width: fit-content;">
-        <span>Baki Mutiara Anda:</span>
-        <strong id="user-pearls">0</strong>
-        <span>🐚</span>
-      </div>
-    </div>
-    <img src="{{ url_for('static', filename=cut ~ 'fania-happy.png') }}"
-         alt="Fania Kedai" style="height: 140px; width: auto; filter: drop-shadow(0 4px 8px rgba(6,58,90,0.3));">
+  <section class="shop-host" aria-label="Ucapan Mal">
+    <img class="shop-host__mascot"
+         src="{{ url_for('static', filename='images/characters/cutouts/mal-happy.png') }}"
+         alt="Mal">
+    <p class="shop-host__message" id="shop-host-message" aria-live="polite">
+      Selamat datang! Kumpul mutiara dan pilih hiasan untuk akuarium anda.
+    </p>
   </section>
+
+  <section class="shop-goal bubble-panel" id="shop-goal" aria-live="polite"></section>
+  <div class="shop-category-chips" id="shop-category-chips" role="group" aria-label="Kategori hiasan"></div>
 
   <!-- Shop Tabs -->
   <div class="shop-tabs" role="tablist">
@@ -69,6 +69,27 @@
   </div>
 </div>
 
+<div class="catalog-modal-overlay" id="catalog-item-modal" hidden>
+  <section class="catalog-modal-card" role="dialog" aria-modal="true" aria-labelledby="catalog-modal-title">
+    <div class="catalog-modal-heading">
+      <span class="catalog-modal-emoji" id="catalog-modal-emoji" aria-hidden="true"></span>
+      <div>
+        <h2 id="catalog-modal-title"></h2>
+        <p id="catalog-modal-description"></p>
+      </div>
+    </div>
+    <p class="catalog-preview-label">Lihat hiasan ini dalam akuarium:</p>
+    <div class="catalog-preview-tank" id="catalog-preview-tank" aria-label="Pratonton akuarium"></div>
+    <p class="catalog-preview-hint">Seret hiasan untuk mencuba kedudukannya.</p>
+    <div class="catalog-modal-actions">
+      <button type="button" class="aq-btn aq-btn--ghost" id="btn-catalog-favorite">♡ Jadikan sasaran</button>
+      <button type="button" class="aq-btn aq-btn--primary" id="btn-catalog-place" hidden>Letak yang dimiliki</button>
+      <button type="button" class="aq-btn aq-btn--coral" id="btn-catalog-buy">Beli</button>
+      <button type="button" class="aq-btn aq-btn--ghost" id="btn-catalog-close">Tutup</button>
+    </div>
+  </section>
+</div>
+
 <!-- Placement Modal -->
 <div class="placement-modal-overlay" id="placement-modal" aria-hidden="true">
   <div class="placement-card">
@@ -82,7 +103,7 @@
     <!-- Mini Tank Canvas Preview -->
     <div class="mini-tank-preview" id="mini-tank-preview">
       <div class="mini-tank-sand"></div>
-      <img src="" alt="Marker" class="mini-tank-marker" id="mini-tank-marker">
+      <span class="mini-tank-marker" id="mini-tank-marker" aria-hidden="true"></span>
     </div>
 
     <div style="display: flex; gap: 0.75rem; justify-content: flex-end; align-items: center;">
