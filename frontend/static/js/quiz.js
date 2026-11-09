@@ -4,6 +4,31 @@
 (function () {
   "use strict";
 
+  // Safe fallback: if aq-render.js did not load, still show a plain (unstyled-markdown) page
+  var R = window.AqRender || (function () {
+    if (window.console) console.warn("aq-render.js tidak dimuatkan. Pastikan fail static/js/aq-render.js wujud.");
+    function esc(s) {
+      return String(s == null ? "" : s).replace(/[&<>'"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[c];
+      });
+    }
+    return {
+      esc: esc,
+      markdown: function (t) { return "<p>" + esc(t).replace(/\n/g, "<br>") + "</p>"; },
+      prettySkill: function (s) { return String(s == null ? "" : s).replace(/_/g, " "); },
+      reviewCard: function (o) {
+        var d = document.createElement("div");
+        d.className = "review-item " + (o.isCorrect ? "correct" : "incorrect");
+        d.innerHTML =
+          '<div class="review-q-title">Soalan ' + esc(o.index) + ": " + (o.isCorrect ? "Betul" : "Salah") + "</div>" +
+          '<div class="review-ans">Jawapan anda: <strong>' + esc(o.studentAnswer) + "</strong>" +
+          (o.isCorrect ? "" : " | Jawapan betul: <strong>" + esc(o.correctAnswer) + "</strong>") + "</div>" +
+          (o.explanation ? '<div class="review-exp">' + esc(o.explanation) + "</div>" : "");
+        return d;
+      }
+    };
+  })();
+
   // Elements
   var viewSelector = document.getElementById("view-selector");
   var viewQuiz = document.getElementById("view-quiz");
@@ -346,9 +371,18 @@
         completedResult = result;
         // Save latest attempt ID for Ask Aqua and Learning page
         sessionStorage.setItem("latest_attempt_id", result.attempt_id);
-        renderResults(result);
+
+        // The quiz IS saved at this point. If only the results screen fails to draw,
+        // do not claim the server was unreachable - send the student to their notes.
+        try {
+          renderResults(result);
+        } catch (renderErr) {
+          if (window.console) console.error("Gagal memaparkan keputusan:", renderErr);
+          window.location.assign("/learning?attempt_id=" + result.attempt_id + "&tab=notes");
+        }
       })
       .catch(function (err) {
+        if (window.console) console.error("Ralat hantar kuiz:", err);
         btnSubmitQuiz.disabled = false;
         btnSubmitQuiz.textContent = "Hantar Kuiz!";
         alert("Tidak dapat menghubungi pelayan kuiz. Sila cuba lagi!");
@@ -387,7 +421,7 @@
 
     if (Array.isArray(result.question_results)) {
       result.question_results.forEach(function (q, idx) {
-        breakdownContainer.appendChild(window.AqRender.reviewCard({
+        breakdownContainer.appendChild(R.reviewCard({
           index: idx + 1,
           question: q.question,
           studentAnswer: q.student_answer,

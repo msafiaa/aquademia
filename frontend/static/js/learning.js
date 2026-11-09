@@ -4,7 +4,30 @@
 (function () {
   "use strict";
 
-  var R = window.AqRender;
+  // Safe fallback: if aq-render.js did not load, still show a plain (unstyled-markdown) page
+  var R = window.AqRender || (function () {
+    if (window.console) console.warn("aq-render.js tidak dimuatkan. Pastikan fail static/js/aq-render.js wujud.");
+    function esc(s) {
+      return String(s == null ? "" : s).replace(/[&<>'"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[c];
+      });
+    }
+    return {
+      esc: esc,
+      markdown: function (t) { return "<p>" + esc(t).replace(/\n/g, "<br>") + "</p>"; },
+      prettySkill: function (s) { return String(s == null ? "" : s).replace(/_/g, " "); },
+      reviewCard: function (o) {
+        var d = document.createElement("div");
+        d.className = "review-item " + (o.isCorrect ? "correct" : "incorrect");
+        d.innerHTML =
+          '<div class="review-q-title">Soalan ' + esc(o.index) + ": " + (o.isCorrect ? "Betul" : "Salah") + "</div>" +
+          '<div class="review-ans">Jawapan anda: <strong>' + esc(o.studentAnswer) + "</strong>" +
+          (o.isCorrect ? "" : " | Jawapan betul: <strong>" + esc(o.correctAnswer) + "</strong>") + "</div>" +
+          (o.explanation ? '<div class="review-exp">' + esc(o.explanation) + "</div>" : "");
+        return d;
+      }
+    };
+  })();
 
   // Elements
   var tabs = {
