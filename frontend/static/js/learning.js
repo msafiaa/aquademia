@@ -217,6 +217,9 @@
         var skillsBox = document.getElementById("weak-skills-list");
         skillsBox.innerHTML = "";
         var weakSkills = note.weak_skills_json || [];
+        if (!Array.isArray(weakSkills)) {
+          weakSkills = typeof weakSkills === "object" ? Object.keys(weakSkills) : [];
+        }
         if (weakSkills.length === 0) {
           skillsBox.innerHTML = '<span style="color: var(--aq-success); font-weight:700;">Tiada kelemahan ketara dikesan! Anda menguasai topik ini.</span>';
         } else {
@@ -230,6 +233,11 @@
 
         // Render notes content
         renderNotes(document.getElementById("notes-container"), note.notes_json);
+      })
+      .catch(function (error) {
+        console.error("Tidak dapat memuatkan nota revisi:", error);
+        document.getElementById("notes-container").innerHTML =
+          "<p>Nota revisi tidak dapat dimuatkan. Sila muat semula halaman dan cuba lagi.</p>";
       });
 
     // Load Explanations
@@ -276,39 +284,91 @@
     adaptiveContainer.innerHTML =
       '<p style="color: var(--aq-muted);">Menyemak status soalan adaptif untuk percubaan #' + attemptId + '...</p>';
 
-    // Look up attempt in database / quiz submit response
-    // For adaptive quiz, we prompt student with the questions if available
     var btnSubmitAdaptive = document.getElementById("btn-submit-adaptive");
+    btnSubmitAdaptive.hidden = true;
+    btnSubmitAdaptive.disabled = false;
+    btnSubmitAdaptive.textContent = "Hantar Latihan Adaptif";
 
-    // We can fetch notes/history to check if adaptive already taken
-    // Build an interactive adaptive practice box
-    adaptiveContainer.innerHTML =
-      '<div style="text-align:center; padding: 1.5rem;">' +
-      '<img src="/static/images/characters/cutouts/fania-happy.png" style="height:120px; margin-bottom:1rem;">' +
-      '<h3 style="color: var(--aq-ocean);">Cabaran Latihan Adaptif Aqua 🐠</h3>' +
-      '<p style="color: var(--aq-muted); max-width: 50ch; margin: 0 auto 1.5rem;">' +
-      'Latihan adaptif direka khas oleh AI mengikut kemahiran yang perlu diperbaiki. Selesaikan latihan untuk memenangi ikan baharu bagi akuarium anda!' +
-      '</p>' +
-      '<div id="adaptive-interactive-questions"></div>' +
-      '</div>';
+    fetch("/api/adaptive/" + attemptId, { credentials: "same-origin" })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          if (!res.ok) throw new Error(data.error || "Gagal memuatkan soalan adaptif.");
+          return data;
+        });
+      })
+      .then(function (data) {
+        var questions = (data && data.questions) || [];
+        if (!questions.length) {
+          adaptiveContainer.innerHTML =
+            '<p style="color: var(--aq-muted);">Soalan latihan adaptif belum tersedia untuk percubaan ini. Cuba kuiz lain atau kembali kemudian.</p>';
+          return;
+        }
 
-    // Render questions if student took the quiz in current session
-    // Or allow generating practice
-    btnSubmitAdaptive.hidden = false;
-    btnSubmitAdaptive.onclick = function () {
-      submitAdaptiveAnswers(attemptId);
-    };
+        adaptiveContainer.innerHTML =
+          '<div style="text-align:center; padding: 1.5rem;">' +
+          '<img src="/static/images/characters/cutouts/fania-happy.png" style="height:120px; margin-bottom:1rem;">' +
+          '<h3 style="color: var(--aq-ocean);">Cabaran Latihan Adaptif Aqua 🐠</h3>' +
+          '<p style="color: var(--aq-muted); max-width: 50ch; margin: 0 auto 1.5rem;">' +
+          'Jawab soalan ini untuk mengukuhkan kemahiran anda dan mendapatkan ikan serta mutiara.' +
+          '</p>' +
+          '<div id="adaptive-interactive-questions"></div>' +
+          '</div>';
+
+        var questionsBox = document.getElementById("adaptive-interactive-questions");
+        questions.forEach(function (question, index) {
+          var fieldset = document.createElement("fieldset");
+          fieldset.className = "adaptive-question";
+
+          var legend = document.createElement("legend");
+          legend.textContent = "Soalan " + (index + 1) + ": " + question.question;
+          fieldset.appendChild(legend);
+
+          (question.options || []).forEach(function (option) {
+            var label = document.createElement("label");
+            var input = document.createElement("input");
+            input.type = "radio";
+            input.name = "adaptive-answer-" + question.id;
+            input.value = option;
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(" " + option));
+            fieldset.appendChild(label);
+          });
+
+          questionsBox.appendChild(fieldset);
+        });
+
+        btnSubmitAdaptive.hidden = false;
+        btnSubmitAdaptive.onclick = function () {
+          submitAdaptiveAnswers(attemptId, questions);
+        };
+      })
+      .catch(function (error) {
+        console.error("Tidak dapat memuatkan latihan adaptif:", error);
+        adaptiveContainer.innerHTML =
+          '<p style="color: var(--aq-muted);">Latihan adaptif tidak dapat dimuatkan. Sila muat semula halaman dan cuba lagi.</p>';
+      });
   }
 
-  function submitAdaptiveAnswers(attemptId) {
+  function submitAdaptiveAnswers(attemptId, questions) {
     var btn = document.getElementById("btn-submit-adaptive");
+    var answers = {};
+    for (var i = 0; i < questions.length; i++) {
+      var selected = document.querySelector(
+        'input[name="adaptive-answer-' + questions[i].id + '"]:checked'
+      );
+      if (!selected) {
+        alert("Sila jawab semua soalan latihan adaptif dahulu.");
+        return;
+      }
+      answers[String(questions[i].id)] = selected.value;
+    }
+
     btn.disabled = true;
     btn.textContent = "Menilai jawapan adaptif...";
 
-    // Mock/collected answers
     var payload = {
       attempt_id: attemptId,
-      answers: { "1": "360" } // submits string map
+      answers: answers
     };
 
     fetch("/api/adaptive/submit", {
@@ -317,23 +377,31 @@
       credentials: "same-origin",
       body: JSON.stringify(payload)
     })
-      .then(function (res) { return res.json(); })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          if (!res.ok) throw new Error(data.error || "Gagal menghantar latihan adaptif.");
+          return data;
+        });
+      })
       .then(function (result) {
         btn.disabled = false;
         btn.textContent = "Hantar Latihan Adaptif";
 
-        if (result.error) {
-          alert(result.error);
-          return;
+        if (result.reward) {
+          fetch("/api/shop/wallet", { credentials: "same-origin" })
+            .then(function (res) { return res.ok ? res.json() : null; })
+            .then(function (wallet) {
+              if (wallet && typeof wallet.pearls !== "undefined") {
+                document.getElementById("user-pearls").textContent = wallet.pearls;
+              }
+            });
         }
-
-        // Show confirmed celebration modal!
         showRewardModal(result.reward, result.score);
       })
-      .catch(function () {
+      .catch(function (error) {
         btn.disabled = false;
         btn.textContent = "Hantar Latihan Adaptif";
-        alert("Tidak dapat menghantar latihan adaptif. Sila cuba sebentar lagi.");
+        alert(error.message || "Tidak dapat menghantar latihan adaptif. Sila cuba sebentar lagi.");
       });
   }
 

@@ -434,7 +434,12 @@
 
     // Adaptive Quiz button state
     var btnAdaptive = document.getElementById("btn-goto-adaptive");
-    if (result.weak_skills && result.weak_skills.length > 0) {
+    if (
+      result.weak_skills &&
+      Object.keys(result.weak_skills).length > 0 &&
+      result.adaptive_quiz &&
+      result.adaptive_quiz.status !== "unavailable"
+    ) {
       btnAdaptive.hidden = false;
       btnAdaptive.onclick = function () {
         window.location.assign("/learning?attempt_id=" + result.attempt_id + "&tab=adaptive");
