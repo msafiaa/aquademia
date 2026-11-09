@@ -105,7 +105,7 @@ body.page-aquaplan {
   .ap-hero { grid-template-columns: minmax(0,1fr) 165px; gap: .5rem; }
   .ap-mascot { height: 170px; }
   .ap-mascot img { height: 160px; }
-  .ap-speech { top: -2.5rem; left: -3.2rem; max-width: 140px; font-size: .72rem; }
+  .ap-speech { top: -2.5rem; left: -8rem; max-width: 165px; font-size: .72rem; }
   .ap-weekdays { grid-template-columns: repeat(4, minmax(0,1fr)); }
   .ap-form-bottom { grid-template-columns: 1fr 1fr; }
   .ap-build-button { grid-column: 1 / -1; }
@@ -122,7 +122,7 @@ body.page-aquaplan {
   .ap-agent-tags span { width: fit-content; font-size: .65rem; }
   .ap-mascot { height: 135px; align-items: end; }
   .ap-mascot img { height: 128px; }
-  .ap-speech { top: -2.8rem; left: -2.4rem; max-width: 105px; padding: .45rem; font-size: .65rem; }
+  .ap-speech { top: -2.8rem; left: clamp(-14rem, -45vw, -9rem); width: 165px; max-width: none; box-sizing: border-box; padding: .55rem; font-size: .68rem; }
   .ap-builder, .ap-plan-section { padding: 1rem; border-radius: 18px; }
   .ap-step-badge { max-width: 90px; font-size: .65rem; text-align: center; }
   .ap-weekdays { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .35rem; }
