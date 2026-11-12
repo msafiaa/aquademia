@@ -17,6 +17,3 @@ Aquademia is a web-based educational platform developed to support personalised 
 
 ## Project Background
 Developed for Festival Idea Putrajaya 2026.
-
-## Project Status
-In Development
